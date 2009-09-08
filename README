@@ -1,0 +1,29 @@
+Introduction
+------------
+Appirater is a class that you can drop into any iPhone app that will help remind your users
+to review your app on the App Store. The code is released under the LGPL, so feel free to
+modify and share your changes with the world.
+
+Getting Started
+---------------
+Add the Appirater code into your project and call [Appirater appLaunched] at the end of
+your app delegate's application:didFinishLaunchingWithOptions: method. Finally, set the
+APPIRATER_APP_ID in Appirater.h to your Apple provided software id.
+
+License
+-------
+Copyright 2008. Arash Payan (http://arashpayan.com)
+This library is distributed under the terms of the GNU LGPL.
+
+Appirater is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+ 
+Appirater is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+ 
+You should have received a copy of the GNU Lesser General Public License
+along with Appirater. If not, see <http://www.gnu.org/licenses/>.
