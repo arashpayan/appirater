@@ -14,17 +14,7 @@ APPIRATER_APP_ID in Appirater.h to your Apple provided software id.
 License
 -------
 Copyright 2008. Arash Payan (http://arashpayan.com)
-This library is distributed under the terms of the GNU LGPL.
+This library is distributed under the terms of the MIT/X11.
 
-Appirater is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
- 
-Appirater is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU Lesser General Public License for more details.
- 
-You should have received a copy of the GNU Lesser General Public License
-along with Appirater. If not, see <http://www.gnu.org/licenses/>.
+While not required, I greatly encourage and appreciate any improvements that you make
+to this library be contributed back for the benefit of all who use Appirater.
