@@ -1,7 +1,7 @@
 /*
  This file is part of Appirater.
  
- Copyright (c) 2009, Arash Payan
+ Copyright (c) 2010, Arash Payan
  All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
@@ -31,7 +31,7 @@
  *
  * Created by Arash Payan on 9/5/09.
  * http://arashpayan.com
- * Copyright 2009 Arash Payan. All rights reserved.
+ * Copyright 2010 Arash Payan. All rights reserved.
  */
 
 #import <Foundation/Foundation.h>
@@ -94,7 +94,7 @@ extern NSString *const kAppiraterDeclinedToRate;
  'YES' will show the Appirater alert everytime. Useful for testing how your message
  looks and making sure the link to your app's review page works.
  */
-#define APPIRATER_DEBUG				NO
+#define APPIRATER_DEBUG				YES
 
 @interface Appirater : NSObject <UIAlertViewDelegate> {
 

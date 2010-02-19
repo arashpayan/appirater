@@ -1,7 +1,7 @@
 /*
  This file is part of Appirater.
  
- Copyright (c) 2009, Arash Payan
+ Copyright (c) 2010, Arash Payan
  All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
@@ -31,7 +31,7 @@
  *
  * Created by Arash Payan on 9/5/09.
  * http://arashpayan.com
- * Copyright 2009 Arash Payan. All rights reserved.
+ * Copyright 2010 Arash Payan. All rights reserved.
  */
 
 #import "Appirater.h"
@@ -44,7 +44,7 @@ NSString *const kAppiraterCurrentVersion			= @"kAppiraterCurrentVersion";
 NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion";
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 
-NSString *templateReviewURL = @"http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=APP_ID&onlyLatestVersion=true&pageNumber=0&sortOrdering=1&type=Purple+Software";
+NSString *templateReviewURL = @"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=APP_ID&onlyLatestVersion=true&pageNumber=0&sortOrdering=1&type=Purple+Software";
 
 @interface Appirater (hidden)
 - (BOOL)connectedToNetwork;
@@ -103,6 +103,8 @@ NSString *templateReviewURL = @"http://itunes.apple.com/WebObjects/MZStore.woa/w
 		return;
 	}
 	
+	BOOL willShowPrompt = NO;
+	
 	// get the app's version
 	NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleVersionKey];
 	
@@ -150,7 +152,10 @@ NSString *templateReviewURL = @"http://itunes.apple.com/WebObjects/MZStore.woa/w
 			!ratedApp)
 		{
 			if ([self connectedToNetwork])	// check if they can reach the app store
+			{
+				willShowPrompt = YES;
 				[self performSelectorOnMainThread:@selector(showPrompt) withObject:nil waitUntilDone:NO];
+			}
 		}
 	}
 	else
@@ -165,6 +170,8 @@ NSString *templateReviewURL = @"http://itunes.apple.com/WebObjects/MZStore.woa/w
 
 	
 	[userDefaults synchronize];
+	if (!willShowPrompt)
+		[self autorelease];
 	
 	[pool release];
 }
@@ -180,14 +187,6 @@ NSString *templateReviewURL = @"http://itunes.apple.com/WebObjects/MZStore.woa/w
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	
-	//if (buttonIndex == 1)
-//	{
-//		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
-//		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
-//		
-//		[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
-//	}
 	
 	switch (buttonIndex) {
 		case 0:
