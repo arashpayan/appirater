@@ -7,10 +7,10 @@ homepage] [homepage].
 
 Getting Started
 ---------------
-1) Add the Appirater code into your project
-2) Add the `CFNetwork` and `SystemConfiguration` frameworks to your project
-3) Call `[Appirater appLaunched]` at the end of your app delegate's `application:didFinishLaunchingWithOptions:` method.
-4) Finally, set the `APPIRATER_APP_ID` in `Appirater.h` to your Apple provided software id.
+1. Add the Appirater code into your project
+2. Add the `CFNetwork` and `SystemConfiguration` frameworks to your project
+3. Call `[Appirater appLaunched]` at the end of your app delegate's `application:didFinishLaunchingWithOptions:` method.
+4. Finally, set the `APPIRATER_APP_ID` in `Appirater.h` to your Apple provided software id.
 
 License
 -------
