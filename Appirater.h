@@ -56,27 +56,27 @@ extern NSString *const kAppiraterDeclinedToRate;
  This is the message your users will see once they've passed the day+launches
  threshold.
  */
-#define APPIRATER_MESSAGE				[NSString stringWithFormat:@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", APPIRATER_APP_NAME]
+#define APPIRATER_MESSAGE				@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!"
 
 /*
  This is the title of the message alert that users will see.
  */
-#define APPIRATER_MESSAGE_TITLE			[NSString stringWithFormat:@"Rate %@", APPIRATER_APP_NAME]
+#define APPIRATER_MESSAGE_TITLE			@"Rate %@"
 
 /*
  The text of the button that rejects reviewing the app.
  */
-#define APPIRATER_CANCEL_BUTTON			@"No, Thanks"
+#define APPIRATER_CANCEL_BUTTON			NSLocalizedString(@"No, Thanks", nil)
 
 /*
  Text of button that will send user to app review page.
  */
-#define APPIRATER_RATE_BUTTON			[NSString stringWithFormat:@"Rate %@", APPIRATER_APP_NAME]
+#define APPIRATER_RATE_BUTTON			@"Yes, rate %@"
 
 /*
  Text for button to remind the user to review later.
  */
-#define APPIRATER_RATE_LATER			@"Remind me later"
+#define APPIRATER_RATE_LATER			NSLocalizedString(@"Remind me later", nil)
 
 /*
  Users will need to have the same version of your app installed for this many

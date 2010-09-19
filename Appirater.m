@@ -176,12 +176,25 @@ NSString *templateReviewURL = @"itms-apps://itunes.apple.com/WebObjects/MZStore.
 	[pool release];
 }
 
-- (void)showPrompt {
-	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														message:APPIRATER_MESSAGE
+- (void)showPrompt {  
+  // uses application name from bundle as localization key
+  NSString *appiraterAppName = NSLocalizedString(APPIRATER_APP_NAME, nil);
+  
+  // uses localized strings for substitution if they exist
+  NSString *appiraterMessage = NSLocalizedString(APPIRATER_MESSAGE, nil);
+  appiraterMessage = [NSString stringWithFormat:appiraterMessage, appiraterAppName];
+  
+  NSString *appiraterMessageTitle = NSLocalizedString(APPIRATER_MESSAGE_TITLE, nil);
+  appiraterMessageTitle = [NSString stringWithFormat:appiraterMessageTitle, appiraterAppName];
+  
+  NSString *appiraterRateButton = NSLocalizedString(APPIRATER_RATE_BUTTON, nil);
+  appiraterRateButton = [NSString stringWithFormat:appiraterRateButton, appiraterAppName];
+  
+	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:appiraterMessageTitle
+														message:appiraterMessage
 													   delegate:self
 											  cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											  otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+                        otherButtonTitles:appiraterRateButton, APPIRATER_RATE_LATER, nil];
 	[alertView show];
 }
 
