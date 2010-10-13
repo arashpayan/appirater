@@ -263,7 +263,7 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 		[self ratingConditionsHaveBeenMet] &&
 		[self connectedToNetwork])
 	{
-		[self showRatingAlert];
+		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
 	}
 	
 	[pool release];
@@ -278,7 +278,7 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 		[self ratingConditionsHaveBeenMet] &&
 		[self connectedToNetwork])
 	{
-		[self showRatingAlert];
+		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
 	}
 	
 	[pool release];
