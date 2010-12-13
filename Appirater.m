@@ -295,7 +295,7 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 	 as two uses on multitasking devices. */
 	UIDevice *device = [UIDevice currentDevice];
 	if ([device respondsToSelector:@selector(multitaskingSupported)] &&
-		device.multitaskingSupported)
+		[device multitaskingSupported])
 	{
 		return;
 	}
