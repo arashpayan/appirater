@@ -91,6 +91,12 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
     return ((isReachable && !needsConnection) || nonWiFi) ? (testConnection ? YES : NO) : NO;
 }
 
++ (void) load {
+	if (self == [Appirater class]) {
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:UIApplicationDidFinishLaunchingNotification object:nil];
+	}
+}
+
 + (Appirater*)sharedInstance {
 	static Appirater *appirater = nil;
 	if (appirater == nil)
@@ -102,6 +108,10 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 	}
 	
 	return appirater;
+}
+
++ (void) applicationDidFinishLaunching:(NSNotification *)note {
+	[self appLaunched];
 }
 
 - (void)showRatingAlert {
