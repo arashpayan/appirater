@@ -94,6 +94,7 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 + (void) load {
 	if (self == [Appirater class]) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching:) name:UIApplicationDidFinishLaunchingNotification object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
 	}
 }
 
@@ -111,7 +112,11 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 }
 
 + (void) applicationDidFinishLaunching:(NSNotification *)note {
-	[self appLaunched];
+	[self appLaunched:YES];
+}
+
++ (void) applicationWillEnterForeground:(NSNotification *)note {
+	[self appEnteredForeground:YES];
 }
 
 - (void)showRatingAlert {

@@ -9,10 +9,8 @@ Getting Started
 ---------------
 1. Add the Appirater code into your project
 2. Add the `CFNetwork` and `SystemConfiguration` frameworks to your project
-3. Call `[Appirater appLaunched:YES]` at the end of your app delegate's `application:didFinishLaunchingWithOptions:` method.
-4. Call `[Appirater appEnteredForeground:YES]` in your app delegate's `applicationWillEnterForeground:` method.
-5. (OPTIONAL) Call `[Appirater userDidSignificantEvent:YES]` when the user does something 'significant' in the app.
-6. Finally, set the `APPIRATER_APP_ID` in `Appirater.h` to your Apple provided software id.
+3. (OPTIONAL) Call `[Appirater userDidSignificantEvent:YES]` when the user does something 'significant' in the app.
+4. Finally, set the `APPIRATER_APP_ID` in `Appirater.h` to your Apple provided software id.
 
 License
 -------
