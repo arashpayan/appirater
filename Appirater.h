@@ -35,6 +35,8 @@
  */
 
 #import <Foundation/Foundation.h>
+#import <Availability.h>
+
 
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
@@ -123,9 +125,11 @@ extern NSString *const kAppiraterDeclinedToRate;
  */
 #define APPIRATER_DEBUG				NO
 
-@interface Appirater : NSObject <UIAlertViewDelegate> {
-
-}
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+@interface Appirater : NSObject <UIAlertViewDelegate>
+#else
+@interface Appirater : NSObject
+#endif
 
 /*
  DEPRECATED: While still functional, it's better to use

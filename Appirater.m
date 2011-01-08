@@ -46,7 +46,14 @@ NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
 NSString *templateReviewURL = @"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=APP_ID&onlyLatestVersion=true&pageNumber=0&sortOrdering=1&type=Purple+Software";
+#else
+//annoyingly this seems to open in iTunes rather than the mac app store - couldn't find a way to deeplink to the mac app review panel
+//NSString *templateReviewURL = @"https://userpub.itunes.apple.com/WebObjects/MZUserPublishing.woa/wa/addUserReview?id=APP_ID&onlyLatestVersion=true&type=Purple+Software";
+NSString *templateReviewURL = @"http://itunes.apple.com/us/app/rainbow-blocks/idAPP_ID?mt=12&ls=1";
+#endif
+
 NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=APP_ID";
 
 
@@ -102,15 +109,6 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 	}
 	
 	return appirater;
-}
-
-- (void)showRatingAlert {
-	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
-														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil] autorelease];
-	[alertView show];
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
@@ -249,6 +247,34 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 	[userDefaults synchronize];
 }
 
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+
+- (void)showRatingAlert {
+	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+														 message:APPIRATER_MESSAGE
+														delegate:self
+											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
+											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil] autorelease];
+	[alertView show];
+}
+
+#else
+
+- (void)showRatingAlert {
+	NSAlert *alert = [NSAlert alertWithMessageText:APPIRATER_MESSAGE_TITLE
+									 defaultButton:APPIRATER_RATE_BUTTON
+								   alternateButton:APPIRATER_CANCEL_BUTTON
+									   otherButton:APPIRATER_RATE_LATER
+						 informativeTextWithFormat:APPIRATER_MESSAGE];	
+	
+	[alert beginSheetModalForWindow:[[NSApplication sharedApplication] mainWindow]
+					  modalDelegate:self
+					 didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:)
+						contextInfo:nil];
+}
+
+#endif
+
 @end
 
 
@@ -293,12 +319,15 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 	 multitasking devices also get a usage call when they come
 	 into the foreground and we don't want to count app launches
 	 as two uses on multitasking devices. */
+	
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
 	UIDevice *device = [UIDevice currentDevice];
 	if ([device respondsToSelector:@selector(multitaskingSupported)] &&
 		[device multitaskingSupported])
 	{
 		return;
 	}
+#endif
 	
 	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
 	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
@@ -322,6 +351,8 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 						   withObject:_canPromptForRating];
 	[_canPromptForRating release];
 }
+
+#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
@@ -363,5 +394,40 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 			break;
 	}
 }
+
+#else
+
+- (void) alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo {
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+	
+	switch (returnCode) {
+		case NSAlertAlternateReturn:
+		{
+			// they don't want to rate it
+			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
+			break;
+		}
+		case NSAlertDefaultReturn:
+		{
+			// they want to rate it
+			NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+			[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:reviewURL]];
+			
+			[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+			break;
+		}
+		case NSAlertOtherReturn:
+			// remind them later
+			break;
+		default:
+			break;
+	}
+	
+	[userDefaults synchronize];
+	
+	[self release];
+}
+
+#endif
 
 @end
