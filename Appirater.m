@@ -289,17 +289,6 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 }
 
 + (void)appLaunched:(BOOL)canPromptForRating {
-	/* We only count launches on non-multitasking devices, because
-	 multitasking devices also get a usage call when they come
-	 into the foreground and we don't want to count app launches
-	 as two uses on multitasking devices. */
-	UIDevice *device = [UIDevice currentDevice];
-	if ([device respondsToSelector:@selector(multitaskingSupported)] &&
-		[device multitaskingSupported])
-	{
-		return;
-	}
-	
 	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
 	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
 							 toTarget:[Appirater sharedInstance]
@@ -336,6 +325,9 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 		}
 		case 1:
 		{
+#if TARGET_IPHONE_SIMULATOR
+			NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
+#else
 			// they want to rate it
 			NSString *reviewURL = nil;
 			// figure out which URL to use. iPad only apps have to use a different app store URL
@@ -352,6 +344,7 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 			[userDefaults synchronize];
 			
 			[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
+#endif
 			break;
 		}
 		case 2:
