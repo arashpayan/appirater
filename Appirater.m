@@ -47,7 +47,7 @@ NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
 NSString *templateReviewURL = @"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=APP_ID&onlyLatestVersion=true&pageNumber=0&sortOrdering=1&type=Purple+Software";
-NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=APP_ID";
+NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 
 
 @interface Appirater (hidden)
