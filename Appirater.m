@@ -254,6 +254,17 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 
 @implementation Appirater
 
+- (void)forceRatingAlert:(id)nothing {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		
+	if ([self connectedToNetwork])
+	{
+		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
+	}
+	
+	[pool release];
+}
+
 - (void)incrementAndRate:(NSNumber*)_canPromptForRating {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
@@ -289,6 +300,17 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 }
 
 + (void)appLaunched:(BOOL)canPromptForRating {
+	/* We only count launches on non-multitasking devices, because
+	 multitasking devices also get a usage call when they come
+	 into the foreground and we don't want to count app launches
+	 as two uses on multitasking devices. */
+	UIDevice *device = [UIDevice currentDevice];
+	if ([device respondsToSelector:@selector(isMultitaskingSupported)] &&
+		[device isMultitaskingSupported])
+	{
+		return;
+	}
+	
 	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
 	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
 							 toTarget:[Appirater sharedInstance]
@@ -302,6 +324,12 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 							 toTarget:[Appirater sharedInstance]
 						   withObject:_canPromptForRating];
 	[_canPromptForRating release];
+}
+
++ (void)showPrompt {
+	[NSThread detachNewThreadSelector:@selector(forceRatingAlert:)
+							 toTarget:[Appirater sharedInstance]
+						   withObject:nil];
 }
 
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating {

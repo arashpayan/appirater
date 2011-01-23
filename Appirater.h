@@ -165,6 +165,11 @@ extern NSString *const kAppiraterDeclinedToRate;
 + (void)appEnteredForeground:(BOOL)canPromptForRating;
 
 /*
+ Forcefully shows the prompt.
+ */
++ (void)showPrompt;
+
+/*
  Tells Appirater that the user performed a significant event. A significant
  event is whatever you want it to be. If you're app is used to make VoIP
  calls, then you might want to call this method whenever the user places
