@@ -46,7 +46,7 @@ extern NSString *const kAppiraterDeclinedToRate;
 /*
  Place your Apple generated software id here.
  */
-#define APPIRATER_APP_ID				301377083
+#define APPIRATER_APP_ID				410117546
 
 /*
  Your app's name.
@@ -57,7 +57,7 @@ extern NSString *const kAppiraterDeclinedToRate;
  This is the message your users will see once they've passed the day+launches
  threshold.
  */
-#define APPIRATER_MESSAGE				[NSString stringWithFormat:@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", APPIRATER_APP_NAME]
+#define APPIRATER_MESSAGE				[NSString stringWithFormat:@"If you're enjoying %@, please consider rating it. It won't take more than a minute. Thank you for your support!", APPIRATER_APP_NAME]
 
 /*
  This is the title of the message alert that users will see.
@@ -115,7 +115,7 @@ extern NSString *const kAppiraterDeclinedToRate;
  'Remind me later'. This value specifies how long (in days) Appirater
  will wait before reminding them.
  */
-#define APPIRATER_TIME_BEFORE_REMINDING		1	// double
+#define APPIRATER_TIME_BEFORE_REMINDING		3	// double
 
 /*
  'YES' will show the Appirater alert everytime. Useful for testing how your message
@@ -179,5 +179,16 @@ extern NSString *const kAppiraterDeclinedToRate;
  in those methods).
  */
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating;
+
+/*
+ Opens the appropriate URL (based on device) for the user to review the app
+ and tells Appirater that the user has review the app. Once this method has
+ been called, Appirater will not prompt the user to rate the app again for
+ this version.
+ 
+ You should call this method from any controller that provides an alternate
+ method to allow users to rate the app.
+ */
++ (void)reviewApp;
 
 @end

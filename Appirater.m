@@ -325,26 +325,8 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 		}
 		case 1:
 		{
-#if TARGET_IPHONE_SIMULATOR
-			NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
-#else
-			// they want to rate it
-			NSString *reviewURL = nil;
-			// figure out which URL to use. iPad only apps have to use a different app store URL
-			NSDictionary *bundleDictionary = [[NSBundle mainBundle] infoDictionary];
-			if ([bundleDictionary objectForKey:@"UISupportedInterfaceOrientations"] != nil &&
-				[bundleDictionary objectForKey:@"UISupportedInterfaceOrientations~ipad"] == nil)
-			{
-				// it's an iPad only app, so use the iPad url
-				reviewURL = [templateReviewURLIpad stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
-			}
-			else	// iPhone or Universal app, so we can use the direct url
-				reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
-			[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
-			[userDefaults synchronize];
-			
-			[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
-#endif
+            // they want to rate it
+            [Appirater reviewApp];
 			break;
 		}
 		case 2:
@@ -355,6 +337,29 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 		default:
 			break;
 	}
+}
+
++ (void)reviewApp {
+#if TARGET_IPHONE_SIMULATOR
+    NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
+#else
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *reviewURL = nil;
+    // figure out which URL to use. iPad only apps have to use a different app store URL
+    NSDictionary *bundleDictionary = [[NSBundle mainBundle] infoDictionary];
+    if ([bundleDictionary objectForKey:@"UISupportedInterfaceOrientations"] != nil &&
+        [bundleDictionary objectForKey:@"UISupportedInterfaceOrientations~ipad"] == nil)
+    {
+        // it's an iPad only app, so use the iPad url
+        reviewURL = [templateReviewURLIpad stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+    }
+    else	// iPhone or Universal app, so we can use the direct url
+        reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+    [userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+    [userDefaults synchronize];
+    
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
+#endif
 }
 
 @end
