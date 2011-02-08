@@ -329,6 +329,8 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 #else
 			// they want to rate it
 			NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+			[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+			[userDefaults synchronize];
 			[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
 #endif
 			break;
