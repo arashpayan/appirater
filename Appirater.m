@@ -95,9 +95,11 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	if (appirater == nil)
 	{
 		@synchronized(self) {
-			if (appirater == nil)
+			if (appirater == nil) {
 				appirater = [[Appirater alloc] init];
-		}
+                [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:@"UIApplicationWillResignActiveNotification" object:nil];
+            }
+        }
 	}
 	
 	return appirater;
@@ -251,7 +253,13 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 @end
 
 
+@interface Appirater ()
+- (void)hideRatingAlert;
+@end
+
 @implementation Appirater
+
+@synthesize ratingAlert;
 
 - (void)incrementAndRate:(NSNumber*)_canPromptForRating {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -293,6 +301,20 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 							 toTarget:[Appirater sharedInstance]
 						   withObject:_canPromptForRating];
 	[_canPromptForRating release];
+}
+
+- (void)hideRatingAlert {
+	if (self.ratingAlert.visible) {
+		if (APPIRATER_DEBUG)
+			NSLog(@"APPIRATER Hiding Alert");
+		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
+	}	
+}
+
++ (void)appWillResignActive {
+	if (APPIRATER_DEBUG)
+		NSLog(@"APPIRATER appWillResignActive");
+	[[Appirater sharedInstance] hideRatingAlert];
 }
 
 + (void)appEnteredForeground:(BOOL)canPromptForRating {
