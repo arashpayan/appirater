@@ -338,6 +338,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 #if TARGET_IPHONE_SIMULATOR
 	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
 #else
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
