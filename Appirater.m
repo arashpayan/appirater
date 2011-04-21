@@ -29,9 +29,9 @@
  * Appirater.m
  * appirater
  *
- * Created by Arash Payan on 9/5/09.
- * http://arashpayan.com
- * Copyright 2010 Arash Payan. All rights reserved.
+ * Created by Alexander Jaeger on 21/4/11.
+ * http://alexanderjaeger.de
+ * Copyright 2011 Alexander Jaeger. All rights reserved.
  */
 
 #import "Appirater.h"
