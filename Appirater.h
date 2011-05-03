@@ -130,8 +130,10 @@ extern NSString *const kAppiraterDeclinedToRate;
 #define APPIRATER_DEBUG				NO
 
 @interface Appirater : NSObject <UIAlertViewDelegate> {
-	
+	UIAlertView		*ratingAlert;
 }
+
+@property(nonatomic, retain) UIAlertView *ratingAlert;
 
 /*
  DEPRECATED: While still functional, it's better to use
