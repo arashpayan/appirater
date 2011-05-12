@@ -46,8 +46,7 @@ NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
-NSString *templateReviewURL = @"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=APP_ID&onlyLatestVersion=true&pageNumber=0&sortOrdering=1&type=Purple+Software";
-NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=APP_ID";
+NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 
 
 @interface Appirater (hidden)
@@ -96,9 +95,11 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 	if (appirater == nil)
 	{
 		@synchronized(self) {
-			if (appirater == nil)
+			if (appirater == nil) {
 				appirater = [[Appirater alloc] init];
-		}
+                [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:@"UIApplicationWillResignActiveNotification" object:nil];
+            }
+        }
 	}
 	
 	return appirater;
@@ -110,6 +111,7 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 														delegate:self
 											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
 											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil] autorelease];
+	self.ratingAlert = alertView;
 	[alertView show];
 }
 
@@ -252,7 +254,13 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 @end
 
 
+@interface Appirater ()
+- (void)hideRatingAlert;
+@end
+
 @implementation Appirater
+
+@synthesize ratingAlert;
 
 - (void)incrementAndRate:(NSNumber*)_canPromptForRating {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -289,22 +297,25 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 }
 
 + (void)appLaunched:(BOOL)canPromptForRating {
-	/* We only count launches on non-multitasking devices, because
-	 multitasking devices also get a usage call when they come
-	 into the foreground and we don't want to count app launches
-	 as two uses on multitasking devices. */
-	UIDevice *device = [UIDevice currentDevice];
-	if ([device respondsToSelector:@selector(multitaskingSupported)] &&
-		[device multitaskingSupported])
-	{
-		return;
-	}
-	
 	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
 	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
 							 toTarget:[Appirater sharedInstance]
 						   withObject:_canPromptForRating];
 	[_canPromptForRating release];
+}
+
+- (void)hideRatingAlert {
+	if (self.ratingAlert.visible) {
+		if (APPIRATER_DEBUG)
+			NSLog(@"APPIRATER Hiding Alert");
+		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
+	}	
+}
+
++ (void)appWillResignActive {
+	if (APPIRATER_DEBUG)
+		NSLog(@"APPIRATER appWillResignActive");
+	[[Appirater sharedInstance] hideRatingAlert];
 }
 
 + (void)appEnteredForeground:(BOOL)canPromptForRating {
@@ -323,6 +334,18 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 	[_canPromptForRating release];
 }
 
++ (void)rateApp {
+#if TARGET_IPHONE_SIMULATOR
+	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
+#else
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+	[userDefaults synchronize];
+	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
+#endif
+}
+
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
@@ -337,21 +360,7 @@ NSString *templateReviewURLIpad = @"itms-apps://ax.itunes.apple.com/WebObjects/M
 		case 1:
 		{
 			// they want to rate it
-			NSString *reviewURL = nil;
-			// figure out which URL to use. iPad only apps have to use a different app store URL
-			NSDictionary *bundleDictionary = [[NSBundle mainBundle] infoDictionary];
-			if ([bundleDictionary objectForKey:@"UISupportedInterfaceOrientations"] != nil &&
-				[bundleDictionary objectForKey:@"UISupportedInterfaceOrientations~ipad"] == nil)
-			{
-				// it's an iPad only app, so use the iPad url
-				reviewURL = [templateReviewURLIpad stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
-			}
-			else	// iPhone or Universal app, so we can use the direct url
-				reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
-			[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
-			[userDefaults synchronize];
-			
-			[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
+			[Appirater rateApp];
 			break;
 		}
 		case 2:
