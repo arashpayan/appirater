@@ -46,12 +46,12 @@ extern NSString *const kAppiraterDeclinedToRate;
 /*
  Place your Apple generated software id here.
  */
-#define APPIRATER_APP_ID				301377083
+#define APPIRATER_APP_ID				0000000000
 
 /*
  Your app's name.
  */
-#define APPIRATER_APP_NAME				[[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleNameKey]
+#define APPIRATER_APP_NAME				[[[NSBundle mainBundle] localizedInfoDictionary] objectForKey:(NSString *)kCFBundleNameKey]
 
 /*
  The localized template message for displaying the rating request
