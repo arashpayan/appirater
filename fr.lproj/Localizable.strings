@@ -1,0 +1,17 @@
+/* 
+Localizable.strings
+This file is part of Appirater.
+ 
+Copyright (c) 2011, Alexander Jaeger
+All rights reserved.
+
+Created by Alexander Jäger on 21.04.11.
+Copyright 2010 AYCS UG. All rights reserved.
+ */
+ 
+"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!" = "Si vous aimez %@, voulez-vous prendre un moment pour l'évaluer? Il ne prendra pas plus d'une minute. Merci pour votre soutien!";
+"Rate %@" = "Taux %@";
+"No, Thanks" = "Non, Merci";
+"Remind me later" = "Rappelez-moi plus tard";
+
+
