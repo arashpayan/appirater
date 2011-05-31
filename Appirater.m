@@ -171,7 +171,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	if (APPIRATER_DEBUG)
 		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
 	
-	if ([trackingVersion isEqualToString:version])
+	if (!APPIRATER_PROMPT_EVERY_VERSION || [trackingVersion isEqualToString:version])
 	{
 		// check if the first use date has been set. if not, set it.
 		NSTimeInterval timeInterval = [userDefaults doubleForKey:kAppiraterFirstUseDate];
@@ -219,7 +219,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	if (APPIRATER_DEBUG)
 		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
 	
-	if ([trackingVersion isEqualToString:version])
+	if (!APPIRATER_PROMPT_EVERY_VERSION || [trackingVersion isEqualToString:version])
 	{
 		// check if the first use date has been set. if not, set it.
 		NSTimeInterval timeInterval = [userDefaults doubleForKey:kAppiraterFirstUseDate];
