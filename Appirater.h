@@ -227,4 +227,15 @@ extern NSString *const kAppiraterDeclinedToRate;
  */
 + (void)rateApp;
 
+/*
+ Find out if the rating conditions have been met, so that a prompt can be displayed
+ in a more customized manner.
+ */
++ (BOOL)haveRatingConditionsBeenMet;
+
+/*
+ Display the rating prompt (used in conjunction with the above).
+ */
++ (void)showRatingPrompt;
+
 @end

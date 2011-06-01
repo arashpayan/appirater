@@ -346,6 +346,16 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 #endif
 }
 
++ (BOOL)haveRatingConditionsBeenMet
+{
+    return [[Appirater sharedInstance] ratingConditionsHaveBeenMet];
+}
+
++ (void)showRatingPrompt
+{
+	[[Appirater sharedInstance] showRatingAlert];
+}
+
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
