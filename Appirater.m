@@ -116,8 +116,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
-	if (APPIRATER_DEBUG)
-		return YES;
+#if APPIRATER_DEBUG
+	return YES;
+#endif
 	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
@@ -168,8 +169,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 	}
 	
-	if (APPIRATER_DEBUG)
-		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
+#if APPIRATER_DEBUG
+	NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
+#endif
 	
 	if ([trackingVersion isEqualToString:version])
 	{
@@ -185,8 +187,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		int useCount = [userDefaults integerForKey:kAppiraterUseCount];
 		useCount++;
 		[userDefaults setInteger:useCount forKey:kAppiraterUseCount];
-		if (APPIRATER_DEBUG)
-			NSLog(@"APPIRATER Use count: %d", useCount);
+#if APPIRATER_DEBUG
+		NSLog(@"APPIRATER Use count: %d", useCount);
+#endif
 	}
 	else
 	{
@@ -216,8 +219,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 	}
 	
-	if (APPIRATER_DEBUG)
-		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
+#if APPIRATER_DEBUG
+	NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
+#endif
 	
 	if ([trackingVersion isEqualToString:version])
 	{
@@ -233,8 +237,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 		sigEventCount++;
 		[userDefaults setInteger:sigEventCount forKey:kAppiraterSignificantEventCount];
-		if (APPIRATER_DEBUG)
-			NSLog(@"APPIRATER Significant event count: %d", sigEventCount);
+#if APPIRATER_DEBUG
+		NSLog(@"APPIRATER Significant event count: %d", sigEventCount);
+#endif
 	}
 	else
 	{
@@ -306,15 +311,17 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 
 - (void)hideRatingAlert {
 	if (self.ratingAlert.visible) {
-		if (APPIRATER_DEBUG)
-			NSLog(@"APPIRATER Hiding Alert");
+#if APPIRATER_DEBUG
+		NSLog(@"APPIRATER Hiding Alert");
+#endif
 		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
 	}	
 }
 
 + (void)appWillResignActive {
-	if (APPIRATER_DEBUG)
-		NSLog(@"APPIRATER appWillResignActive");
+#if APPIRATER_DEBUG
+	NSLog(@"APPIRATER appWillResignActive");
+#endif
 	[[Appirater sharedInstance] hideRatingAlert];
 }
 

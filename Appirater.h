@@ -118,10 +118,10 @@ extern NSString *const kAppiraterDeclinedToRate;
 #define APPIRATER_TIME_BEFORE_REMINDING		1	// double
 
 /*
- 'YES' will show the Appirater alert everytime. Useful for testing how your message
+ '1' will show the Appirater alert everytime. Useful for testing how your message
  looks and making sure the link to your app's review page works.
  */
-#define APPIRATER_DEBUG				NO
+#define APPIRATER_DEBUG				0
 
 @interface Appirater : NSObject <UIAlertViewDelegate> {
 
