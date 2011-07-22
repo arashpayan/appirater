@@ -267,34 +267,26 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 
 @synthesize ratingAlert;
 
-- (void)incrementAndRate:(NSNumber*)_canPromptForRating {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
+- (void)incrementAndRate:(BOOL)canPromptForRating {
 	[self incrementUseCount];
 	
-	if ([_canPromptForRating boolValue] == YES &&
+	if (canPromptForRating == YES &&
 		[self ratingConditionsHaveBeenMet] &&
 		[self connectedToNetwork])
 	{
 		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
 	}
-	
-	[pool release];
 }
 
-- (void)incrementSignificantEventAndRate:(NSNumber*)_canPromptForRating {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
+- (void)incrementSignificantEventAndRate:(BOOL)canPromptForRating {
 	[self incrementSignificantEventCount];
 	
-	if ([_canPromptForRating boolValue] == YES &&
+	if (canPromptForRating == YES &&
 		[self ratingConditionsHaveBeenMet] &&
 		[self connectedToNetwork])
 	{
 		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
 	}
-	
-	[pool release];
 }
 
 + (void)appLaunched {
@@ -302,11 +294,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 + (void)appLaunched:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+		[[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+	});
 }
 
 - (void)hideRatingAlert {
@@ -326,19 +316,15 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 + (void)appEnteredForeground:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+		[[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+	});
 }
 
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementSignificantEventAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+		[[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
+	});
 }
 
 + (void)rateApp {
