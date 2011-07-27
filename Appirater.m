@@ -95,7 +95,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	static dispatch_once_t appiraterOnceToken;
 	dispatch_once(&appiraterOnceToken, ^{
 		appirater = [[Appirater alloc] init];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:@"UIApplicationWillResignActiveNotification" object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
 	});
 	
 	return appirater;
