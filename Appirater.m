@@ -103,15 +103,11 @@ NSBundle *appiraterBundle(void) {
 
 + (Appirater*)sharedInstance {
 	static Appirater *appirater = nil;
-	if (appirater == nil)
-	{
-		@synchronized(self) {
-			if (appirater == nil) {
-				appirater = [[Appirater alloc] init];
-                [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:@"UIApplicationWillResignActiveNotification" object:nil];
-            }
-        }
-	}
+	static dispatch_once_t appiraterOnceToken;
+	dispatch_once(&appiraterOnceToken, ^{
+		appirater = [[Appirater alloc] init];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:@"UIApplicationWillResignActiveNotification" object:nil];
+	});
 	
 	return appirater;
 }
