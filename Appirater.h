@@ -62,14 +62,14 @@ extern NSString *const kAppiraterDeclinedToRate;
  threshold. The %@ will be filled in with the APPIRATER_APP_NAME.
  */
 #ifndef APPIRATER_MESSAGE
-#define APPIRATER_MESSAGE				NSLocalizedString(@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", @"App rating message")
+#define APPIRATER_MESSAGE				[NSString stringWithFormat:NSLocalizedString(@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", @"App rating message"), APPIRATER_APP_NAME]
 #endif
 
 /*
  This is the title of the message alert that users will see. The %@ will be filled in with the APPIRATER_APP_NAME.
  */
 #ifndef APPIRATER_MESSAGE_TITLE
-#define APPIRATER_MESSAGE_TITLE			NSLocalizedString(@"Rate %@", @"App rating title")
+#define APPIRATER_MESSAGE_TITLE			[NSString stringWithFormat:NSLocalizedString(@"Rate %@", @"App rating title"), APPIRATER_APP_NAME]
 #endif
 
 /*
@@ -83,7 +83,7 @@ extern NSString *const kAppiraterDeclinedToRate;
  Text of button that will send user to app review page. The %@ will be filled in with the APPIRATER_APP_NAME.
  */
 #ifndef APPIRATER_RATE_BUTTON
-#define APPIRATER_RATE_BUTTON			NSLocalizedString(@"Rate %@", @"App rating rate button")
+#define APPIRATER_RATE_BUTTON			[NSString stringWithFormat:NSLocalizedString(@"Rate %@", @"App rating rate button"), APPIRATER_APP_NAME]
 #endif
 
 /*
