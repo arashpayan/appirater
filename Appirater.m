@@ -52,15 +52,132 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	#error "APPIRATER_APP_ID was not set in \"Appirater.h\""
 #endif
 
-@interface Appirater (hidden)
-- (BOOL)connectedToNetwork;
+@interface Appirater ()
 + (Appirater*)sharedInstance;
-- (void)showRatingAlert;
+- (BOOL)connectedToNetwork;
 - (BOOL)ratingConditionsHaveBeenMet;
++ (void)appWillResignActive;
+- (void)hideRatingAlert;
 - (void)incrementUseCount;
+- (void)showRatingAlert;
 @end
 
-@implementation Appirater (hidden)
+@implementation Appirater
+
+@synthesize ratingAlert;
+
+- (void)incrementAndRate:(NSNumber*)_canPromptForRating {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	[self incrementUseCount];
+	
+	if ([_canPromptForRating boolValue] == YES &&
+		[self ratingConditionsHaveBeenMet] &&
+		[self connectedToNetwork])
+	{
+		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
+	}
+	
+	[pool release];
+}
+
+- (void)incrementSignificantEventAndRate:(NSNumber*)_canPromptForRating {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	[self incrementSignificantEventCount];
+	
+	if ([_canPromptForRating boolValue] == YES &&
+		[self ratingConditionsHaveBeenMet] &&
+		[self connectedToNetwork])
+	{
+		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
+	}
+	
+	[pool release];
+}
+
++ (void)appLaunched {
+	[Appirater appLaunched:YES];
+}
+
++ (void)appLaunched:(BOOL)canPromptForRating {
+	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
+	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
+							 toTarget:[Appirater sharedInstance]
+						   withObject:_canPromptForRating];
+	[_canPromptForRating release];
+}
+
+- (void)hideRatingAlert {
+	if (self.ratingAlert.visible) {
+		if (APPIRATER_DEBUG)
+			NSLog(@"APPIRATER Hiding Alert");
+		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
+	}	
+}
+
++ (void)appWillResignActive {
+	if (APPIRATER_DEBUG)
+		NSLog(@"APPIRATER appWillResignActive");
+	[[Appirater sharedInstance] hideRatingAlert];
+}
+
++ (void)appEnteredForeground:(BOOL)canPromptForRating {
+	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
+	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
+							 toTarget:[Appirater sharedInstance]
+						   withObject:_canPromptForRating];
+	[_canPromptForRating release];
+}
+
++ (void)userDidSignificantEvent:(BOOL)canPromptForRating {
+	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
+	[NSThread detachNewThreadSelector:@selector(incrementSignificantEventAndRate:)
+							 toTarget:[Appirater sharedInstance]
+						   withObject:_canPromptForRating];
+	[_canPromptForRating release];
+}
+
++ (void)rateApp {
+#if TARGET_IPHONE_SIMULATOR
+	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
+#else
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+	[userDefaults synchronize];
+	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
+#endif
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+	
+	switch (buttonIndex) {
+		case 0:
+		{
+			// they don't want to rate it
+			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
+			[userDefaults synchronize];
+			break;
+		}
+		case 1:
+		{
+			// they want to rate it
+			[Appirater rateApp];
+			break;
+		}
+		case 2:
+			// remind them later
+			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+			[userDefaults synchronize];
+			break;
+		default:
+			break;
+	}
+}
+
+#pragma mark - Hidden
 
 - (BOOL)connectedToNetwork {
     // Create zero addy
@@ -252,128 +369,6 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	}
 	
 	[userDefaults synchronize];
-}
-
-@end
-
-
-@interface Appirater ()
-- (void)hideRatingAlert;
-@end
-
-@implementation Appirater
-
-@synthesize ratingAlert;
-
-- (void)incrementAndRate:(NSNumber*)_canPromptForRating {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-	[self incrementUseCount];
-	
-	if ([_canPromptForRating boolValue] == YES &&
-		[self ratingConditionsHaveBeenMet] &&
-		[self connectedToNetwork])
-	{
-		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
-	}
-	
-	[pool release];
-}
-
-- (void)incrementSignificantEventAndRate:(NSNumber*)_canPromptForRating {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-	[self incrementSignificantEventCount];
-	
-	if ([_canPromptForRating boolValue] == YES &&
-		[self ratingConditionsHaveBeenMet] &&
-		[self connectedToNetwork])
-	{
-		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
-	}
-	
-	[pool release];
-}
-
-+ (void)appLaunched {
-	[Appirater appLaunched:YES];
-}
-
-+ (void)appLaunched:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
-}
-
-- (void)hideRatingAlert {
-	if (self.ratingAlert.visible) {
-		if (APPIRATER_DEBUG)
-			NSLog(@"APPIRATER Hiding Alert");
-		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
-	}	
-}
-
-+ (void)appWillResignActive {
-	if (APPIRATER_DEBUG)
-		NSLog(@"APPIRATER appWillResignActive");
-	[[Appirater sharedInstance] hideRatingAlert];
-}
-
-+ (void)appEnteredForeground:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
-}
-
-+ (void)userDidSignificantEvent:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementSignificantEventAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
-}
-
-+ (void)rateApp {
-#if TARGET_IPHONE_SIMULATOR
-	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
-#else
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
-	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
-	[userDefaults synchronize];
-	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
-#endif
-}
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	
-	switch (buttonIndex) {
-		case 0:
-		{
-			// they don't want to rate it
-			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
-			[userDefaults synchronize];
-			break;
-		}
-		case 1:
-		{
-			// they want to rate it
-			[Appirater rateApp];
-			break;
-		}
-		case 2:
-			// remind them later
-			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
-			[userDefaults synchronize];
-			break;
-		default:
-			break;
-	}
 }
 
 @end
