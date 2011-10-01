@@ -38,13 +38,13 @@
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
 
-NSString *const kAppiraterFirstUseDate				= @"kAppiraterFirstUseDate";
-NSString *const kAppiraterUseCount					= @"kAppiraterUseCount";
-NSString *const kAppiraterSignificantEventCount		= @"kAppiraterSignificantEventCount";
-NSString *const kAppiraterCurrentVersion			= @"kAppiraterCurrentVersion";
-NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion";
-NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
-NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
+NSString *const kAppiraterFirstUseDate				= @"Appirater.FirstUseDate";
+NSString *const kAppiraterUseCount					= @"Appirater.UseCount";
+NSString *const kAppiraterSignificantEventCount		= @"Appirater.SignificantEventCount";
+NSString *const kAppiraterCurrentVersion			= @"Appirater.CurrentVersion";
+NSString *const kAppiraterRatedCurrentVersion		= @"Appirater.RatedCurrentVersion";
+NSString *const kAppiraterDeclinedToRate			= @"Appirater.DeclinedToRate";
+NSString *const kAppiraterReminderRequestDate		= @"Appirater.ReminderRequestDate";
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 
