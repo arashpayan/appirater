@@ -48,6 +48,9 @@ NSString *const kAppiraterReminderRequestDate		= @"Appirater.ReminderRequestDate
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 
+#if APPIRATER_APP_ID == 301377083
+	#error "APPIRATER_APP_ID was not set in \"Appirater.h\""
+#endif
 
 @interface Appirater (hidden)
 - (BOOL)connectedToNetwork;
