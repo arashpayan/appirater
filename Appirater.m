@@ -87,7 +87,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	NSURLRequest *testRequest = [NSURLRequest requestWithURL:testURL  cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:20.0];
 	NSURLConnection *testConnection = [[NSURLConnection alloc] initWithRequest:testRequest delegate:self];
 	
-    return ((isReachable && !needsConnection) || nonWiFi) ? (testConnection ? YES : NO) : NO;
+    BOOL ret =  ((isReachable && !needsConnection) || nonWiFi) ? (testConnection ? YES : NO) : NO;
+    [testConnection release];
+    return ret;
 }
 
 + (Appirater*)sharedInstance {
