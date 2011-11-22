@@ -49,6 +49,17 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 
 
+NSBundle *appiraterBundle(void) {
+  static NSBundle* bundle = nil;
+  if (!bundle) {
+    NSString* path = [[[NSBundle mainBundle] resourcePath]
+                      stringByAppendingPathComponent:kAppiraterBundleName];
+    bundle = [[NSBundle bundleWithPath:path] retain];
+  }
+  return bundle;
+}
+
+
 @interface Appirater (hidden)
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
@@ -106,11 +117,11 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 - (void)showRatingAlert {
-	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
-														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil] autorelease];
+	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:AppiraterLocalize(@"AppiraterTitle"), APPIRATER_APP_NAME]
+                                                       message:[NSString stringWithFormat:AppiraterLocalize(@"AppiraterMessage"), APPIRATER_APP_NAME]
+                                                      delegate:self
+                                             cancelButtonTitle:AppiraterLocalize(@"AppiraterCancelButton")
+                                             otherButtonTitles:[NSString stringWithFormat:AppiraterLocalize(@"AppiraterRateButton"), APPIRATER_APP_NAME], AppiraterLocalize(@"AppiraterRateLaterButton"), nil] autorelease];
 	self.ratingAlert = alertView;
 	[alertView show];
 }
@@ -292,11 +303,10 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	[pool release];
 }
 
-+ (void)appLaunched {
-	[Appirater appLaunched:YES];
-}
+static int appID;
 
-+ (void)appLaunched:(BOOL)canPromptForRating {
++ (void)appLaunchedWithAppStoreID:(int)anAppID canPromptForRating:(BOOL)canPromptForRating {
+  appID = anAppID;
 	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
 	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
 							 toTarget:[Appirater sharedInstance]
@@ -339,7 +349,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
 #else
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", appID]];
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];

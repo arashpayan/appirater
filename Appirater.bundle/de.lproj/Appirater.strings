@@ -1,0 +1,11 @@
+/*
+   Appirater.strings
+   Appirater
+
+   Created by Martin Kavalar on 11/15/10.
+ */
+"AppiraterMessage" = "Gefällt Dir %@? Dann bewerte es doch kurz. Es dauert nur eine Minute. Danke für Deine Unterstützung!";
+"AppiraterTitle" = "%@ bewerten";
+"AppiraterCancelButton" = "Nein, danke";
+"AppiraterRateLaterButton" = "Später nochmal fragen";
+"AppiraterRateButton" = "%@ bewerten";
