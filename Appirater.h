@@ -43,41 +43,18 @@ extern NSString *const kAppiraterCurrentVersion;
 extern NSString *const kAppiraterRatedCurrentVersion;
 extern NSString *const kAppiraterDeclinedToRate;
 
-/*
- Place your Apple generated software id here.
- */
-#define APPIRATER_APP_ID				301377083
+#define kAppiraterBundleName @"Appirater.bundle"
 
-/*
- Your app's name.
- */
-#define APPIRATER_APP_NAME				[[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleNameKey]
 
-/*
- This is the message your users will see once they've passed the day+launches
- threshold.
- */
-#define APPIRATER_MESSAGE				[NSString stringWithFormat:@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", APPIRATER_APP_NAME]
+NSBundle *appiraterBundle(void);
 
-/*
- This is the title of the message alert that users will see.
- */
-#define APPIRATER_MESSAGE_TITLE			[NSString stringWithFormat:@"Rate %@", APPIRATER_APP_NAME]
+ /*
+   Your app's name.
+  */
+#define APPIRATER_APP_NAME [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleNameKey]
 
-/*
- The text of the button that rejects reviewing the app.
- */
-#define APPIRATER_CANCEL_BUTTON			@"No, Thanks"
+#define AppiraterLocalize(StringToken) NSLocalizedStringFromTableInBundle(StringToken, @"Appirater", appiraterBundle(), @"")
 
-/*
- Text of button that will send user to app review page.
- */
-#define APPIRATER_RATE_BUTTON			[NSString stringWithFormat:@"Rate %@", APPIRATER_APP_NAME]
-
-/*
- Text for button to remind the user to review later.
- */
-#define APPIRATER_RATE_LATER			@"Remind me later"
 
 /*
  Users will need to have the same version of your app installed for this many
@@ -118,10 +95,10 @@ extern NSString *const kAppiraterDeclinedToRate;
 #define APPIRATER_TIME_BEFORE_REMINDING		1	// double
 
 /*
- 'YES' will show the Appirater alert everytime. Useful for testing how your message
+ '1' will show the Appirater alert everytime. Useful for testing how your message
  looks and making sure the link to your app's review page works.
  */
-#define APPIRATER_DEBUG				NO
+#define APPIRATER_DEBUG				0
 
 @interface Appirater : NSObject <UIAlertViewDelegate> {
 
@@ -129,14 +106,6 @@ extern NSString *const kAppiraterDeclinedToRate;
 }
 
 @property(nonatomic, retain) UIAlertView *ratingAlert;
-
-/*
- DEPRECATED: While still functional, it's better to use
- appLaunched:(BOOL)canPromptForRating instead.
- 
- Calls [Appirater appLaunched:YES]. See appLaunched: for details of functionality.
- */
-+ (void)appLaunched;
 
 /*
  Tells Appirater that the app has launched, and on devices that do NOT
@@ -151,7 +120,7 @@ extern NSString *const kAppiraterDeclinedToRate;
  can also be triggered by appEnteredForeground: and userDidSignificantEvent:
  (as long as you pass YES for canPromptForRating in those methods).
  */
-+ (void)appLaunched:(BOOL)canPromptForRating;
++ (void)appLaunchedWithAppStoreID:(int)appID canPromptForRating:(BOOL)canPromptForRating;
 
 /*
  Tells Appirater that the app was brought to the foreground on multitasking

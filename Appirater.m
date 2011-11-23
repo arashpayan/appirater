@@ -49,6 +49,17 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 
 
+NSBundle *appiraterBundle(void) {
+  static NSBundle* bundle = nil;
+  if (!bundle) {
+    NSString* path = [[[NSBundle mainBundle] resourcePath]
+                      stringByAppendingPathComponent:kAppiraterBundleName];
+    bundle = [[NSBundle bundleWithPath:path] retain];
+  }
+  return bundle;
+}
+
+
 @interface Appirater (hidden)
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
@@ -92,32 +103,29 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 
 + (Appirater*)sharedInstance {
 	static Appirater *appirater = nil;
-	if (appirater == nil)
-	{
-		@synchronized(self) {
-			if (appirater == nil) {
-				appirater = [[Appirater alloc] init];
-                [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:@"UIApplicationWillResignActiveNotification" object:nil];
-            }
-        }
-	}
+	static dispatch_once_t appiraterOnceToken;
+	dispatch_once(&appiraterOnceToken, ^{
+		appirater = [[Appirater alloc] init];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
+	});
 	
 	return appirater;
 }
 
 - (void)showRatingAlert {
-	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
-														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil] autorelease];
+	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:AppiraterLocalize(@"AppiraterTitle"), APPIRATER_APP_NAME]
+                                                       message:[NSString stringWithFormat:AppiraterLocalize(@"AppiraterMessage"), APPIRATER_APP_NAME]
+                                                      delegate:self
+                                             cancelButtonTitle:AppiraterLocalize(@"AppiraterCancelButton")
+                                             otherButtonTitles:[NSString stringWithFormat:AppiraterLocalize(@"AppiraterRateButton"), APPIRATER_APP_NAME], AppiraterLocalize(@"AppiraterRateLaterButton"), nil] autorelease];
 	self.ratingAlert = alertView;
 	[alertView show];
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
-	if (APPIRATER_DEBUG)
-		return YES;
+#if APPIRATER_DEBUG
+	return YES;
+#endif
 	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
@@ -168,8 +176,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 	}
 	
-	if (APPIRATER_DEBUG)
-		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
+#if APPIRATER_DEBUG
+	NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
+#endif
 	
 	if ([trackingVersion isEqualToString:version])
 	{
@@ -185,8 +194,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		int useCount = [userDefaults integerForKey:kAppiraterUseCount];
 		useCount++;
 		[userDefaults setInteger:useCount forKey:kAppiraterUseCount];
-		if (APPIRATER_DEBUG)
-			NSLog(@"APPIRATER Use count: %d", useCount);
+#if APPIRATER_DEBUG
+		NSLog(@"APPIRATER Use count: %d", useCount);
+#endif
 	}
 	else
 	{
@@ -216,8 +226,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 	}
 	
-	if (APPIRATER_DEBUG)
-		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
+#if APPIRATER_DEBUG
+	NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
+#endif
 	
 	if ([trackingVersion isEqualToString:version])
 	{
@@ -233,8 +244,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 		sigEventCount++;
 		[userDefaults setInteger:sigEventCount forKey:kAppiraterSignificantEventCount];
-		if (APPIRATER_DEBUG)
-			NSLog(@"APPIRATER Significant event count: %d", sigEventCount);
+#if APPIRATER_DEBUG
+		NSLog(@"APPIRATER Significant event count: %d", sigEventCount);
+#endif
 	}
 	else
 	{
@@ -262,76 +274,63 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 
 @synthesize ratingAlert;
 
-- (void)incrementAndRate:(NSNumber*)_canPromptForRating {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
+- (void)incrementAndRate:(BOOL)canPromptForRating {
 	[self incrementUseCount];
 	
-	if ([_canPromptForRating boolValue] == YES &&
+	if (canPromptForRating == YES &&
 		[self ratingConditionsHaveBeenMet] &&
 		[self connectedToNetwork])
 	{
 		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
 	}
-	
-	[pool release];
 }
 
-- (void)incrementSignificantEventAndRate:(NSNumber*)_canPromptForRating {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
+- (void)incrementSignificantEventAndRate:(BOOL)canPromptForRating {
 	[self incrementSignificantEventCount];
 	
-	if ([_canPromptForRating boolValue] == YES &&
+	if (canPromptForRating == YES &&
 		[self ratingConditionsHaveBeenMet] &&
 		[self connectedToNetwork])
 	{
 		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
 	}
-	
-	[pool release];
 }
 
-+ (void)appLaunched {
-	[Appirater appLaunched:YES];
-}
+static int appID;
 
-+ (void)appLaunched:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
++ (void)appLaunchedWithAppStoreID:(int)anAppID canPromptForRating:(BOOL)canPromptForRating {
+    appID = anAppID;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+		[[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+	});
 }
 
 - (void)hideRatingAlert {
 	if (self.ratingAlert.visible) {
-		if (APPIRATER_DEBUG)
-			NSLog(@"APPIRATER Hiding Alert");
+#if APPIRATER_DEBUG
+		NSLog(@"APPIRATER Hiding Alert");
+#endif
 		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
 	}	
 }
 
 + (void)appWillResignActive {
-	if (APPIRATER_DEBUG)
-		NSLog(@"APPIRATER appWillResignActive");
+#if APPIRATER_DEBUG
+	NSLog(@"APPIRATER appWillResignActive");
+#endif
 	[[Appirater sharedInstance] hideRatingAlert];
 }
 
 + (void)appEnteredForeground:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+		[[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+	});
 }
 
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementSignificantEventAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+		[[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
+	});
 }
 
 + (void)rateApp {
@@ -339,7 +338,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
 #else
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", appID]];
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
