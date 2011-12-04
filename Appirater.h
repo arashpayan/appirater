@@ -54,7 +54,7 @@ extern NSString *const kAppiraterDeclinedToRate;
  Your app's name.
  */
 #ifndef APPIRATER_APP_NAME
-#define APPIRATER_APP_NAME				[[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleNameKey]
+#define APPIRATER_APP_NAME				[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"]
 #endif
 
 /*
