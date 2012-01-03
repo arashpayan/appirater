@@ -123,10 +123,22 @@ extern NSString *const kAppiraterDeclinedToRate;
  */
 #define APPIRATER_DEBUG				NO
 
+/*
+ Delegate callbacks.
+ */
+@protocol AppiraterDelegate
+@optional
+- (void)ratedApp;
+- (void)remindedLater;
+- (void)declinedRate;
+@end
+
 @interface Appirater : NSObject <UIAlertViewDelegate> {
 
 	UIAlertView		*ratingAlert;
 }
+
+@property (assign) NSObject <AppiraterDelegate> *delegate;
 
 @property(nonatomic, retain) UIAlertView *ratingAlert;
 
@@ -195,5 +207,15 @@ extern NSString *const kAppiraterDeclinedToRate;
  whether to rate the app.
  */
 + (void)rateApp;
+
+/*
+ Delegate setter.
+ */
++ (void)setDelegate:(NSObject<AppiraterDelegate> *)delegate;
+
+/*
+ Force display the alert.
+ */
++ (void)showRatingAlert;
 
 @end

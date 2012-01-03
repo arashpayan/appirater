@@ -260,6 +260,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 
 @implementation Appirater
 
+@synthesize delegate;
 @synthesize ratingAlert;
 
 - (void)incrementAndRate:(NSNumber*)_canPromptForRating {
@@ -346,6 +347,20 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 #endif
 }
 
++ (void)setDelegate:(NSObject<AppiraterDelegate> *)delegate {
+    [[Appirater sharedInstance] setDelegate:delegate];
+}
+
++ (void)showRatingAlert {
+    // Mark alert is being shown
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+	[userDefaults synchronize];
+    
+    // Show alert
+    [[Appirater sharedInstance] showRatingAlert];
+}
+
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
@@ -355,18 +370,33 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 			// they don't want to rate it
 			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
 			[userDefaults synchronize];
+            
+            // inform delegate
+            if (delegate && [delegate respondsToSelector:@selector(declinedRate)]) {
+                [delegate declinedRate];
+            }
 			break;
 		}
 		case 1:
 		{
 			// they want to rate it
 			[Appirater rateApp];
+            
+            // inform delegate
+            if (delegate && [delegate respondsToSelector:@selector(ratedApp)]) {
+                [delegate ratedApp];
+            }
 			break;
 		}
 		case 2:
 			// remind them later
 			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
 			[userDefaults synchronize];
+            
+            // inform delegate
+            if (delegate && [delegate respondsToSelector:@selector(remindedLater)]) {
+                [delegate remindedLater];
+            }
 			break;
 		default:
 			break;
