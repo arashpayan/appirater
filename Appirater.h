@@ -42,6 +42,7 @@ extern NSString *const kAppiraterSignificantEventCount;
 extern NSString *const kAppiraterCurrentVersion;
 extern NSString *const kAppiraterRatedCurrentVersion;
 extern NSString *const kAppiraterDeclinedToRate;
+extern NSString *const kAppiraterReminderRequestDate;
 
 /*
  Place your Apple generated software id here.
