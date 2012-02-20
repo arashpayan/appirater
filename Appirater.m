@@ -1,7 +1,7 @@
 /*
  This file is part of Appirater.
  
- Copyright (c) 2010, Arash Payan
+ Copyright (c) 2012, Arash Payan
  All rights reserved.
  
  Permission is hereby granted, free of charge, to any person
@@ -31,7 +31,7 @@
  *
  * Created by Arash Payan on 9/5/09.
  * http://arashpayan.com
- * Copyright 2010 Arash Payan. All rights reserved.
+ * Copyright 2012 Arash Payan. All rights reserved.
  */
 
 #import "Appirater.h"
@@ -48,16 +48,18 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 
-
-@interface Appirater (hidden)
+@interface Appirater ()
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
 - (void)showRatingAlert;
 - (BOOL)ratingConditionsHaveBeenMet;
 - (void)incrementUseCount;
+- (void)hideRatingAlert;
 @end
 
-@implementation Appirater (hidden)
+@implementation Appirater 
+
+@synthesize ratingAlert;
 
 - (BOOL)connectedToNetwork {
     // Create zero addy
@@ -85,7 +87,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	
 	NSURL *testURL = [NSURL URLWithString:@"http://www.apple.com/"];
 	NSURLRequest *testRequest = [NSURLRequest requestWithURL:testURL  cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:20.0];
-	NSURLConnection *testConnection = [[NSURLConnection alloc] initWithRequest:testRequest delegate:self];
+	NSURLConnection *testConnection = [[[NSURLConnection alloc] initWithRequest:testRequest delegate:self] autorelease];
 	
     return ((isReachable && !needsConnection) || nonWiFi) ? (testConnection ? YES : NO) : NO;
 }
@@ -94,12 +96,12 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	static Appirater *appirater = nil;
 	if (appirater == nil)
 	{
-		@synchronized(self) {
-			if (appirater == nil) {
-				appirater = [[Appirater alloc] init];
-                [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:@"UIApplicationWillResignActiveNotification" object:nil];
-            }
-        }
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            appirater = [[Appirater alloc] init];
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:
+                UIApplicationWillResignActiveNotification object:nil];
+        });
 	}
 	
 	return appirater;
@@ -251,45 +253,32 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	[userDefaults synchronize];
 }
 
-@end
-
-
-@interface Appirater ()
-- (void)hideRatingAlert;
-@end
-
-@implementation Appirater
-
-@synthesize ratingAlert;
-
-- (void)incrementAndRate:(NSNumber*)_canPromptForRating {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
+- (void)incrementAndRate:(BOOL)canPromptForRating {
 	[self incrementUseCount];
 	
-	if ([_canPromptForRating boolValue] == YES &&
+	if (canPromptForRating &&
 		[self ratingConditionsHaveBeenMet] &&
 		[self connectedToNetwork])
 	{
-		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           [self showRatingAlert];
+                       });
 	}
-	
-	[pool release];
 }
 
-- (void)incrementSignificantEventAndRate:(NSNumber*)_canPromptForRating {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
+- (void)incrementSignificantEventAndRate:(BOOL)canPromptForRating {
 	[self incrementSignificantEventCount];
 	
-	if ([_canPromptForRating boolValue] == YES &&
+	if (canPromptForRating &&
 		[self ratingConditionsHaveBeenMet] &&
 		[self connectedToNetwork])
 	{
-		[self performSelectorOnMainThread:@selector(showRatingAlert) withObject:nil waitUntilDone:NO];
+        dispatch_async(dispatch_get_main_queue(),
+                       ^{
+                           [self showRatingAlert];
+                       });
 	}
-	
-	[pool release];
 }
 
 + (void)appLaunched {
@@ -297,11 +286,10 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 + (void)appLaunched:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
+                   ^{
+                       [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+                   });
 }
 
 - (void)hideRatingAlert {
@@ -319,19 +307,17 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 + (void)appEnteredForeground:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
+                   ^{
+                       [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+                   });
 }
 
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating {
-	NSNumber *_canPromptForRating = [[NSNumber alloc] initWithBool:canPromptForRating];
-	[NSThread detachNewThreadSelector:@selector(incrementSignificantEventAndRate:)
-							 toTarget:[Appirater sharedInstance]
-						   withObject:_canPromptForRating];
-	[_canPromptForRating release];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
+                   ^{
+                       [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
+                   });
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
