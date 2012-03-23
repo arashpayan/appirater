@@ -156,6 +156,27 @@ extern NSString *const kAppiraterReminderRequestDate;
 #define APPIRATER_DEBUG				NO
 #endif
 
+/*
+ Used simulate usage cases to test popup.  Generally, you'll want to set one 
+ or two of them and test the others.  -1 == disabled.  Leave APPIRATER_DEBUG 
+ set to NO in order to use these.
+ */
+#ifndef APPIRATER_DEBUG_DAYS_LAPSED_OVERRIDE
+#define APPIRATER_DEBUG_DAYS_LAPSED_OVERRIDE    -1
+#endif
+#ifndef APPIRATER_DEBUG_USE_COUNT_OVERRIDE
+#define APPIRATER_DEBUG_USE_COUNT_OVERRIDE      -1
+#endif
+#ifndef APPIRATER_DEBUG_SIG_EVENTS_COUNT_OVERRIDE
+#define APPIRATER_DEBUG_SIG_EVENTS_COUNT_OVERRIDE     -1
+#endif
+#ifndef APPIRATER_DEBUG_DAYS_LAPSED_SINCE_REMINDER_OVERRIDE
+#define APPIRATER_DEBUG_DAYS_LAPSED_SINCE_REMINDER_OVERRIDE     -1
+#endif
+
+
+
+
 @interface Appirater : NSObject <UIAlertViewDelegate> {
 
 	UIAlertView		*ratingAlert;
