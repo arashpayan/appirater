@@ -47,47 +47,68 @@ extern NSString *const kAppiraterReminderRequestDate;
 /*
  Place your Apple generated software id here.
  */
+#ifndef APPIRATER_APP_ID
 #define APPIRATER_APP_ID				301377083
-
+#endif
 /*
  Your app's name.
  */
+#ifndef APPIRATER_APP_NAME
 #define APPIRATER_APP_NAME				[[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleNameKey]
+#endif
 
 /*
  This is the message your users will see once they've passed the day+launches
  threshold.
  */
+#ifndef APPIRATER_LOCALIZED_MESSAGE
 #define APPIRATER_LOCALIZED_MESSAGE     NSLocalizedString(@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", nil)
+#endif
+#ifndef APPIRATER_MESSAGE
 #define APPIRATER_MESSAGE				[NSString stringWithFormat:APPIRATER_LOCALIZED_MESSAGE, APPIRATER_APP_NAME]
+#endif
 
 /*
  This is the title of the message alert that users will see.
  */
+#ifndef APPIRATER_LOCALIZED_MESSAGE_TITLE
 #define APPIRATER_LOCALIZED_MESSAGE_TITLE   NSLocalizedString(@"Rate %@", nil)
+#endif
+#ifndef APPIRATER_MESSAGE_TITLE
 #define APPIRATER_MESSAGE_TITLE             [NSString stringWithFormat:APPIRATER_LOCALIZED_MESSAGE_TITLE, APPIRATER_APP_NAME]
+#endif
 
 /*
  The text of the button that rejects reviewing the app.
  */
+#ifndef APPIRATER_CANCEL_BUTTON
 #define APPIRATER_CANCEL_BUTTON			NSLocalizedString(@"No, Thanks", nil)
+#endif
 
 /*
  Text of button that will send user to app review page.
  */
+#ifndef APPIRATER_LOCALIZED_RATE_BUTTON
 #define APPIRATER_LOCALIZED_RATE_BUTTON NSLocalizedString(@"Rate %@", nil)
+#endif
+#ifndef APPIRATER_RATE_BUTTON
 #define APPIRATER_RATE_BUTTON			[NSString stringWithFormat:APPIRATER_LOCALIZED_RATE_BUTTON, APPIRATER_APP_NAME]
+#endif
 
 /*
  Text for button to remind the user to review later.
  */
+#ifndef APPIRATER_RATE_LATER
 #define APPIRATER_RATE_LATER			NSLocalizedString(@"Remind me later", nil)
+#endif
 
 /*
  Users will need to have the same version of your app installed for this many
  days before they will be prompted to rate it.
  */
+#ifndef APPIRATER_DAYS_UNTIL_PROMPT
 #define APPIRATER_DAYS_UNTIL_PROMPT		30		// double
+#endif
 
 /*
  An example of a 'use' would be if the user launched the app. Bringing the app
@@ -99,7 +120,9 @@ extern NSString *const kAppiraterReminderRequestDate;
  Users need to 'use' the same version of the app this many times before
  before they will be prompted to rate it.
  */
+#ifndef APPIRATER_USES_UNTIL_PROMPT
 #define APPIRATER_USES_UNTIL_PROMPT		20		// integer
+#endif
 
 /*
  A significant event can be anything you want to be in your app. In a
@@ -112,20 +135,26 @@ extern NSString *const kAppiraterReminderRequestDate;
  a significant event, call the method:
  [Appirater userDidSignificantEvent:];
  */
+#ifndef APPIRATER_SIG_EVENTS_UNTIL_PROMPT
 #define APPIRATER_SIG_EVENTS_UNTIL_PROMPT	-1	// integer
+#endif
 
 /*
  Once the rating alert is presented to the user, they might select
  'Remind me later'. This value specifies how long (in days) Appirater
  will wait before reminding them.
  */
+#ifndef APPIRATER_TIME_BEFORE_REMINDING
 #define APPIRATER_TIME_BEFORE_REMINDING		1	// double
+#endif
 
 /*
  'YES' will show the Appirater alert everytime. Useful for testing how your message
  looks and making sure the link to your app's review page works.
  */
+#ifndef APPIRATER_DEBUG
 #define APPIRATER_DEBUG				NO
+#endif
 
 @interface Appirater : NSObject <UIAlertViewDelegate> {
 
