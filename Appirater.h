@@ -45,6 +45,17 @@ extern NSString *const kAppiraterDeclinedToRate;
 extern NSString *const kAppiraterReminderRequestDate;
 
 /*
+ NSNotification name for popup click event
+ */
+extern NSString *const kAppiraterButtonClickedNotification;
+
+/* Sent as the object to the above notification on click */
+extern NSString *const kAppiraterNotificationObjectForDeclinedClicked;
+extern NSString *const kAppiraterNotificationObjectForRateClicked;
+extern NSString *const kAppiraterNotificationObjectForLaterClicked;
+extern NSString *const kAppiraterNotificationObjectForOtherClicked;
+
+/*
  Place your Apple generated software id here.
  */
 #ifndef APPIRATER_APP_ID

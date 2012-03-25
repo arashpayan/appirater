@@ -48,6 +48,14 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 
+/** Notification message & objects */
+NSString *const kAppiraterButtonClickedNotification = @"kAppiraterButtonClickedNotification";
+NSString *const kAppiraterNotificationObjectForDeclinedClicked = @"kAppiraterNotificationObjectForDeclinedClicked";
+NSString *const kAppiraterNotificationObjectForRateClicked = @"kAppiraterNotificationObjectForRateClicked";
+NSString *const kAppiraterNotificationObjectForLaterClicked = @"kAppiraterNotificationObjectForLaterClicked";
+NSString *const kAppiraterNotificationObjectForOtherClicked = @"kAppiraterNotificationObjectForOtherClicked";
+
+
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
@@ -359,28 +367,45 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
+    NSString *notifObj;
+    
 	switch (buttonIndex) {
 		case 0:
 		{
 			// they don't want to rate it
 			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
 			[userDefaults synchronize];
+            
+            // Msg for notification
+            notifObj = kAppiraterNotificationObjectForDeclinedClicked;
+            
 			break;
 		}
 		case 1:
 		{
 			// they want to rate it
 			[Appirater rateApp];
+            
+            notifObj = kAppiraterNotificationObjectForRateClicked;
+            
 			break;
 		}
 		case 2:
 			// remind them later
 			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
 			[userDefaults synchronize];
+            
+            notifObj = kAppiraterNotificationObjectForLaterClicked;
+            
 			break;
 		default:
+            
+            notifObj = kAppiraterNotificationObjectForOtherClicked;
 			break;
 	}
+    
+    // Send the notification
+    [[NSNotificationCenter defaultCenter] postNotificationName:kAppiraterButtonClickedNotification object:notifObj];
 }
 
 @end
