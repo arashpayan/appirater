@@ -48,6 +48,14 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 
+/** Notification message & objects */
+NSString *const kAppiraterButtonClickedNotification = @"kAppiraterButtonClickedNotification";
+NSString *const kAppiraterNotificationObjectForDeclinedClicked = @"kAppiraterNotificationObjectForDeclinedClicked";
+NSString *const kAppiraterNotificationObjectForRateClicked = @"kAppiraterNotificationObjectForRateClicked";
+NSString *const kAppiraterNotificationObjectForLaterClicked = @"kAppiraterNotificationObjectForLaterClicked";
+NSString *const kAppiraterNotificationObjectForOtherClicked = @"kAppiraterNotificationObjectForOtherClicked";
+
+
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
@@ -124,18 +132,34 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
 	NSDate *dateOfFirstLaunch = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterFirstUseDate]];
-	NSTimeInterval timeSinceFirstLaunch = [[NSDate date] timeIntervalSinceDate:dateOfFirstLaunch];
-	NSTimeInterval timeUntilRate = 60 * 60 * 24 * APPIRATER_DAYS_UNTIL_PROMPT;
+    NSTimeInterval timeSinceFirstLaunch;
+    if (APPIRATER_DEBUG_DAYS_LAPSED_OVERRIDE >= 0) {
+        timeSinceFirstLaunch = 60 * 60 * 24 * APPIRATER_DEBUG_DAYS_LAPSED_OVERRIDE;
+    } else {
+        timeSinceFirstLaunch = [[NSDate date] timeIntervalSinceDate:dateOfFirstLaunch];
+    }
+    NSTimeInterval timeUntilRate = 60 * 60 * 24 * APPIRATER_DAYS_UNTIL_PROMPT;
+
 	if (timeSinceFirstLaunch < timeUntilRate)
 		return NO;
 	
 	// check if the app has been used enough
-	int useCount = [userDefaults integerForKey:kAppiraterUseCount];
+    int useCount;
+    if (APPIRATER_DEBUG_USE_COUNT_OVERRIDE >= 0) {
+        useCount = APPIRATER_DEBUG_USE_COUNT_OVERRIDE;
+    } else {
+        useCount = [userDefaults integerForKey:kAppiraterUseCount];
+    }
 	if (useCount <= APPIRATER_USES_UNTIL_PROMPT)
 		return NO;
 	
 	// check if the user has done enough significant events
-	int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
+	int sigEventCount;
+    if (APPIRATER_DEBUG_SIG_EVENTS_COUNT_OVERRIDE >= 0) {
+        sigEventCount = APPIRATER_DEBUG_SIG_EVENTS_COUNT_OVERRIDE;
+    } else {
+        sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
+    }
 	if (sigEventCount <= APPIRATER_SIG_EVENTS_UNTIL_PROMPT)
 		return NO;
 	
@@ -149,7 +173,12 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	
 	// if the user wanted to be reminded later, has enough time passed?
 	NSDate *reminderRequestDate = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterReminderRequestDate]];
-	NSTimeInterval timeSinceReminderRequest = [[NSDate date] timeIntervalSinceDate:reminderRequestDate];
+    NSTimeInterval timeSinceReminderRequest;
+    if (APPIRATER_DEBUG_DAYS_LAPSED_SINCE_REMINDER_OVERRIDE >= 0) {
+        timeSinceReminderRequest = 60 * 60 * 24 *APPIRATER_DEBUG_DAYS_LAPSED_SINCE_REMINDER_OVERRIDE;
+    } else {
+        timeSinceReminderRequest = [[NSDate date] timeIntervalSinceDate:reminderRequestDate];
+    }
 	NSTimeInterval timeUntilReminder = 60 * 60 * 24 * APPIRATER_TIME_BEFORE_REMINDING;
 	if (timeSinceReminderRequest < timeUntilReminder)
 		return NO;
@@ -187,8 +216,11 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		int useCount = [userDefaults integerForKey:kAppiraterUseCount];
 		useCount++;
 		[userDefaults setInteger:useCount forKey:kAppiraterUseCount];
-		if (APPIRATER_DEBUG)
-			NSLog(@"APPIRATER Use count: %d", useCount);
+		if (APPIRATER_DEBUG) {
+            NSLog(@"APPIRATER Use count: %d", useCount);
+        } else if (APPIRATER_DEBUG_USE_COUNT_OVERRIDE > -1) {
+            NSLog(@"APPIRATER Use count (debug override): %d", APPIRATER_DEBUG_USE_COUNT_OVERRIDE);
+        }
 	}
 	else
 	{
@@ -335,28 +367,45 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
+    NSString *notifObj;
+    
 	switch (buttonIndex) {
 		case 0:
 		{
 			// they don't want to rate it
 			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
 			[userDefaults synchronize];
+            
+            // Msg for notification
+            notifObj = kAppiraterNotificationObjectForDeclinedClicked;
+            
 			break;
 		}
 		case 1:
 		{
 			// they want to rate it
 			[Appirater rateApp];
+            
+            notifObj = kAppiraterNotificationObjectForRateClicked;
+            
 			break;
 		}
 		case 2:
 			// remind them later
 			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
 			[userDefaults synchronize];
+            
+            notifObj = kAppiraterNotificationObjectForLaterClicked;
+            
 			break;
 		default:
+            
+            notifObj = kAppiraterNotificationObjectForOtherClicked;
 			break;
 	}
+    
+    // Send the notification
+    [[NSNotificationCenter defaultCenter] postNotificationName:kAppiraterButtonClickedNotification object:notifObj];
 }
 
 @end
