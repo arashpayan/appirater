@@ -200,4 +200,11 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 + (void)rateApp;
 
+/*
+ Tells Appirater to reset all counters for tracking.
+ This is generally used only for debugging when you want to test different
+ thresholds of rating trigger thresholds
+ */
++ (void)resetToDefaults;
+
 @end
