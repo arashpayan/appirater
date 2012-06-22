@@ -241,13 +241,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	else
 	{
 		// it's a new version of the app, so restart tracking
-		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
-		[userDefaults setDouble:0 forKey:kAppiraterFirstUseDate];
-		[userDefaults setInteger:0 forKey:kAppiraterUseCount];
-		[userDefaults setInteger:1 forKey:kAppiraterSignificantEventCount];
-		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
-		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
-		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+		[[self class] resetToDefaults];
 	}
 	
 	[userDefaults synchronize];
@@ -330,6 +324,19 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	[userDefaults synchronize];
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
 #endif
+}
+
++ (void)resetToDefaults {
+	NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleVersionKey];
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:version forKey:kAppiraterCurrentVersion];
+    [userDefaults setDouble:0 forKey:kAppiraterFirstUseDate];
+    [userDefaults setInteger:0 forKey:kAppiraterUseCount];
+    [userDefaults setInteger:1 forKey:kAppiraterSignificantEventCount];
+    [userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
+    [userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
+    [userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+    [userDefaults synchronize];
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
