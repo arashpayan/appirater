@@ -2,3 +2,9 @@
 "Rate %@" = "Avaliar o %@";
 "No, Thanks" = "Não, obrigado";
 "Remind me later" = "Mais tarde";
+
+"%@ Feedback" = "%@ Feedback";
+"Do you have any issues using %@?" = "Do you have any issues using %@?";
+"Yes" = "Yes";
+"No" = "No";
+"I have feedback" = "I have feedback";

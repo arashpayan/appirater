@@ -36,6 +36,8 @@
 
 #import "Appirater.h"
 #import <SystemConfiguration/SCNetworkReachability.h>
+#import <MessageUI/MessageUI.h>
+#import <MessageUI/MFMailComposeViewController.h>
 #include <netinet/in.h>
 
 NSString *const kAppiraterFirstUseDate				= @"kAppiraterFirstUseDate";
@@ -52,6 +54,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
 - (void)showRatingAlert;
+- (void)showQuestionAlert;
 - (BOOL)ratingConditionsHaveBeenMet;
 - (void)incrementUseCount;
 - (void)hideRatingAlert;
@@ -59,6 +62,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 
 @implementation Appirater 
 
+@synthesize questionAlert;
 @synthesize ratingAlert;
 
 - (BOOL)connectedToNetwork {
@@ -113,8 +117,23 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 														delegate:self
 											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
 											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil] autorelease];
+    alertView.tag = 2;
 	self.ratingAlert = alertView;
 	[alertView show];
+    
+}
+
+- (void)showQuestionAlert 
+{      
+    UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:APPIRATER_QUESTION_MESSAGE_TITLE
+														 message:APPIRATER_QUESTION
+														delegate:self
+											   cancelButtonTitle:APPIRATER_RATE_LATER
+											   otherButtonTitles:APPIRATER_NO, APPIRATER_YES, nil] autorelease];
+    alertView.tag = 1;
+	self.questionAlert = alertView;
+	[alertView show];
+    
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
@@ -155,6 +174,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		return NO;
 	
 	return YES;
+    
 }
 
 - (void)incrementUseCount {
@@ -200,6 +220,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+        
 	}
 	
 	[userDefaults synchronize];
@@ -262,7 +283,18 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	{
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                           [self showRatingAlert];
+                           //If they have been asked before and said remind me take them straight to the rating alert
+                           /*
+                           NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+                           double kAppiraterReminder = [userDefaults doubleForKey:kAppiraterReminderRequestDate];
+                           if(kAppiraterReminder == 0)
+                           {
+                               [self showQuestionAlert];
+                           }else{
+                               [self showRatingAlert];
+                           }
+                            */
+                           [self showQuestionAlert];
                        });
 	}
 }
@@ -296,7 +328,16 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	if (self.ratingAlert.visible) {
 		if (APPIRATER_DEBUG)
 			NSLog(@"APPIRATER Hiding Alert");
+        
 		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
+        
+	}	
+    if (self.questionAlert.visible) {
+		if (APPIRATER_DEBUG)
+			NSLog(@"APPIRATER questionAlert Alert");
+        
+		[self.questionAlert dismissWithClickedButtonIndex:-1 animated:NO];
+        
 	}	
 }
 
@@ -333,30 +374,95 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
-	switch (buttonIndex) {
-		case 0:
-		{
-			// they don't want to rate it
-			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
-			[userDefaults synchronize];
-			break;
-		}
-		case 1:
-		{
-			// they want to rate it
-			[Appirater rateApp];
-			break;
-		}
-		case 2:
-			// remind them later
-			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
-			[userDefaults synchronize];
-			break;
-		default:
-			break;
-	}
+    NSLog(@"%i buttonIndex tag %i", buttonIndex, alertView.tag);
+    
+    if(alertView.tag == 1)
+    {
+        
+        //we are asking to rate, remind, or no thanks
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        
+        switch (buttonIndex) {
+            case 0:
+            {
+                //They have issues ask them to fill in a email question
+                //They got issues
+                NSLog(@"They got issues present a mail thing");
+                
+                MFMailComposeViewController *picker = [[MFMailComposeViewController alloc] init];
+                picker.mailComposeDelegate = alertView.delegate;
+                
+                [picker setSubject:APPIRATER_EMAIL_SUBJECT];
+                
+                // Set up recipients
+                NSArray *toRecipients = [NSArray arrayWithObject:@"first@example.com"]; 
+                
+                [picker setToRecipients:toRecipients];
+                
+                // Fill out the email body text
+                NSString *emailBody = @"Please provide feedback!";
+                [picker setMessageBody:emailBody isHTML:NO];
+                
+                //Not sure this is the best method but it will do for now
+                [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentModalViewController:picker animated:YES];
+                
+                [picker release];
+                
+                
+                break;
+            }
+            case 1:
+            {
+                //No
+                [self showRatingAlert];
+                
+                
+                break;
+            }
+            case 2:
+                // remind them later
+                [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+                [userDefaults synchronize];
+                break;
+            default:
+                break;
+        }
+        
+        
+    }else if(alertView.tag == 2)
+    {
+        
+        //we are asking if the have any issues using app no, yes or remind me later
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        
+        switch (buttonIndex) {
+            case 0:
+            {
+                // they don't want to rate it
+                [userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
+                [userDefaults synchronize];
+                
+                break;
+            }
+            case 1:
+            {
+                // they want to rate it
+                [Appirater rateApp];
+                break;
+            }
+            case 2:
+                // remind them later
+                [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+                [userDefaults synchronize];
+                break;
+            default:
+                break;
+        }
+        
+
+    }
+    
 }
 
 @end

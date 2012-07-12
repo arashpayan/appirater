@@ -2,3 +2,9 @@
 "Rate %@" = "%@ 평가하기";
 "No, Thanks" = "평가하지 않겠습니다";
 "Remind me later" = "다음에 평가하겠습니다";
+
+"%@ Feedback" = "%@ Feedback";
+"Do you have any issues using %@?" = "Do you have any issues using %@?";
+"Yes" = "Yes";
+"No" = "No";
+"I have feedback" = "I have feedback";

@@ -84,6 +84,35 @@ extern NSString *const kAppiraterReminderRequestDate;
 #define APPIRATER_LOCALIZED_RATE_BUTTON NSLocalizedString(@"Rate %@", nil)
 #define APPIRATER_RATE_BUTTON			[NSString stringWithFormat:APPIRATER_LOCALIZED_RATE_BUTTON, APPIRATER_APP_NAME]
 
+
+
+#define APPIRATER_LOCALIZED_QUESTION_MESSAGE_TITLE   NSLocalizedString(@"%@ Feedback", nil)
+#define APPIRATER_QUESTION_MESSAGE_TITLE             [NSString stringWithFormat:APPIRATER_LOCALIZED_QUESTION_MESSAGE_TITLE, APPIRATER_APP_NAME]
+
+#define APPIRATER_LOCALIZED_QUESTION   NSLocalizedString(@"Do you have any issues using %@?", nil)
+#define APPIRATER_QUESTION             [NSString stringWithFormat:APPIRATER_LOCALIZED_QUESTION, APPIRATER_APP_NAME]
+
+
+#define APPIRATER_LOCALIZED_EMAIL_SUBJECT NSLocalizedString(@"Having issues with %@", nil)
+#define APPIRATER_EMAIL_SUBJECT			[NSString stringWithFormat:APPIRATER_LOCALIZED_EMAIL_SUBJECT, APPIRATER_APP_NAME]
+
+
+/*
+ Text for button to remind the user to no.
+ */
+#define APPIRATER_NO NSLocalizedString(@"No", nil)
+
+/*
+ Text for button to remind the user to yes.
+ */
+#define APPIRATER_YES NSLocalizedString(@"Yes", nil)
+
+/*
+ Text for button to remind the user to feedback.
+ */
+#define APPIRATER_FEEDBACK NSLocalizedString(@"I have feedback", nil)
+
+
 /*
  Text for button to remind the user to review later.
  */
@@ -135,9 +164,11 @@ extern NSString *const kAppiraterReminderRequestDate;
 
 @interface Appirater : NSObject <UIAlertViewDelegate> {
 
-	UIAlertView		*ratingAlert;
+	UIAlertView		*questionAlert;
+    UIAlertView		*ratingAlert;
+    
 }
-
+@property(nonatomic, retain) UIAlertView *questionAlert;
 @property(nonatomic, retain) UIAlertView *ratingAlert;
 
 /*

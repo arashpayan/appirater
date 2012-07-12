@@ -2,3 +2,9 @@
 "Rate %@" = "%@の評価";
 "No, Thanks" ="いいえ";
 "Remind me later" = "後で見る";
+
+"%@ Feedback" = "%@ Feedback";
+"Do you have any issues using %@?" = "Do you have any issues using %@?";
+"Yes" = "Yes";
+"No" = "No";
+"I have feedback" = "I have feedback";
