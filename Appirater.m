@@ -445,6 +445,10 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
                                                           otherButtonTitles: nil];
                     [alert show];
                 }
+                //We dont want them to rate it
+                [userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
+                [userDefaults synchronize];
+                
                 
                                 
                 break;
