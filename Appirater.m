@@ -64,6 +64,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 
 @synthesize questionAlert;
 @synthesize ratingAlert;
+@synthesize theViewController;
 
 - (BOOL)connectedToNetwork {
     // Create zero addy
@@ -112,6 +113,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 - (void)showRatingAlert {
+    
 	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
 														 message:APPIRATER_MESSAGE
 														delegate:self
@@ -317,10 +319,21 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	[Appirater appLaunched:YES];
 }
 
-+ (void)appLaunched:(BOOL)canPromptForRating {
++ (void)appLaunched:(BOOL)canPromptForRating  {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
                        [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+                   });
+}
+
+
++ (void)appLaunched:(BOOL)canPromptForRating viewController:(UINavigationController*)viewController {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
+                   ^{
+                       [[Appirater sharedInstance] setTheViewController:viewController];
+                       
+                       [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+                       
                    });
 }
 
@@ -373,9 +386,13 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 #endif
 }
 
+- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error {
+    [theViewController dismissModalViewControllerAnimated:YES];
+}
+
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	
-    NSLog(@"%i buttonIndex tag %i", buttonIndex, alertView.tag);
+    NSLog(@"tag %i buttonIndex %i  ", alertView.tag, buttonIndex);
     
     if(alertView.tag == 1)
     {
@@ -386,29 +403,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
         switch (buttonIndex) {
             case 0:
             {
-                //They have issues ask them to fill in a email question
-                //They got issues
-                NSLog(@"They got issues present a mail thing");
-                
-                MFMailComposeViewController *picker = [[MFMailComposeViewController alloc] init];
-                picker.mailComposeDelegate = alertView.delegate;
-                
-                [picker setSubject:APPIRATER_EMAIL_SUBJECT];
-                
-                // Set up recipients
-                NSArray *toRecipients = [NSArray arrayWithObject:@"first@example.com"]; 
-                
-                [picker setToRecipients:toRecipients];
-                
-                // Fill out the email body text
-                NSString *emailBody = @"Please provide feedback!";
-                [picker setMessageBody:emailBody isHTML:NO];
-                
-                //Not sure this is the best method but it will do for now
-                [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentModalViewController:picker animated:YES];
-                
-                [picker release];
-                
+                // remind them later
+                [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+                [userDefaults synchronize];
                 
                 break;
             }
@@ -417,13 +414,27 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
                 //No
                 [self showRatingAlert];
                 
-                
                 break;
             }
             case 2:
-                // remind them later
-                [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
-                [userDefaults synchronize];
+                //They have issues ask them to fill in a email question
+                
+                NSLog(@"They got issues present a mail thing");
+                
+                MFMailComposeViewController *mailPicker = [[MFMailComposeViewController alloc] init];
+                mailPicker.mailComposeDelegate = self;
+                [mailPicker setSubject:APPIRATER_EMAIL_SUBJECT];
+
+                // Set up recipients
+                NSArray *toRecipients = [NSArray arrayWithObject:APPIRATER_DEVELOPER_EMAIL]; 
+                
+                [mailPicker setToRecipients:toRecipients];
+                [mailPicker setMessageBody:@"Please describe your issue:\n" isHTML:NO];
+                
+                [theViewController presentModalViewController:mailPicker animated:YES];
+                [mailPicker release];
+
+                                
                 break;
             default:
                 break;

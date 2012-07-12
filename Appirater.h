@@ -36,6 +36,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "InAppEmailViewController.h"
+
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
 extern NSString *const kAppiraterSignificantEventCount;
@@ -48,6 +50,8 @@ extern NSString *const kAppiraterReminderRequestDate;
  Place your Apple generated software id here.
  */
 #define APPIRATER_APP_ID				301377083
+
+#define APPIRATER_DEVELOPER_EMAIL @"contact@lukedurrant.com"
 
 
 /*
@@ -162,14 +166,17 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 #define APPIRATER_DEBUG				YES
 
-@interface Appirater : NSObject <UIAlertViewDelegate> {
+@interface Appirater : NSObject <UIAlertViewDelegate, MFMailComposeViewControllerDelegate> {
 
 	UIAlertView		*questionAlert;
     UIAlertView		*ratingAlert;
+    UIViewController *theViewController;
     
 }
 @property(nonatomic, retain) UIAlertView *questionAlert;
 @property(nonatomic, retain) UIAlertView *ratingAlert;
+
+@property(nonatomic, retain) UIViewController *theViewController;
 
 /*
  DEPRECATED: While still functional, it's better to use
@@ -194,6 +201,8 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 + (void)appLaunched:(BOOL)canPromptForRating;
 
++ (void)appLaunched:(BOOL)canPromptForRating viewController:(UINavigationController*)viewController;
+
 /*
  Tells Appirater that the app was brought to the foreground on multitasking
  devices. You should call this method from the application delegate's
@@ -207,6 +216,8 @@ extern NSString *const kAppiraterReminderRequestDate;
  (as long as you pass YES for canPromptForRating in those methods).
  */
 + (void)appEnteredForeground:(BOOL)canPromptForRating;
+
+
 
 /*
  Tells Appirater that the user performed a significant event. A significant
