@@ -439,7 +439,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
                 [mPicker release];
                 }else {
                     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Failure" 
-                                                                    message:[NSString stringWithFormat:@"Your device doesn't support the sending email please email %@" , APPIRATER_DEVELOPER_EMAIL]
+                                                                    message:APPIRATER_DEVELOPER_EMAIL_ALERT
                                                                    delegate:nil 
                                                           cancelButtonTitle:@"OK" 
                                                           otherButtonTitles: nil];

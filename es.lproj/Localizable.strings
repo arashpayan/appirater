@@ -11,3 +11,4 @@
 
 "Having issues with %@" = "Having issues with %@";
 "Please describe your issue:\n" = "Please describe your issue:\n";
+"Your device doesn't support sending email please email %@" = "Your device doesn't support sending email please email %@";

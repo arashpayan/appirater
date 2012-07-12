@@ -102,6 +102,9 @@ extern NSString *const kAppiraterReminderRequestDate;
 
 #define APPIRATER_EMAIL_BODY NSLocalizedString(@"Please describe your issue:", nil)
 
+#define APPIRATER_LOCALIZED_DEVELOPER_EMAIL_ALERT NSLocalizedString(@"Your device doesn't support sending email please email %@", nil)
+#define APPIRATER_DEVELOPER_EMAIL_ALERT			[NSString stringWithFormat:APPIRATER_LOCALIZED_DEVELOPER_EMAIL_ALERT, APPIRATER_DEVELOPER_EMAIL]
+ 
 /*
  Text for button to remind the user to no.
  */
