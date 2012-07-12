@@ -36,7 +36,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "InAppEmailViewController.h"
+
 
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
@@ -100,6 +100,7 @@ extern NSString *const kAppiraterReminderRequestDate;
 #define APPIRATER_LOCALIZED_EMAIL_SUBJECT NSLocalizedString(@"Having issues with %@", nil)
 #define APPIRATER_EMAIL_SUBJECT			[NSString stringWithFormat:APPIRATER_LOCALIZED_EMAIL_SUBJECT, APPIRATER_APP_NAME]
 
+#define APPIRATER_EMAIL_BODY NSLocalizedString(@"Please describe your issue:", nil)
 
 /*
  Text for button to remind the user to no.
@@ -165,6 +166,10 @@ extern NSString *const kAppiraterReminderRequestDate;
  looks and making sure the link to your app's review page works.
  */
 #define APPIRATER_DEBUG				YES
+
+#import <UIKit/UIKit.h>
+#import <MessageUI/MessageUI.h>
+
 
 @interface Appirater : NSObject <UIAlertViewDelegate, MFMailComposeViewControllerDelegate> {
 

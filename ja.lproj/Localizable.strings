@@ -6,5 +6,8 @@
 "%@ Feedback" = "%@ Feedback";
 "Do you have any issues using %@?" = "Do you have any issues using %@?";
 "Yes" = "Yes";
-"No" = "No";
+"No" = "No, I love it";
 "I have feedback" = "I have feedback";
+
+"Having issues with %@" = "Having issues with %@";
+"Please describe your issue:\n" = "Please describe your issue:\n";

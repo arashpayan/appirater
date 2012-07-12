@@ -36,9 +36,9 @@
 
 #import "Appirater.h"
 #import <SystemConfiguration/SCNetworkReachability.h>
-#import <MessageUI/MessageUI.h>
-#import <MessageUI/MFMailComposeViewController.h>
 #include <netinet/in.h>
+
+
 
 NSString *const kAppiraterFirstUseDate				= @"kAppiraterFirstUseDate";
 NSString *const kAppiraterUseCount					= @"kAppiraterUseCount";
@@ -286,17 +286,16 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
         dispatch_async(dispatch_get_main_queue(),
                        ^{
                            //If they have been asked before and said remind me take them straight to the rating alert
-                           /*
+
                            NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
                            double kAppiraterReminder = [userDefaults doubleForKey:kAppiraterReminderRequestDate];
-                           if(kAppiraterReminder == 0)
+                           
+                           if(kAppiraterReminder == 0 || APPIRATER_DEBUG)
                            {
                                [self showQuestionAlert];
                            }else{
                                [self showRatingAlert];
                            }
-                            */
-                           [self showQuestionAlert];
                        });
 	}
 }
@@ -310,7 +309,15 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	{
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                           [self showRatingAlert];
+                           NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+                           double kAppiraterReminder = [userDefaults doubleForKey:kAppiraterReminderRequestDate];
+                           
+                           if(kAppiraterReminder == 0 || APPIRATER_DEBUG)
+                           {
+                               [self showQuestionAlert];
+                           }else{
+                               [self showRatingAlert];
+                           }
                        });
 	}
 }
@@ -391,9 +398,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-	
-    NSLog(@"tag %i buttonIndex %i  ", alertView.tag, buttonIndex);
-    
+    //NSLog(@"tag %i buttonIndex %i  ", alertView.tag, buttonIndex);
     if(alertView.tag == 1)
     {
         
@@ -413,27 +418,34 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
             {
                 //No
                 [self showRatingAlert];
-                
                 break;
             }
             case 2:
                 //They have issues ask them to fill in a email question
+                //You need to include UIMessage Framework
+                if ([MFMailComposeViewController canSendMail])
+                {
+                MFMailComposeViewController *mPicker = [[MFMailComposeViewController alloc] init];
+                mPicker.mailComposeDelegate = self;
                 
-                NSLog(@"They got issues present a mail thing");
+                [mPicker setSubject:APPIRATER_EMAIL_SUBJECT];
                 
-                MFMailComposeViewController *mailPicker = [[MFMailComposeViewController alloc] init];
-                mailPicker.mailComposeDelegate = self;
-                [mailPicker setSubject:APPIRATER_EMAIL_SUBJECT];
-
-                // Set up recipients
                 NSArray *toRecipients = [NSArray arrayWithObject:APPIRATER_DEVELOPER_EMAIL]; 
                 
-                [mailPicker setToRecipients:toRecipients];
-                [mailPicker setMessageBody:@"Please describe your issue:\n" isHTML:NO];
+                [mPicker setToRecipients:toRecipients];
+                [mPicker setMessageBody:APPIRATER_EMAIL_BODY isHTML:NO];
                 
-                [theViewController presentModalViewController:mailPicker animated:YES];
-                [mailPicker release];
-
+                [theViewController presentModalViewController:mPicker animated:YES];
+                [mPicker release];
+                }else {
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Failure" 
+                                                                    message:[NSString stringWithFormat:@"Your device doesn't support the sending email please email %@" , APPIRATER_DEVELOPER_EMAIL]
+                                                                   delegate:nil 
+                                                          cancelButtonTitle:@"OK" 
+                                                          otherButtonTitles: nil];
+                    [alert show];
+                }
+                
                                 
                 break;
             default:
