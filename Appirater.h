@@ -93,7 +93,7 @@ extern NSString *const kAppiraterReminderRequestDate;
 #define APPIRATER_LOCALIZED_QUESTION_MESSAGE_TITLE   NSLocalizedString(@"%@ Feedback", nil)
 #define APPIRATER_QUESTION_MESSAGE_TITLE             [NSString stringWithFormat:APPIRATER_LOCALIZED_QUESTION_MESSAGE_TITLE, APPIRATER_APP_NAME]
 
-#define APPIRATER_LOCALIZED_QUESTION   NSLocalizedString(@"Do you have any issues using %@?", nil)
+#define APPIRATER_LOCALIZED_QUESTION   NSLocalizedString(@"How do you feel about %@?", nil)
 #define APPIRATER_QUESTION             [NSString stringWithFormat:APPIRATER_LOCALIZED_QUESTION, APPIRATER_APP_NAME]
 
 
@@ -106,14 +106,14 @@ extern NSString *const kAppiraterReminderRequestDate;
 #define APPIRATER_DEVELOPER_EMAIL_ALERT			[NSString stringWithFormat:APPIRATER_LOCALIZED_DEVELOPER_EMAIL_ALERT, APPIRATER_DEVELOPER_EMAIL]
  
 /*
- Text for button to remind the user to no.
+ Text for button to say the love it (no problems)
  */
-#define APPIRATER_NO NSLocalizedString(@"No", nil)
+#define APPIRATER_NO NSLocalizedString(@"I love it!", nil)
 
 /*
- Text for button to remind the user to yes.
+ Text for button to say somethings not right (email).
  */
-#define APPIRATER_YES NSLocalizedString(@"Yes", nil)
+#define APPIRATER_YES NSLocalizedString(@"Something's not quite right", nil)
 
 /*
  Text for button to remind the user to feedback.

@@ -4,9 +4,9 @@
 "Remind me later" = "Mais tarde";
 
 "%@ Feedback" = "%@ Feedback";
-"Do you have any issues using %@?" = "Do you have any issues using %@?";
-"Yes" = "Yes";
-"No" = "No, I love it";
+"How do you feel about %@?" = "How do you feel about %@?";
+"Something's not quite right" = "Something's not quite right";
+"I love it!" = "I love it!";
 "I have feedback" = "I have feedback";
 
 "Having issues with %@" = "Having issues with %@";
