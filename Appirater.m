@@ -94,8 +94,10 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 	
 	NSURL *testURL = [NSURL URLWithString:@"http://www.apple.com/"];
 	NSURLRequest *testRequest = [NSURLRequest requestWithURL:testURL  cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:20.0];
-	NSURLConnection *testConnection = [[[NSURLConnection alloc] initWithRequest:testRequest delegate:self] autorelease];
-	
+	NSURLConnection *testConnection = [[NSURLConnection alloc] initWithRequest:testRequest delegate:self];
+#if !__has_feature(objc_arc)
+	[testConnection autorelease];
+#endif
     return ((isReachable && !needsConnection) || nonWiFi) ? (testConnection ? YES : NO) : NO;
 }
 
@@ -115,11 +117,14 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 }
 
 - (void)showRatingAlert {
-	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
-														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil] autorelease];
+	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+                                                        message:APPIRATER_MESSAGE
+                                                       delegate:self
+                                              cancelButtonTitle:APPIRATER_CANCEL_BUTTON
+                                              otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+#if !__has_feature(objc_arc)
+	[alertView autorelease];
+#endif
 	self.ratingAlert = alertView;
 	[alertView show];
 }
