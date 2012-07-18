@@ -71,17 +71,14 @@
 
 - (NSInteger) usesUntilPrompt{
     return [self objectForKey:@"UsesUntilPrompt" withDefault: APPIRATER_USES_UNTIL_PROMPT];
-    return 20;
 }
 
 - (NSInteger) sigEventsUntilPrompt{
     return [self objectForKey:@"SigEventsUntilPrompt" withDefault: APPIRATER_SIG_EVENTS_UNTIL_PROMPT];
-    return -1;
 }
 
 - (NSInteger) timeBeforeReminding{
     return [self objectForKey:@"TimeBeforeReminding" withDefault: APPIRATER_TIME_BEFORE_REMINDING];
-    return 1;
 }
 
 - (NSString *) urlStore {
