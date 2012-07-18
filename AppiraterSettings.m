@@ -3,10 +3,11 @@
 //  OP22
 //
 //  Created by Yann-Cyril PELUD on 17/07/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Yann-Cyril PELUD. All rights reserved.
 //
 
 #import "AppiraterSettings.h"
+#import "Appirater.h"
 
 @interface AppiraterSettings()
 
@@ -59,26 +60,27 @@
 
 }
 
+
 - (NSInteger) appId{
-    return [self objectForKey:@"AppId" withDefault: 480776381];
+    return [self objectForKey:@"AppId" withDefault: APPIRATER_APP_ID];
 }
 
 - (NSInteger) daysUntilPrompt{
-    return [self objectForKey:@"DaysUntilPrompt" withDefault: 20];
+    return [self objectForKey:@"DaysUntilPrompt" withDefault: APPIRATER_DAYS_UNTIL_PROMPT];
 }
 
 - (NSInteger) usesUntilPrompt{
-    return [self objectForKey:@"UsesUntilPrompt" withDefault: 20];
+    return [self objectForKey:@"UsesUntilPrompt" withDefault: APPIRATER_USES_UNTIL_PROMPT];
     return 20;
 }
 
 - (NSInteger) sigEventsUntilPrompt{
-    return [self objectForKey:@"SigEventsUntilPrompt" withDefault: -1];
+    return [self objectForKey:@"SigEventsUntilPrompt" withDefault: APPIRATER_SIG_EVENTS_UNTIL_PROMPT];
     return -1;
 }
 
 - (NSInteger) timeBeforeReminding{
-    return [self objectForKey:@"TimeBeforeReminding" withDefault: 1];
+    return [self objectForKey:@"TimeBeforeReminding" withDefault: APPIRATER_TIME_BEFORE_REMINDING];
     return 1;
 }
 

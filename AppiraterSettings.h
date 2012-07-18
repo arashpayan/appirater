@@ -3,7 +3,7 @@
 //  OP22
 //
 //  Created by Yann-Cyril PELUD on 17/07/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Yann-Cyril PELUD. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
