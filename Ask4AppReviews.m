@@ -1,8 +1,5 @@
 /*
- This file is part of Appirater.
- 
- Copyright (c) 2012, Arash Payan
- All rights reserved.
+ This file is part of Ask4AppReviews (forked from Appirater).
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,17 +23,18 @@
  OTHER DEALINGS IN THE SOFTWARE.
  */
 /*
- * Appirater.m
- * appirater
+ * Ask4AppReviews.m
+ * Ask4AppReviews
  *
- * Created by Arash Payan on 9/5/09.
- * http://arashpayan.com
- * Copyright 2012 Arash Payan. All rights reserved.
+ * Created by Luke Durrant on 7/12.
+ * Ask4AppReviews (forked from Appirater).
  */
 
-#import "Appirater.h"
+#import "Ask4AppReviews.h"
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
+
+
 
 NSString *const kAppiraterFirstUseDate				= @"kAppiraterFirstUseDate";
 NSString *const kAppiraterUseCount					= @"kAppiraterUseCount";
@@ -52,6 +50,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
 - (void)showRatingAlert;
+- (void)showQuestionAlert;
 - (BOOL)ratingConditionsHaveBeenMet;
 - (void)incrementUseCount;
 - (void)hideRatingAlert;
@@ -59,7 +58,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 
 @implementation Appirater 
 
+@synthesize questionAlert;
 @synthesize ratingAlert;
+@synthesize theViewController;
 
 - (BOOL)connectedToNetwork {
     // Create zero addy
@@ -108,13 +109,29 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 - (void)showRatingAlert {
+    
 	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
 														 message:APPIRATER_MESSAGE
 														delegate:self
 											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
 											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil] autorelease];
+    alertView.tag = 2;
 	self.ratingAlert = alertView;
 	[alertView show];
+    
+}
+
+- (void)showQuestionAlert 
+{      
+    UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:APPIRATER_QUESTION_MESSAGE_TITLE
+														 message:APPIRATER_QUESTION
+														delegate:self
+											   cancelButtonTitle:APPIRATER_RATE_LATER
+											   otherButtonTitles:APPIRATER_NO, APPIRATER_YES, nil] autorelease];
+    alertView.tag = 1;
+	self.questionAlert = alertView;
+	[alertView show];
+    
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
@@ -155,6 +172,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		return NO;
 	
 	return YES;
+    
 }
 
 - (void)incrementUseCount {
@@ -200,6 +218,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+        
 	}
 	
 	[userDefaults synchronize];
@@ -262,7 +281,17 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	{
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                           [self showRatingAlert];
+                           //If they have been asked before and said remind me take them straight to the rating alert
+
+                           NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+                           double kAppiraterReminder = [userDefaults doubleForKey:kAppiraterReminderRequestDate];
+                           
+                           if(kAppiraterReminder == 0 || APPIRATER_DEBUG)
+                           {
+                               [self showQuestionAlert];
+                           }else{
+                               [self showRatingAlert];
+                           }
                        });
 	}
 }
@@ -276,7 +305,15 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	{
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                           [self showRatingAlert];
+                           NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+                           double kAppiraterReminder = [userDefaults doubleForKey:kAppiraterReminderRequestDate];
+                           
+                           if(kAppiraterReminder == 0 || APPIRATER_DEBUG)
+                           {
+                               [self showQuestionAlert];
+                           }else{
+                               [self showRatingAlert];
+                           }
                        });
 	}
 }
@@ -285,10 +322,21 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	[Appirater appLaunched:YES];
 }
 
-+ (void)appLaunched:(BOOL)canPromptForRating {
++ (void)appLaunched:(BOOL)canPromptForRating  {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
                        [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+                   });
+}
+
+
++ (void)appLaunched:(BOOL)canPromptForRating viewController:(UINavigationController*)viewController {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
+                   ^{
+                       [[Appirater sharedInstance] setTheViewController:viewController];
+                       
+                       [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+                       
                    });
 }
 
@@ -296,7 +344,16 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	if (self.ratingAlert.visible) {
 		if (APPIRATER_DEBUG)
 			NSLog(@"APPIRATER Hiding Alert");
+        
 		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
+        
+	}	
+    if (self.questionAlert.visible) {
+		if (APPIRATER_DEBUG)
+			NSLog(@"APPIRATER questionAlert Alert");
+        
+		[self.questionAlert dismissWithClickedButtonIndex:-1 animated:NO];
+        
 	}	
 }
 
@@ -332,31 +389,103 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 #endif
 }
 
+- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error {
+    [theViewController dismissModalViewControllerAnimated:YES];
+}
+
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	
-	switch (buttonIndex) {
-		case 0:
-		{
-			// they don't want to rate it
-			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
-			[userDefaults synchronize];
-			break;
-		}
-		case 1:
-		{
-			// they want to rate it
-			[Appirater rateApp];
-			break;
-		}
-		case 2:
-			// remind them later
-			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
-			[userDefaults synchronize];
-			break;
-		default:
-			break;
-	}
+    //NSLog(@"tag %i buttonIndex %i  ", alertView.tag, buttonIndex);
+    if(alertView.tag == 1)
+    {
+        
+        //we are asking to rate, remind, or no thanks
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        
+        switch (buttonIndex) {
+            case 0:
+            {
+                // remind them later
+                [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+                [userDefaults synchronize];
+                
+                break;
+            }
+            case 1:
+            {
+                //No
+                [self showRatingAlert];
+                break;
+            }
+            case 2:
+                //They have issues ask them to fill in a email question
+                //You need to include UIMessage Framework
+                if ([MFMailComposeViewController canSendMail])
+                {
+                MFMailComposeViewController *mPicker = [[MFMailComposeViewController alloc] init];
+                mPicker.mailComposeDelegate = self;
+                
+                [mPicker setSubject:APPIRATER_EMAIL_SUBJECT];
+                
+                NSArray *toRecipients = [NSArray arrayWithObject:APPIRATER_DEVELOPER_EMAIL]; 
+                
+                [mPicker setToRecipients:toRecipients];
+                [mPicker setMessageBody:APPIRATER_EMAIL_BODY isHTML:NO];
+                
+                [theViewController presentModalViewController:mPicker animated:YES];
+                [mPicker release];
+                }else {
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Failure" 
+                                                                    message:APPIRATER_DEVELOPER_EMAIL_ALERT
+                                                                   delegate:nil 
+                                                          cancelButtonTitle:@"OK" 
+                                                          otherButtonTitles: nil];
+                    [alert show];
+                }
+                //We dont want them to rate it
+                [userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
+                [userDefaults synchronize];
+                
+                
+                                
+                break;
+            default:
+                break;
+        }
+        
+        
+    }else if(alertView.tag == 2)
+    {
+        
+        //we are asking if the have any issues using app no, yes or remind me later
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        
+        switch (buttonIndex) {
+            case 0:
+            {
+                // they don't want to rate it
+                [userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
+                [userDefaults synchronize];
+                
+                break;
+            }
+            case 1:
+            {
+                // they want to rate it
+                [Appirater rateApp];
+                break;
+            }
+            case 2:
+                // remind them later
+                [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+                [userDefaults synchronize];
+                break;
+            default:
+                break;
+        }
+        
+
+    }
+    
 }
 
 @end

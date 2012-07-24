@@ -2,3 +2,13 @@
 "Rate %@" = "Bedøm %@";
 "No, Thanks" = "Nej tak";
 "Remind me later" = "Påmind mig senere";
+
+"%@ Feedback" = "%@ Feedback";
+"How do you feel about %@?" = "How do you feel about %@?";
+"Something's not quite right" = "Something's not quite right";
+"I love it!" = "I love it!";
+"I have feedback" = "I have feedback";
+
+"Having issues with %@" = "Having issues with %@";
+"Please describe your issue:\n" = "Please describe your issue:\n";
+"Your device doesn't support sending email please email %@" = "Your device doesn't support sending email please email %@";

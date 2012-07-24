@@ -25,16 +25,18 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
  */
+
 /*
- * Appirater.h
- * appirater
+ * Ask4AppReviews.h
+ * Ask4AppReviews
  *
- * Created by Arash Payan on 9/5/09.
- * http://arashpayan.com
- * Copyright 2012 Arash Payan. All rights reserved.
+ * Created by Luke Durrant on 7/12.
+ * Ask4AppReviews (forked from Appirater).
  */
 
 #import <Foundation/Foundation.h>
+
+
 
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
@@ -48,6 +50,8 @@ extern NSString *const kAppiraterReminderRequestDate;
  Place your Apple generated software id here.
  */
 #define APPIRATER_APP_ID				301377083
+
+#define APPIRATER_DEVELOPER_EMAIL @"contact@lukedurrant.com"
 
 
 /*
@@ -83,6 +87,39 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 #define APPIRATER_LOCALIZED_RATE_BUTTON NSLocalizedString(@"Rate %@", nil)
 #define APPIRATER_RATE_BUTTON			[NSString stringWithFormat:APPIRATER_LOCALIZED_RATE_BUTTON, APPIRATER_APP_NAME]
+
+
+
+#define APPIRATER_LOCALIZED_QUESTION_MESSAGE_TITLE   NSLocalizedString(@"%@ Feedback", nil)
+#define APPIRATER_QUESTION_MESSAGE_TITLE             [NSString stringWithFormat:APPIRATER_LOCALIZED_QUESTION_MESSAGE_TITLE, APPIRATER_APP_NAME]
+
+#define APPIRATER_LOCALIZED_QUESTION   NSLocalizedString(@"How do you feel about %@?", nil)
+#define APPIRATER_QUESTION             [NSString stringWithFormat:APPIRATER_LOCALIZED_QUESTION, APPIRATER_APP_NAME]
+
+
+#define APPIRATER_LOCALIZED_EMAIL_SUBJECT NSLocalizedString(@"Having issues with %@", nil)
+#define APPIRATER_EMAIL_SUBJECT			[NSString stringWithFormat:APPIRATER_LOCALIZED_EMAIL_SUBJECT, APPIRATER_APP_NAME]
+
+#define APPIRATER_EMAIL_BODY NSLocalizedString(@"Please describe your issue:", nil)
+
+#define APPIRATER_LOCALIZED_DEVELOPER_EMAIL_ALERT NSLocalizedString(@"Your device doesn't support sending email please email %@", nil)
+#define APPIRATER_DEVELOPER_EMAIL_ALERT			[NSString stringWithFormat:APPIRATER_LOCALIZED_DEVELOPER_EMAIL_ALERT, APPIRATER_DEVELOPER_EMAIL]
+ 
+/*
+ Text for button to say the love it (no problems)
+ */
+#define APPIRATER_NO NSLocalizedString(@"I love it!", nil)
+
+/*
+ Text for button to say somethings not right (email).
+ */
+#define APPIRATER_YES NSLocalizedString(@"Something's not quite right", nil)
+
+/*
+ Text for button to remind the user to feedback.
+ */
+#define APPIRATER_FEEDBACK NSLocalizedString(@"I have feedback", nil)
+
 
 /*
  Text for button to remind the user to review later.
@@ -133,12 +170,21 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 #define APPIRATER_DEBUG				YES
 
-@interface Appirater : NSObject <UIAlertViewDelegate> {
+#import <UIKit/UIKit.h>
+#import <MessageUI/MessageUI.h>
 
-	UIAlertView		*ratingAlert;
+
+@interface Appirater : NSObject <UIAlertViewDelegate, MFMailComposeViewControllerDelegate> {
+
+	UIAlertView		*questionAlert;
+    UIAlertView		*ratingAlert;
+    UIViewController *theViewController;
+    
 }
-
+@property(nonatomic, retain) UIAlertView *questionAlert;
 @property(nonatomic, retain) UIAlertView *ratingAlert;
+
+@property(nonatomic, retain) UIViewController *theViewController;
 
 /*
  DEPRECATED: While still functional, it's better to use
@@ -163,6 +209,8 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 + (void)appLaunched:(BOOL)canPromptForRating;
 
++ (void)appLaunched:(BOOL)canPromptForRating viewController:(UINavigationController*)viewController;
+
 /*
  Tells Appirater that the app was brought to the foreground on multitasking
  devices. You should call this method from the application delegate's
@@ -176,6 +224,8 @@ extern NSString *const kAppiraterReminderRequestDate;
  (as long as you pass YES for canPromptForRating in those methods).
  */
 + (void)appEnteredForeground:(BOOL)canPromptForRating;
+
+
 
 /*
  Tells Appirater that the user performed a significant event. A significant
