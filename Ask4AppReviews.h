@@ -25,13 +25,13 @@
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  OTHER DEALINGS IN THE SOFTWARE.
  */
+
 /*
- * Appirater.h
- * appirater
+ * Ask4AppReviews.h
+ * Ask4AppReviews
  *
- * Created by Arash Payan on 9/5/09.
- * http://arashpayan.com
- * Copyright 2012 Arash Payan. All rights reserved.
+ * Created by Luke Durrant on 7/12.
+ * Ask4AppReviews (forked from Appirater).
  */
 
 #import <Foundation/Foundation.h>

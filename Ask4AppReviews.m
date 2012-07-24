@@ -1,8 +1,5 @@
 /*
- This file is part of Appirater.
- 
- Copyright (c) 2012, Arash Payan
- All rights reserved.
+ This file is part of Ask4AppReviews (forked from Appirater).
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
@@ -26,15 +23,14 @@
  OTHER DEALINGS IN THE SOFTWARE.
  */
 /*
- * Appirater.m
- * appirater
+ * Ask4AppReviews.m
+ * Ask4AppReviews
  *
- * Created by Arash Payan on 9/5/09.
- * http://arashpayan.com
- * Copyright 2012 Arash Payan. All rights reserved.
+ * Created by Luke Durrant on 7/12.
+ * Ask4AppReviews (forked from Appirater).
  */
 
-#import "Appirater.h"
+#import "Ask4AppReviews.h"
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
 
