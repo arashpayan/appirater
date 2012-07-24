@@ -46,6 +46,11 @@ NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
+NSString * const AppiraterDidShowAlertViewNotification          = @"AppiraterDidShowAlertView";
+NSString * const AppiraterUserDidRateNotification               = @"AppiraterUserDidRate";
+NSString * const AppiraterUserDidPostponeNotification           = @"AppiraterUserDidPostpone";
+NSString * const AppiraterUserDidDeclineNotification            = @"AppiraterUserDidDecline";
+
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 
 @interface Appirater ()
@@ -328,6 +333,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
+    [[NSNotificationCenter defaultCenter] postNotificationName:AppiraterUserDidRateNotification
+                                                        object:nil
+                                                      userInfo:nil];
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
 #endif
 }
@@ -341,6 +349,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 			// they don't want to rate it
 			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
 			[userDefaults synchronize];
+            [[NSNotificationCenter defaultCenter] postNotificationName:AppiraterUserDidDeclineNotification
+                                                                object:nil
+                                                              userInfo:nil];
 			break;
 		}
 		case 1:
@@ -353,6 +364,9 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 			// remind them later
 			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
 			[userDefaults synchronize];
+            [[NSNotificationCenter defaultCenter] postNotificationName:AppiraterUserDidPostponeNotification
+                                                                object:nil
+                                                              userInfo:nil];
 			break;
 		default:
 			break;
