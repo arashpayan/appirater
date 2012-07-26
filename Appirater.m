@@ -263,14 +263,12 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 
 @implementation Appirater
 
-@synthesize ratingAlert;
-
 - (void)incrementAndRate:(NSNumber*)_canPromptForRating {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	[self incrementUseCount];
 	
-	if ([_canPromptForRating boolValue] == YES &&
+	if ([_canPromptForRating boolValue] &&
 		[self ratingConditionsHaveBeenMet] &&
 		[self connectedToNetwork])
 	{
@@ -285,7 +283,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	
 	[self incrementSignificantEventCount];
 	
-	if ([_canPromptForRating boolValue] == YES &&
+	if ([_canPromptForRating boolValue] &&
 		[self ratingConditionsHaveBeenMet] &&
 		[self connectedToNetwork])
 	{
