@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- All these options have suitable defaults -->
+    <!-- See Appirater.h for more information -->
+    <!-- %@ is always replaced with AppName -->
+    <key>AppID</key>
+    <string>1234</string>
+    <key>AppName</key>
+    <string>Appirater</string>
+    <key>Message</key>
+    <string>If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!</string>
+    <key>MessageTitle</key>
+    <string>Rate %@</string>
+    <key>CancelButton</key>
+    <string>No, Thanks</string>
+    <key>RateButton</key>
+    <string>Rate %@</string>
+    <key>RateLater</key>
+    <string>Remind me later</string>
+    <key>DaysUntilPrompt</key>
+    <integer>30</integer>
+    <key>UsesUntilPrompt</key>
+    <integer>20</integer>
+    <key>SigEventsUntilPrompt</key>
+    <integer>-1</integer>
+    <key>TimeBeforeReminding</key>
+    <integer>1</integer>
+    <key>Debug</key>
+    <false/>
+</dict>
+</plist>

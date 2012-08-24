@@ -34,7 +34,7 @@
  * Copyright 2012 Arash Payan. All rights reserved.
  */
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
@@ -47,7 +47,7 @@ extern NSString *const kAppiraterReminderRequestDate;
 /*
  Place your Apple generated software id here.
  */
-#define APPIRATER_APP_ID				301377083
+#define APPIRATER_APP_ID				[bundle objectForInfoDictionaryKey:@"iTunesAppID"]
 
 
 /*
@@ -64,14 +64,12 @@ extern NSString *const kAppiraterReminderRequestDate;
  This is the message your users will see once they've passed the day+launches
  threshold.
  */
-#define APPIRATER_LOCALIZED_MESSAGE     NSLocalizedString(@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", nil)
-#define APPIRATER_MESSAGE				[NSString stringWithFormat:APPIRATER_LOCALIZED_MESSAGE, APPIRATER_APP_NAME]
+#define APPIRATER_MESSAGE               NSLocalizedString(@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", nil)
 
 /*
  This is the title of the message alert that users will see.
  */
-#define APPIRATER_LOCALIZED_MESSAGE_TITLE   NSLocalizedString(@"Rate %@", nil)
-#define APPIRATER_MESSAGE_TITLE             [NSString stringWithFormat:APPIRATER_LOCALIZED_MESSAGE_TITLE, APPIRATER_APP_NAME]
+#define APPIRATER_MESSAGE_TITLE         NSLocalizedString(@"Rate %@", nil)
 
 /*
  The text of the button that rejects reviewing the app.
@@ -81,8 +79,7 @@ extern NSString *const kAppiraterReminderRequestDate;
 /*
  Text of button that will send user to app review page.
  */
-#define APPIRATER_LOCALIZED_RATE_BUTTON NSLocalizedString(@"Rate %@", nil)
-#define APPIRATER_RATE_BUTTON			[NSString stringWithFormat:APPIRATER_LOCALIZED_RATE_BUTTON, APPIRATER_APP_NAME]
+#define APPIRATER_RATE_BUTTON           NSLocalizedString(@"Rate %@", nil)
 
 /*
  Text for button to remind the user to review later.

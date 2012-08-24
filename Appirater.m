@@ -46,20 +46,98 @@ NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
-NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
+NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@";
 
-@interface Appirater ()
+NSString *const kConfigAppID                        = @"AppID";
+NSString *const kConfigAppName                      = @"AppName";
+NSString *const kConfigMessage                      = @"Message";
+NSString *const kConfigMessageTitle                 = @"MessageTitle";
+NSString *const kConfigCancelButton                 = @"CancelButton";
+NSString *const kConfigRateButton                   = @"RateButton";
+NSString *const kConfigRateLater                    = @"RateLater";
+NSString *const kConfigDaysUntilPrompt              = @"DaysUntilPrompt";
+NSString *const kConfigUsesUntilPrompt              = @"UsesUntilPrompt";
+NSString *const kConfigSigEventsUntilPrompt         = @"SigEventsUntilPrompt";
+NSString *const kConfigTimeBeforeReminding          = @"TimeBeforeReminding";
+NSString *const kConfigDebug                        = @"Debug";
+
+@interface Appirater () {
+@private
+    NSDictionary *configuration;
+    BOOL debug;
+}
+
+@property (nonatomic, readonly, getter = isDebug) BOOL debug;
+
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
 - (void)showRatingAlert;
 - (BOOL)ratingConditionsHaveBeenMet;
 - (void)incrementUseCount;
 - (void)hideRatingAlert;
+- (NSString *)configurationStringForKey:(NSString *)key;
+- (NSInteger)configurationIntegerForKey:(NSString *)key;
+
 @end
 
-@implementation Appirater 
+@implementation Appirater
 
 @synthesize ratingAlert;
+@synthesize debug;
+
+- (id)init {
+    if (self = [super init]) {
+        NSBundle *bundle = [NSBundle mainBundle];
+
+        NSMutableDictionary *defaults = [NSMutableDictionary dictionaryWithCapacity:10];
+        [defaults setObject:APPIRATER_APP_ID forKey:kConfigAppID];
+        [defaults setObject:APPIRATER_APP_NAME forKey:kConfigAppName];
+        [defaults setObject:APPIRATER_MESSAGE forKey:kConfigMessage];
+        [defaults setObject:APPIRATER_MESSAGE_TITLE forKey:kConfigMessageTitle];
+        [defaults setObject:APPIRATER_CANCEL_BUTTON forKey:kConfigCancelButton];
+        [defaults setObject:APPIRATER_RATE_BUTTON forKey:kConfigRateButton];
+        [defaults setObject:APPIRATER_RATE_LATER forKey:kConfigRateLater];
+        [defaults setObject:[NSNumber numberWithInteger:APPIRATER_DAYS_UNTIL_PROMPT] forKey:kConfigDaysUntilPrompt];
+        [defaults setObject:[NSNumber numberWithInteger:APPIRATER_USES_UNTIL_PROMPT] forKey:kConfigUsesUntilPrompt];
+        [defaults setObject:[NSNumber numberWithInteger:APPIRATER_SIG_EVENTS_UNTIL_PROMPT] forKey:kConfigSigEventsUntilPrompt];
+        [defaults setObject:[NSNumber numberWithInteger:APPIRATER_TIME_BEFORE_REMINDING] forKey:kConfigTimeBeforeReminding];
+        [defaults setObject:[NSNumber numberWithBool:APPIRATER_DEBUG] forKey:kConfigDebug];
+
+        NSString *path = [bundle pathForResource:@"Appirater" ofType:@"plist"];
+        NSDictionary *dict = path ? [NSDictionary dictionaryWithContentsOfFile:path] : nil;
+        if (dict)
+            [defaults addEntriesFromDictionary:dict];
+
+        NSString *appName = [defaults objectForKey:kConfigAppName];
+        for (NSString *key in [defaults allKeys]) {
+            id value = [defaults objectForKey:key];
+            if ([value isKindOfClass:[NSString class]]) {
+                value = [value stringByReplacingOccurrencesOfString:@"%@" withString:appName];
+                [defaults setObject:value forKey:key];
+            }
+        }
+
+        configuration = [[NSDictionary alloc] initWithDictionary:defaults];
+        debug = [[configuration objectForKey:kConfigDebug] boolValue];
+
+        if (debug)
+            NSLog(@"Appirater Config: %@", configuration);
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [configuration release];
+    [super dealloc];
+}
+
+- (NSString *)configurationStringForKey:(NSString *)key {
+    return [configuration objectForKey:key];
+}
+
+- (NSInteger)configurationIntegerForKey:(NSString *)key {
+    return [[configuration objectForKey:key] integerValue];
+}
 
 - (BOOL)connectedToNetwork {
     // Create zero addy
@@ -108,35 +186,35 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 }
 
 - (void)showRatingAlert {
-	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
+	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:[self configurationStringForKey:kConfigMessageTitle]
+														 message:[self configurationStringForKey:kConfigMessage]
 														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil] autorelease];
+											   cancelButtonTitle:[self configurationStringForKey:kConfigCancelButton]
+											   otherButtonTitles:[self configurationStringForKey:kConfigRateButton], [self configurationStringForKey:kConfigRateLater], nil] autorelease];
 	self.ratingAlert = alertView;
 	[alertView show];
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
-	if (APPIRATER_DEBUG)
+	if (debug)
 		return YES;
 	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
 	NSDate *dateOfFirstLaunch = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterFirstUseDate]];
 	NSTimeInterval timeSinceFirstLaunch = [[NSDate date] timeIntervalSinceDate:dateOfFirstLaunch];
-	NSTimeInterval timeUntilRate = 60 * 60 * 24 * APPIRATER_DAYS_UNTIL_PROMPT;
+	NSTimeInterval timeUntilRate = 60 * 60 * 24 * [self configurationIntegerForKey:kConfigDaysUntilPrompt];
 	if (timeSinceFirstLaunch < timeUntilRate)
 		return NO;
 	
 	// check if the app has been used enough
 	int useCount = [userDefaults integerForKey:kAppiraterUseCount];
-	if (useCount <= APPIRATER_USES_UNTIL_PROMPT)
+	if (useCount <= [self configurationIntegerForKey:kConfigUsesUntilPrompt])
 		return NO;
 	
 	// check if the user has done enough significant events
 	int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
-	if (sigEventCount <= APPIRATER_SIG_EVENTS_UNTIL_PROMPT)
+	if (sigEventCount <= [self configurationIntegerForKey:kConfigSigEventsUntilPrompt])
 		return NO;
 	
 	// has the user previously declined to rate this version of the app?
@@ -150,7 +228,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	// if the user wanted to be reminded later, has enough time passed?
 	NSDate *reminderRequestDate = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterReminderRequestDate]];
 	NSTimeInterval timeSinceReminderRequest = [[NSDate date] timeIntervalSinceDate:reminderRequestDate];
-	NSTimeInterval timeUntilReminder = 60 * 60 * 24 * APPIRATER_TIME_BEFORE_REMINDING;
+	NSTimeInterval timeUntilReminder = 60 * 60 * 24 * [self configurationIntegerForKey:kConfigTimeBeforeReminding];
 	if (timeSinceReminderRequest < timeUntilReminder)
 		return NO;
 	
@@ -160,7 +238,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 - (void)incrementUseCount {
 	// get the app's version
 	NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleVersionKey];
-	
+
 	// get the version number that we've been tracking
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	NSString *trackingVersion = [userDefaults stringForKey:kAppiraterCurrentVersion];
@@ -170,7 +248,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 	}
 	
-	if (APPIRATER_DEBUG)
+	if (debug)
 		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
 	
 	if ([trackingVersion isEqualToString:version])
@@ -187,7 +265,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		int useCount = [userDefaults integerForKey:kAppiraterUseCount];
 		useCount++;
 		[userDefaults setInteger:useCount forKey:kAppiraterUseCount];
-		if (APPIRATER_DEBUG)
+		if (debug)
 			NSLog(@"APPIRATER Use count: %d", useCount);
 	}
 	else
@@ -218,7 +296,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 	}
 	
-	if (APPIRATER_DEBUG)
+	if (debug)
 		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
 	
 	if ([trackingVersion isEqualToString:version])
@@ -235,7 +313,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 		int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 		sigEventCount++;
 		[userDefaults setInteger:sigEventCount forKey:kAppiraterSignificantEventCount];
-		if (APPIRATER_DEBUG)
+		if (debug)
 			NSLog(@"APPIRATER Significant event count: %d", sigEventCount);
 	}
 	else
@@ -294,14 +372,14 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 
 - (void)hideRatingAlert {
 	if (self.ratingAlert.visible) {
-		if (APPIRATER_DEBUG)
+		if (debug)
 			NSLog(@"APPIRATER Hiding Alert");
 		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
 	}	
 }
 
 + (void)appWillResignActive {
-	if (APPIRATER_DEBUG)
+	if ([[self sharedInstance] isDebug])
 		NSLog(@"APPIRATER appWillResignActive");
 	[[Appirater sharedInstance] hideRatingAlert];
 }
@@ -325,7 +403,7 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
 #else
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+	NSString *reviewURL = [NSString stringWithFormat:templateReviewURL, [[self sharedInstance] configurationStringForKey:kConfigAppID]];
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
