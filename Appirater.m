@@ -47,6 +47,7 @@ NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
+NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/idAPP_ID";
 
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
@@ -325,7 +326,20 @@ NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZSto
 	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
 #else
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+
+	// added work arround for wrong URL Scheme & iOS 6
+	NSString *reviewURL;
+	if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 6.0) {
+        reviewURL = [templateReviewURLiOS6 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+        
+        reviewURL = [reviewURL stringByReplacingOccurrencesOfString:@"LANGUAGE" withString:[NSString stringWithFormat:@"%@", [[NSLocale preferredLanguages] objectAtIndex:0]]];
+		
+	} else {
+        reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+	}
+	
+	[[NSLocale preferredLanguages] objectAtIndex:0]
+	
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
