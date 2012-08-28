@@ -27,6 +27,8 @@
     <integer>-1</integer>
     <key>TimeBeforeReminding</key>
     <integer>1</integer>
+    <key>LandscapeHideCancelCount</key>
+    <integer>5</integer>
     <key>Debug</key>
     <false/>
 </dict>

@@ -45,6 +45,7 @@ NSString *const kAppiraterCurrentVersion			= @"kAppiraterCurrentVersion";
 NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion";
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
+NSString *const kAppiraterDialogCount				= @"kAppiraterDialogCount";
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=%@";
 
@@ -59,6 +60,7 @@ NSString *const kConfigDaysUntilPrompt              = @"DaysUntilPrompt";
 NSString *const kConfigUsesUntilPrompt              = @"UsesUntilPrompt";
 NSString *const kConfigSigEventsUntilPrompt         = @"SigEventsUntilPrompt";
 NSString *const kConfigTimeBeforeReminding          = @"TimeBeforeReminding";
+NSString *const kConfigLandscapeHideCancelCount     = @"LandscapeHideCancelCount";
 NSString *const kConfigDebug                        = @"Debug";
 
 @interface Appirater () {
@@ -101,6 +103,7 @@ NSString *const kConfigDebug                        = @"Debug";
         [defaults setObject:[NSNumber numberWithInteger:APPIRATER_USES_UNTIL_PROMPT] forKey:kConfigUsesUntilPrompt];
         [defaults setObject:[NSNumber numberWithInteger:APPIRATER_SIG_EVENTS_UNTIL_PROMPT] forKey:kConfigSigEventsUntilPrompt];
         [defaults setObject:[NSNumber numberWithInteger:APPIRATER_TIME_BEFORE_REMINDING] forKey:kConfigTimeBeforeReminding];
+        [defaults setObject:[NSNumber numberWithInteger:APPIRATER_LANDSCAPE_HIDE_CANCEL_COUNT] forKey:kConfigLandscapeHideCancelCount];
         [defaults setObject:[NSNumber numberWithBool:APPIRATER_DEBUG] forKey:kConfigDebug];
 
         NSString *path = [bundle pathForResource:@"Appirater" ofType:@"plist"];
@@ -186,11 +189,32 @@ NSString *const kConfigDebug                        = @"Debug";
 }
 
 - (void)showRatingAlert {
+	// Increment dialog count
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	NSInteger count = [defaults integerForKey:kAppiraterDialogCount] + 1;
+	[defaults setInteger:count forKey:kAppiraterDialogCount];
+	[defaults synchronize];
+
+	// Hide one of cancel/reminder button if in landscape mode
+	NSString *cancelButtonTitle = [self configurationStringForKey:kConfigCancelButton];
+	NSString *reminderButtonTitle = [self configurationStringForKey:kConfigRateLater];
+	UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+	BOOL isLandscape = UIInterfaceOrientationIsLandscape(orientation);
+	if (isLandscape) {
+		if (count <= [self configurationIntegerForKey:kConfigLandscapeHideCancelCount])
+			cancelButtonTitle = nil;
+		else
+			reminderButtonTitle = nil;
+	}
+
+	if (debug)
+		NSLog(@"APPIRATER Show dialog. Count=%d Orientation=%d Landscape=%d", count, orientation, isLandscape);
+
 	UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:[self configurationStringForKey:kConfigMessageTitle]
 														 message:[self configurationStringForKey:kConfigMessage]
 														delegate:self
-											   cancelButtonTitle:[self configurationStringForKey:kConfigCancelButton]
-											   otherButtonTitles:[self configurationStringForKey:kConfigRateButton], [self configurationStringForKey:kConfigRateLater], nil] autorelease];
+											   cancelButtonTitle:cancelButtonTitle
+											   otherButtonTitles:[self configurationStringForKey:kConfigRateButton], reminderButtonTitle, nil] autorelease];
 	self.ratingAlert = alertView;
 	[alertView show];
 }
@@ -278,8 +302,9 @@ NSString *const kConfigDebug                        = @"Debug";
 		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+		[userDefaults setInteger:0 forKey:kAppiraterDialogCount];
 	}
-	
+
 	[userDefaults synchronize];
 }
 
@@ -326,6 +351,7 @@ NSString *const kConfigDebug                        = @"Debug";
 		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+		[userDefaults setInteger:0 forKey:kAppiraterDialogCount];
 	}
 	
 	[userDefaults synchronize];
@@ -412,28 +438,20 @@ NSString *const kConfigDebug                        = @"Debug";
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	
-	switch (buttonIndex) {
-		case 0:
-		{
-			// they don't want to rate it
-			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
-			[userDefaults synchronize];
-			break;
-		}
-		case 1:
-		{
-			// they want to rate it
-			[Appirater rateApp];
-			break;
-		}
-		case 2:
-			// remind them later
-			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
-			[userDefaults synchronize];
-			break;
-		default:
-			break;
+
+	if (buttonIndex == alertView.cancelButtonIndex) {
+		// they don't want to rate it
+		[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
+		[userDefaults synchronize];
+	}
+	else if (buttonIndex == alertView.firstOtherButtonIndex) {
+		// they want to rate it
+		[Appirater rateApp];
+	}
+	else if (buttonIndex == alertView.firstOtherButtonIndex + 1) {
+		// remind them later
+		[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+		[userDefaults synchronize];
 	}
 }
 

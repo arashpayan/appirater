@@ -125,6 +125,14 @@ extern NSString *const kAppiraterReminderRequestDate;
 #define APPIRATER_TIME_BEFORE_REMINDING		1	// double
 
 /*
+ Due to screen dimension limitations, only one of the 'Remind me later' or
+ the 'No, thanks' button may be shown. This setting specifies how many times
+ the 'Remind me later' button should be shown before switching to the 'No thanks'
+ button. This setting does not have any effect while in portrait mode.
+ */
+#define APPIRATER_LANDSCAPE_HIDE_CANCEL_COUNT	5	// integer
+
+/*
  'YES' will show the Appirater alert everytime. Useful for testing how your message
  looks and making sure the link to your app's review page works.
  */
