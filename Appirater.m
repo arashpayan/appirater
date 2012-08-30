@@ -327,7 +327,7 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 #else
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 
-	// added work arround for wrong URL Scheme & iOS 6
+	// added work arround for wrong URL Scheme used in new App store on iOS 6
 	NSString *reviewURL;
 	if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 6.0) {
         reviewURL = [templateReviewURLiOS6 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
@@ -337,8 +337,6 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 	} else {
         reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
 	}
-	
-	[[NSLocale preferredLanguages] objectAtIndex:0]
 	
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
