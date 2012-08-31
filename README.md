@@ -13,7 +13,7 @@ Getting Started
 3. Call `[Appirater appLaunched:YES]` at the end of your app delegate's `application:didFinishLaunchingWithOptions:` method.
 4. Call `[Appirater appEnteredForeground:YES]` in your app delegate's `applicationWillEnterForeground:` method.
 5. (OPTIONAL) Call `[Appirater userDidSignificantEvent:YES]` when the user does something 'significant' in the app.
-6. Finally, set the `APPIRATER_APP_ID` in `Appirater.h` to your Apple provided software id.
+6. Finally, call `[Appirater setAppId:@"yourAppId"]` with your Apple provided software id.
 
 License
 -------
