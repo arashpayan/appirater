@@ -49,6 +49,13 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/idAPP_ID";
 
+static NSString *_appId;
+static double _daysUntilPrompt = 30;
+static NSInteger _usesUntilPrompt = 20;
+static NSInteger _significantEventsUntilPrompt = -1;
+static double _timeBeforeReminding = 1;
+static BOOL _debug = NO;
+
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
@@ -61,6 +68,31 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 @implementation Appirater 
 
 @synthesize ratingAlert;
+
++ (void) setAppId:(NSString *)appId {
+    _appId = appId;
+}
+
++ (void) setDaysUntilPrompt:(double)value {
+    _daysUntilPrompt = value;
+}
+
++ (void) setUsesUntilPrompt:(NSInteger)value {
+    _usesUntilPrompt = value;
+}
+
++ (void) setSignificantEventsUntilPrompt:(NSInteger)value {
+    _significantEventsUntilPrompt = value;
+}
+
++ (void) setTimeBeforeReminding:(double)value {
+    _timeBeforeReminding = value;
+}
+
++ (void) setDebug:(BOOL)debug {
+    _debug = debug;
+}
+
 
 - (BOOL)connectedToNetwork {
     // Create zero addy
@@ -119,25 +151,25 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
-	if (APPIRATER_DEBUG)
+	if (_debug)
 		return YES;
 	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
 	NSDate *dateOfFirstLaunch = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterFirstUseDate]];
 	NSTimeInterval timeSinceFirstLaunch = [[NSDate date] timeIntervalSinceDate:dateOfFirstLaunch];
-	NSTimeInterval timeUntilRate = 60 * 60 * 24 * APPIRATER_DAYS_UNTIL_PROMPT;
+	NSTimeInterval timeUntilRate = 60 * 60 * 24 * _daysUntilPrompt;
 	if (timeSinceFirstLaunch < timeUntilRate)
 		return NO;
 	
 	// check if the app has been used enough
 	int useCount = [userDefaults integerForKey:kAppiraterUseCount];
-	if (useCount <= APPIRATER_USES_UNTIL_PROMPT)
+	if (useCount <= _usesUntilPrompt)
 		return NO;
 	
 	// check if the user has done enough significant events
 	int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
-	if (sigEventCount <= APPIRATER_SIG_EVENTS_UNTIL_PROMPT)
+	if (sigEventCount <= _significantEventsUntilPrompt)
 		return NO;
 	
 	// has the user previously declined to rate this version of the app?
@@ -151,7 +183,7 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 	// if the user wanted to be reminded later, has enough time passed?
 	NSDate *reminderRequestDate = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterReminderRequestDate]];
 	NSTimeInterval timeSinceReminderRequest = [[NSDate date] timeIntervalSinceDate:reminderRequestDate];
-	NSTimeInterval timeUntilReminder = 60 * 60 * 24 * APPIRATER_TIME_BEFORE_REMINDING;
+	NSTimeInterval timeUntilReminder = 60 * 60 * 24 * _timeBeforeReminding;
 	if (timeSinceReminderRequest < timeUntilReminder)
 		return NO;
 	
@@ -171,7 +203,7 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 	}
 	
-	if (APPIRATER_DEBUG)
+	if (_debug)
 		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
 	
 	if ([trackingVersion isEqualToString:version])
@@ -188,7 +220,7 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 		int useCount = [userDefaults integerForKey:kAppiraterUseCount];
 		useCount++;
 		[userDefaults setInteger:useCount forKey:kAppiraterUseCount];
-		if (APPIRATER_DEBUG)
+		if (_debug)
 			NSLog(@"APPIRATER Use count: %d", useCount);
 	}
 	else
@@ -219,7 +251,7 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 	}
 	
-	if (APPIRATER_DEBUG)
+	if (_debug)
 		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
 	
 	if ([trackingVersion isEqualToString:version])
@@ -236,7 +268,7 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 		int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 		sigEventCount++;
 		[userDefaults setInteger:sigEventCount forKey:kAppiraterSignificantEventCount];
-		if (APPIRATER_DEBUG)
+		if (_debug)
 			NSLog(@"APPIRATER Significant event count: %d", sigEventCount);
 	}
 	else
@@ -295,14 +327,14 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 
 - (void)hideRatingAlert {
 	if (self.ratingAlert.visible) {
-		if (APPIRATER_DEBUG)
+		if (_debug)
 			NSLog(@"APPIRATER Hiding Alert");
 		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
 	}	
 }
 
 + (void)appWillResignActive {
-	if (APPIRATER_DEBUG)
+	if (_debug)
 		NSLog(@"APPIRATER appWillResignActive");
 	[[Appirater sharedInstance] hideRatingAlert];
 }
@@ -330,12 +362,12 @@ NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/id
 	// added work arround for wrong URL Scheme used in new App store on iOS 6
 	NSString *reviewURL;
 	if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 6.0) {
-        reviewURL = [templateReviewURLiOS6 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+        reviewURL = [templateReviewURLiOS6 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
         
         reviewURL = [reviewURL stringByReplacingOccurrencesOfString:@"LANGUAGE" withString:[NSString stringWithFormat:@"%@", [[NSLocale preferredLanguages] objectAtIndex:0]]];
 		
 	} else {
-        reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", APPIRATER_APP_ID]];
+        reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
 	}
 	
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
