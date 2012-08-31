@@ -141,14 +141,6 @@ extern NSString *const kAppiraterReminderRequestDate;
 @property(nonatomic, retain) UIAlertView *ratingAlert;
 
 /*
- DEPRECATED: While still functional, it's better to use
- appLaunched:(BOOL)canPromptForRating instead.
- 
- Calls [Appirater appLaunched:YES]. See appLaunched: for details of functionality.
- */
-+ (void)appLaunched;
-
-/*
  Tells Appirater that the app has launched, and on devices that do NOT
  support multitasking, the 'uses' count will be incremented. You should
  call this method at the end of your application delegate's
@@ -205,5 +197,17 @@ extern NSString *const kAppiraterReminderRequestDate;
  whether to rate the app.
  */
 + (void)rateApp;
+
+@end
+
+@interface Appirater(Deprecated)
+
+/*
+ DEPRECATED: While still functional, it's better to use
+ appLaunched:(BOOL)canPromptForRating instead.
+ 
+ Calls [Appirater appLaunched:YES]. See appLaunched: for details of functionality.
+ */
++ (void)appLaunched __attribute__((deprecated)); 
 
 @end
