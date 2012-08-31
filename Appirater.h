@@ -138,7 +138,7 @@ extern NSString *const kAppiraterReminderRequestDate;
 	UIAlertView		*ratingAlert;
 }
 
-@property(nonatomic, retain) UIAlertView *ratingAlert;
+@property(nonatomic, strong) UIAlertView *ratingAlert;
 
 /*
  Tells Appirater that the app has launched, and on devices that do NOT
