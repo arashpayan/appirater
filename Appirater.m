@@ -45,6 +45,7 @@ NSString *const kAppiraterCurrentVersion			= @"kAppiraterCurrentVersion";
 NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion";
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
+NSString *const kAppiraterBadImpressionsCount       = @"kAppiraterBadImpressionsCount";
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 NSString *templateReviewURLiOS6 = @"itms-apps://itunes.apple.com/LANGUAGE/app/idAPP_ID";
@@ -179,6 +180,11 @@ static BOOL _debug = NO;
 	// has the user already rated the app?
 	if ([userDefaults boolForKey:kAppiraterRatedCurrentVersion])
 		return NO;
+    
+    // has user encoutered unpleasant situation in the app? e.g. crashes
+    if ([userDefaults integerForKey:kAppiraterBadImpressionsCount] > 0) {
+        return NO;
+    }
 	
 	// if the user wanted to be reminded later, has enough time passed?
 	NSDate *reminderRequestDate = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterReminderRequestDate]];
@@ -233,6 +239,7 @@ static BOOL _debug = NO;
 		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+        [userDefaults setInteger:0 forKey:kAppiraterBadImpressionsCount];
 	}
 	
 	[userDefaults synchronize];
@@ -281,6 +288,7 @@ static BOOL _debug = NO;
 		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+        [userDefaults setInteger:0 forKey:kAppiraterBadImpressionsCount];
 	}
 	
 	[userDefaults synchronize];
@@ -351,6 +359,15 @@ static BOOL _debug = NO;
                    ^{
                        [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
                    });
+}
+
++ (void)userDidExperienceUnpleasantSituation
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSInteger dissatisfactionRate = [userDefaults integerForKey:kAppiraterBadImpressionsCount];
+    dissatisfactionRate++;
+    [userDefaults setInteger:dissatisfactionRate forKey:kAppiraterBadImpressionsCount];
+    [userDefaults synchronize];
 }
 
 + (void)rateApp {

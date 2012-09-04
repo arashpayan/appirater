@@ -43,6 +43,7 @@ extern NSString *const kAppiraterCurrentVersion;
 extern NSString *const kAppiraterRatedCurrentVersion;
 extern NSString *const kAppiraterDeclinedToRate;
 extern NSString *const kAppiraterReminderRequestDate;
+extern NSString *const kAppiraterBadImpressionsCount;
 
 /*
  Your localized app's name.
@@ -202,6 +203,13 @@ extern NSString *const kAppiraterReminderRequestDate;
  looks and making sure the link to your app's review page works.
  */
 + (void) setDebug:(BOOL)debug;
+
+/*
+ Tells Appirater that the user has experienced unpleasant situation like crash etc.
+ In the wake of that, Appirater will not display "Rate ..." alert because user is
+ not likely to give us 5 stars.
+ */
++ (void)userDidExperienceUnpleasantSituation;
 
 @end
 
