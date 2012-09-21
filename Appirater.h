@@ -35,7 +35,6 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "AppiraterSettings.h"
 
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
@@ -44,12 +43,6 @@ extern NSString *const kAppiraterCurrentVersion;
 extern NSString *const kAppiraterRatedCurrentVersion;
 extern NSString *const kAppiraterDeclinedToRate;
 extern NSString *const kAppiraterReminderRequestDate;
-
-/*
- Place your Apple generated software id here.
- */
-#define APPIRATER_APP_ID				301377083
-
 
 /*
  Your localized app's name.
@@ -65,90 +58,38 @@ extern NSString *const kAppiraterReminderRequestDate;
  This is the message your users will see once they've passed the day+launches
  threshold.
  */
-#define APPIRATER_LOCALIZED_MESSAGE     NSLocalizedStringFromTable(@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", @"Appirater", nil)
+#define APPIRATER_LOCALIZED_MESSAGE     NSLocalizedStringFromTable(@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", @"AppiraterLocalizable", nil)
 #define APPIRATER_MESSAGE				[NSString stringWithFormat:APPIRATER_LOCALIZED_MESSAGE, APPIRATER_APP_NAME]
 
 /*
  This is the title of the message alert that users will see.
  */
-#define APPIRATER_LOCALIZED_MESSAGE_TITLE   NSLocalizedStringFromTable(@"Rate %@", @"Appirater", nil)
+#define APPIRATER_LOCALIZED_MESSAGE_TITLE   NSLocalizedStringFromTable(@"Rate %@", @"AppiraterLocalizable", nil)
 #define APPIRATER_MESSAGE_TITLE             [NSString stringWithFormat:APPIRATER_LOCALIZED_MESSAGE_TITLE, APPIRATER_APP_NAME]
 
 /*
  The text of the button that rejects reviewing the app.
  */
-#define APPIRATER_CANCEL_BUTTON			NSLocalizedStringFromTable(@"No, Thanks", @"Appirater", nil)
+#define APPIRATER_CANCEL_BUTTON			NSLocalizedStringFromTable(@"No, Thanks", @"AppiraterLocalizable", nil)
 
 /*
  Text of button that will send user to app review page.
  */
-#define APPIRATER_LOCALIZED_RATE_BUTTON NSLocalizedStringFromTable(@"Rate %@", @"Appirater", nil)
+#define APPIRATER_LOCALIZED_RATE_BUTTON NSLocalizedStringFromTable(@"Rate %@", @"AppiraterLocalizable", nil)
 #define APPIRATER_RATE_BUTTON			[NSString stringWithFormat:APPIRATER_LOCALIZED_RATE_BUTTON, APPIRATER_APP_NAME]
 
 /*
  Text for button to remind the user to review later.
  */
-#define APPIRATER_RATE_LATER			NSLocalizedStringFromTable(@"Remind me later",@"Appirater",  nil)
+#define APPIRATER_RATE_LATER			NSLocalizedStringFromTable(@"Remind me later", @"AppiraterLocalizable", nil)
 
-/*
- Users will need to have the same version of your app installed for this many
- days before they will be prompted to rate it.
- */
-#define APPIRATER_DAYS_UNTIL_PROMPT		30		// double
-
-/*
- An example of a 'use' would be if the user launched the app. Bringing the app
- into the foreground (on devices that support it) would also be considered
- a 'use'. You tell Appirater about these events using the two methods:
- [Appirater appLaunched:]
- [Appirater appEnteredForeground:]
- 
- Users need to 'use' the same version of the app this many times before
- before they will be prompted to rate it.
- */
-#define APPIRATER_USES_UNTIL_PROMPT		20		// integer
-
-/*
- A significant event can be anything you want to be in your app. In a
- telephone app, a significant event might be placing or receiving a call.
- In a game, it might be beating a level or a boss. This is just another
- layer of filtering that can be used to make sure that only the most
- loyal of your users are being prompted to rate you on the app store.
- If you leave this at a value of -1, then this won't be a criteria
- used for rating. To tell Appirater that the user has performed
- a significant event, call the method:
- [Appirater userDidSignificantEvent:];
- */
-#define APPIRATER_SIG_EVENTS_UNTIL_PROMPT	-1	// integer
-
-/*
- Once the rating alert is presented to the user, they might select
- 'Remind me later'. This value specifies how long (in days) Appirater
- will wait before reminding them.
- */
-#define APPIRATER_TIME_BEFORE_REMINDING		1	// double
-
-/*
- 'YES' will show the Appirater alert everytime. Useful for testing how your message
- looks and making sure the link to your app's review page works.
- */
-#define APPIRATER_DEBUG				NO
 
 @interface Appirater : NSObject <UIAlertViewDelegate> {
 
 	UIAlertView		*ratingAlert;
-    AppiraterSettings *settings;
 }
 
-@property(nonatomic, retain) UIAlertView *ratingAlert;
-
-/*
- DEPRECATED: While still functional, it's better to use
- appLaunched:(BOOL)canPromptForRating instead.
- 
- Calls [Appirater appLaunched:YES]. See appLaunched: for details of functionality.
- */
-+ (void)appLaunched;
+@property(nonatomic, strong) UIAlertView *ratingAlert;
 
 /*
  Tells Appirater that the app has launched, and on devices that do NOT
@@ -207,5 +148,72 @@ extern NSString *const kAppiraterReminderRequestDate;
  whether to rate the app.
  */
 + (void)rateApp;
+
+@end
+
+@interface Appirater(Configuration)
+
+/*
+ Set your Apple generated software id here.
+ */
++ (void) setAppId:(NSString*)appId;
+
+/*
+ Users will need to have the same version of your app installed for this many
+ days before they will be prompted to rate it.
+ */
++ (void) setDaysUntilPrompt:(double)value;
+
+/*
+ An example of a 'use' would be if the user launched the app. Bringing the app
+ into the foreground (on devices that support it) would also be considered
+ a 'use'. You tell Appirater about these events using the two methods:
+ [Appirater appLaunched:]
+ [Appirater appEnteredForeground:]
+ 
+ Users need to 'use' the same version of the app this many times before
+ before they will be prompted to rate it.
+ */
++ (void) setUsesUntilPrompt:(NSInteger)value;
+
+/*
+ A significant event can be anything you want to be in your app. In a
+ telephone app, a significant event might be placing or receiving a call.
+ In a game, it might be beating a level or a boss. This is just another
+ layer of filtering that can be used to make sure that only the most
+ loyal of your users are being prompted to rate you on the app store.
+ If you leave this at a value of -1, then this won't be a criteria
+ used for rating. To tell Appirater that the user has performed
+ a significant event, call the method:
+ [Appirater userDidSignificantEvent:];
+ */
++ (void) setSignificantEventsUntilPrompt:(NSInteger)value;
+
+
+/*
+ Once the rating alert is presented to the user, they might select
+ 'Remind me later'. This value specifies how long (in days) Appirater
+ will wait before reminding them.
+ */
++ (void) setTimeBeforeReminding:(double)value;
+
+/*
+ 'YES' will show the Appirater alert everytime. Useful for testing how your message
+ looks and making sure the link to your app's review page works.
+ */
++ (void) setDebug:(BOOL)debug;
+
+@end
+
+
+@interface Appirater(Deprecated)
+
+/*
+ DEPRECATED: While still functional, it's better to use
+ appLaunched:(BOOL)canPromptForRating instead.
+ 
+ Calls [Appirater appLaunched:YES]. See appLaunched: for details of functionality.
+ */
++ (void)appLaunched __attribute__((deprecated)); 
 
 @end

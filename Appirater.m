@@ -46,6 +46,14 @@ NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
+NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
+
+static NSString *_appId;
+static double _daysUntilPrompt = 30;
+static NSInteger _usesUntilPrompt = 20;
+static NSInteger _significantEventsUntilPrompt = -1;
+static double _timeBeforeReminding = 1;
+static BOOL _debug = NO;
 
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
@@ -60,11 +68,28 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 
 @synthesize ratingAlert;
 
-- (id) init {
-    self = [super init];
-    self->settings = [[AppiraterSettings alloc] init];
-    
-    return self;
++ (void) setAppId:(NSString *)appId {
+    _appId = appId;
+}
+
++ (void) setDaysUntilPrompt:(double)value {
+    _daysUntilPrompt = value;
+}
+
++ (void) setUsesUntilPrompt:(NSInteger)value {
+    _usesUntilPrompt = value;
+}
+
++ (void) setSignificantEventsUntilPrompt:(NSInteger)value {
+    _significantEventsUntilPrompt = value;
+}
+
++ (void) setTimeBeforeReminding:(double)value {
+    _timeBeforeReminding = value;
+}
+
++ (void) setDebug:(BOOL)debug {
+    _debug = debug;
 }
 
 
@@ -95,9 +120,7 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 	NSURL *testURL = [NSURL URLWithString:@"http://www.apple.com/"];
 	NSURLRequest *testRequest = [NSURLRequest requestWithURL:testURL  cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:20.0];
 	NSURLConnection *testConnection = [[NSURLConnection alloc] initWithRequest:testRequest delegate:self];
-#if !__has_feature(objc_arc)
-	[testConnection autorelease];
-#endif
+	
     return ((isReachable && !needsConnection) || nonWiFi) ? (testConnection ? YES : NO) : NO;
 }
 
@@ -118,37 +141,34 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 
 - (void)showRatingAlert {
 	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-                                                        message:APPIRATER_MESSAGE
-                                                       delegate:self
-                                              cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-                                              otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
-#if !__has_feature(objc_arc)
-	[alertView autorelease];
-#endif
+														 message:APPIRATER_MESSAGE
+														delegate:self
+											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
+											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
 	self.ratingAlert = alertView;
 	[alertView show];
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
-	if (APPIRATER_DEBUG)
+	if (_debug)
 		return YES;
 	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
 	NSDate *dateOfFirstLaunch = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterFirstUseDate]];
 	NSTimeInterval timeSinceFirstLaunch = [[NSDate date] timeIntervalSinceDate:dateOfFirstLaunch];
-	NSTimeInterval timeUntilRate = 60 * 60 * 24 * [settings daysUntilPrompt] ; // APPIRATER_DAYS_UNTIL_PROMPT;
+	NSTimeInterval timeUntilRate = 60 * 60 * 24 * _daysUntilPrompt;
 	if (timeSinceFirstLaunch < timeUntilRate)
 		return NO;
 	
 	// check if the app has been used enough
 	int useCount = [userDefaults integerForKey:kAppiraterUseCount];
-	if (useCount <= [settings usesUntilPrompt]) // APPIRATER_USES_UNTIL_PROMPT)
+	if (useCount <= _usesUntilPrompt)
 		return NO;
 	
 	// check if the user has done enough significant events
 	int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
-        if (sigEventCount <= [settings sigEventsUntilPrompt]) // APPIRATER_SIG_EVENTS_UNTIL_PROMPT)
+	if (sigEventCount <= _significantEventsUntilPrompt)
 		return NO;
 	
 	// has the user previously declined to rate this version of the app?
@@ -162,7 +182,7 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 	// if the user wanted to be reminded later, has enough time passed?
 	NSDate *reminderRequestDate = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterReminderRequestDate]];
 	NSTimeInterval timeSinceReminderRequest = [[NSDate date] timeIntervalSinceDate:reminderRequestDate];
-            NSTimeInterval timeUntilReminder = 60 * 60 * 24 * [settings timeBeforeReminding];// APPIRATER_TIME_BEFORE_REMINDING;
+	NSTimeInterval timeUntilReminder = 60 * 60 * 24 * _timeBeforeReminding;
 	if (timeSinceReminderRequest < timeUntilReminder)
 		return NO;
 	
@@ -182,7 +202,7 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 	}
 	
-	if (APPIRATER_DEBUG)
+	if (_debug)
 		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
 	
 	if ([trackingVersion isEqualToString:version])
@@ -199,7 +219,7 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 		int useCount = [userDefaults integerForKey:kAppiraterUseCount];
 		useCount++;
 		[userDefaults setInteger:useCount forKey:kAppiraterUseCount];
-		if (APPIRATER_DEBUG)
+		if (_debug)
 			NSLog(@"APPIRATER Use count: %d", useCount);
 	}
 	else
@@ -230,7 +250,7 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 	}
 	
-	if (APPIRATER_DEBUG)
+	if (_debug)
 		NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
 	
 	if ([trackingVersion isEqualToString:version])
@@ -247,7 +267,7 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 		int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 		sigEventCount++;
 		[userDefaults setInteger:sigEventCount forKey:kAppiraterSignificantEventCount];
-		if (APPIRATER_DEBUG)
+		if (_debug)
 			NSLog(@"APPIRATER Significant event count: %d", sigEventCount);
 	}
 	else
@@ -306,14 +326,14 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 
 - (void)hideRatingAlert {
 	if (self.ratingAlert.visible) {
-		if (APPIRATER_DEBUG)
+		if (_debug)
 			NSLog(@"APPIRATER Hiding Alert");
 		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
 	}	
 }
 
 + (void)appWillResignActive {
-	if (APPIRATER_DEBUG)
+	if (_debug)
 		NSLog(@"APPIRATER appWillResignActive");
 	[[Appirater sharedInstance] hideRatingAlert];
 }
@@ -333,16 +353,14 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 }
 
 + (void)rateApp {
-    [[Appirater sharedInstance] rateApp];
-}
-
-- (void)rateApp {
 #if TARGET_IPHONE_SIMULATOR
 	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
 #else
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 
-	NSString *reviewURL = [[settings urlStore] stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%d", [settings appId]]];
+	// this URL Scheme should work in the iOS 6 App Store in addition to older stores
+	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+	
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
