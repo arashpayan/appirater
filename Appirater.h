@@ -90,7 +90,11 @@ extern NSString *const kAppiraterReminderRequestDate;
 }
 
 @property(nonatomic, strong) UIAlertView *ratingAlert;
+#if __has_feature(objc_arc_weak)
 @property(nonatomic, weak) NSObject <AppiraterDelegate> *delegate;
+#else
+@property(nonatomic, unsafe_unreferenced) NSObject <AppiraterDelegate> *delegate;
+#endif
 
 /*
  Tells Appirater that the app has launched, and on devices that do NOT
