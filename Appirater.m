@@ -362,7 +362,12 @@ static id<AppiraterDelegate> _delegate;
 
 + (void)rateApp {
 #if TARGET_IPHONE_SIMULATOR
-	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil
+                                                        message:@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator."
+                                                       delegate:nil
+                                              cancelButtonTitle:@"Ok"
+                                              otherButtonTitles:nil];
+    [alertView show];
 #else
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 
