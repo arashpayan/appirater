@@ -55,6 +55,13 @@ static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
 static id<AppiraterDelegate> _delegate;
+static NSString *_appName;
+static NSString *_message;
+static NSString *_title;
+static NSString *_rateButtonText;
+static NSString *_cancelButtonText;
+static NSString *_rateLaterButtonText;
+
 
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
@@ -94,6 +101,76 @@ static id<AppiraterDelegate> _delegate;
 }
 + (void)setDelegate:(id<AppiraterDelegate>)delegate{
 	_delegate = delegate;
+}
+
++ (void) setAppName:(NSString*)appName {
+    _appName = appName;
+}
++ (NSString*) appName {
+    if (_appName) {
+        return _appName;
+    }
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSString *localizedName = [[mainBundle localizedInfoDictionary] objectForKey:(NSString*)kCFBundleNameKey];
+    if (localizedName) {
+        return localizedName;
+    }
+    // fall back on non-localized name in info.plist
+    return [[mainBundle infoDictionary] objectForKey:(NSString*)kCFBundleNameKey];
+}
+
++ (void) setMessage:(NSString*)message {
+    _message = message;
+}
++ (NSString*) message {
+    if (_message) {
+        return _message;
+    }
+    NSString *messageFormat = NSLocalizedStringFromTable(@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!",
+                                                         @"AppiraterLocalizable", nil);
+    return [NSString stringWithFormat:messageFormat, [self appName]];
+}
+
++ (void) setTitle:(NSString*)title {
+    _title = title;
+}
++ (NSString*) title {
+    if (_title) {
+        return _title;
+    }
+    NSString *titleFormat = NSLocalizedStringFromTable(@"Rate %@", @"AppiraterLocalizable", nil);
+    return [NSString stringWithFormat:titleFormat, [self appName]];
+}
+
++ (void) setRateButtonText:(NSString*)rateButtonText {
+    _rateButtonText = rateButtonText;
+}
++ (NSString*) rateButtonText {
+    if (_rateButtonText) {
+        return _rateButtonText;
+    }
+    NSString *rateButtonTextFormat = NSLocalizedStringFromTable(@"Rate %@", @"AppiraterLocalizable", nil);
+    return [NSString stringWithFormat:rateButtonTextFormat, [self appName]];
+}
+
++ (void) setCancelButtonText:(NSString*)cancelButtonText {
+    _cancelButtonText = cancelButtonText;
+}
++ (NSString*) cancelButtonText {
+    if (_cancelButtonText) {
+        return _cancelButtonText;
+    }
+    return NSLocalizedStringFromTable(@"No, Thanks", @"AppiraterLocalizable", nil);
+}
+
++ (void) setRateLaterButtonText:(NSString*)rateLaterButtonText {
+    _rateLaterButtonText = rateLaterButtonText;
+}
++ (NSString*) rateLaterButtonText {
+    if (_rateLaterButtonText) {
+        return _rateLaterButtonText;
+    }
+    return NSLocalizedStringFromTable(@"Remind me later", @"AppiraterLocalizable", nil);
 }
 
 - (BOOL)connectedToNetwork {
@@ -144,11 +221,11 @@ static id<AppiraterDelegate> _delegate;
 }
 
 - (void)showRatingAlert {
-	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
-														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:[Appirater title]
+                                                        message:[Appirater message]
+                                                       delegate:self
+                                              cancelButtonTitle:[Appirater cancelButtonText]
+                                              otherButtonTitles:[Appirater rateButtonText], [Appirater rateLaterButtonText], nil];
 	self.ratingAlert = alertView;
 	[alertView show];
 	
