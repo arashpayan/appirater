@@ -438,6 +438,10 @@ static NSString *_rateLaterButtonText;
 }
 
 + (void)rateApp {
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+    [userDefaults synchronize];
+    
 #if TARGET_IPHONE_SIMULATOR
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil
                                                         message:@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator."
@@ -446,13 +450,8 @@ static NSString *_rateLaterButtonText;
                                               otherButtonTitles:nil];
     [alertView show];
 #else
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-
 	// this URL Scheme should work in the iOS 6 App Store in addition to older stores
 	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
-	
-	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
-	[userDefaults synchronize];
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
 #endif
 }
