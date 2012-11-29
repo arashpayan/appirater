@@ -248,12 +248,12 @@ static NSString *_rateLaterButtonText;
 	
 	// check if the app has been used enough
 	int useCount = [userDefaults integerForKey:kAppiraterUseCount];
-	if (useCount <= _usesUntilPrompt)
+	if (useCount < _usesUntilPrompt)
 		return NO;
 	
 	// check if the user has done enough significant events
 	int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
-	if (sigEventCount <= _significantEventsUntilPrompt)
+	if (sigEventCount < _significantEventsUntilPrompt)
 		return NO;
 	
 	// has the user previously declined to rate this version of the app?
