@@ -110,13 +110,26 @@ static NSString *_rateLaterButtonText;
     if (_appName) {
         return _appName;
     }
+    NSString *kCFBundleDisplayNameKey = @"CFBundleDisplayName";
     NSBundle *mainBundle = [NSBundle mainBundle];
-    NSString *localizedName = [[mainBundle localizedInfoDictionary] objectForKey:(NSString*)kCFBundleNameKey];
+    NSDictionary *localizedInfo = [mainBundle localizedInfoDictionary];
+    
+    NSString *localizedName = [localizedInfo objectForKey:kCFBundleDisplayNameKey];
+    if (localizedName) { // display name is not a required info field
+        return localizedName;
+    }
+    localizedName = [localizedInfo objectForKey:(NSString*)kCFBundleNameKey];
     if (localizedName) {
         return localizedName;
     }
-    // fall back on non-localized name in info.plist
-    return [[mainBundle infoDictionary] objectForKey:(NSString*)kCFBundleNameKey];
+
+    // fall back on non-localized name
+    NSDictionary *info = [mainBundle infoDictionary];
+    NSString *name = [info objectForKey:kCFBundleDisplayNameKey];
+    if (name) {
+        return name;
+    }
+    return [info objectForKey:(NSString*)kCFBundleNameKey];
 }
 
 + (void) setMessage:(NSString*)message {
