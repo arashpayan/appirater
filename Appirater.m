@@ -394,7 +394,34 @@ static NSString *_rateLaterButtonText;
                        ^{
                            [self showRatingAlert];
                        });
-	}
+	} else {
+#if SHOW_APPIRATER_DEBUG_ALERTS
+        [self showProgressTowardsPrompt];
+#endif
+    }
+}
+
+- (void) showProgressTowardsPrompt {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        NSInteger numberOfEvents = [userDefaults integerForKey:kAppiraterSignificantEventCount];
+        NSInteger numberOfLaunches = [userDefaults integerForKey:kAppiraterUseCount];
+        NSDate *dateOfFirstLaunch = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterFirstUseDate]];
+        const double daysSinceFirstLaunch = [[NSDate date] timeIntervalSinceDate:dateOfFirstLaunch] / 60 / 60;
+        
+        NSString *message = [NSString stringWithFormat:@"%d significant events so far (%d to trigger rating prompt)\n\n"
+                                                       @"%d launches so far (%d to trigger)\n\n"
+                                                       @"%0.2f days since app install (%0.2f to trigger)",
+                                                       numberOfEvents, _significantEventsUntilPrompt,
+                                                       numberOfLaunches, _usesUntilPrompt,
+                                                       daysSinceFirstLaunch, _daysUntilPrompt];
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Appirater debug message"
+                                                            message:message
+                                                           delegate:nil
+                                                  cancelButtonTitle:@"Ok!"
+                                                  otherButtonTitles:nil];
+        [alertView show];
+    });
 }
 
 - (void)incrementSignificantEventAndRate:(BOOL)canPromptForRating {
@@ -408,7 +435,11 @@ static NSString *_rateLaterButtonText;
                        ^{
                            [self showRatingAlert];
                        });
-	}
+	} else {
+#if SHOW_APPIRATER_DEBUG_ALERTS
+        [self showProgressTowardsPrompt];
+#endif
+    }
 }
 
 + (void)appLaunched {

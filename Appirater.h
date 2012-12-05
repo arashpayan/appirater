@@ -1,3 +1,5 @@
+#define SHOW_APPIRATER_DEBUG_ALERTS 0
+
 /*
  This file is part of Appirater.
  
