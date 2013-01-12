@@ -401,7 +401,6 @@ static BOOL _modalOpen = false;
 		#else
 		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
-		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://google.com"]];
 		#endif
 	}
 }
