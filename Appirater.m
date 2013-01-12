@@ -55,6 +55,7 @@ static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
 static id<AppiraterDelegate> _delegate;
+static UIStatusBarStyle _statusBarStyle;
 
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
@@ -94,6 +95,9 @@ static id<AppiraterDelegate> _delegate;
 }
 + (void)setDelegate:(id<AppiraterDelegate>)delegate{
 	_delegate = delegate;
+}
++ (void)setStatusBarStyle:(UIStatusBarStyle)style {
+	_statusBarStyle = style;
 }
 
 - (BOOL)connectedToNetwork {
@@ -361,18 +365,34 @@ static id<AppiraterDelegate> _delegate;
 }
 
 + (void)rateApp {
-#if TARGET_IPHONE_SIMULATOR
-	NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
-#else
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-
-	// this URL Scheme should work in the iOS 6 App Store in addition to older stores
-	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
 	
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
-	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
-#endif
+
+	//Use the in-app StoreKit view if available (iOS 6) and imported. This works in the simulator.
+	if (NSStringFromClass([SKStoreProductViewController class]) != nil) {
+		
+		SKStoreProductViewController *storeViewController = [[SKStoreProductViewController alloc] init];
+		NSNumber *appId = [NSNumber numberWithInteger:_appId.integerValue];
+		[storeViewController loadProductWithParameters:@{SKStoreProductParameterITunesItemIdentifier:appId} completionBlock:nil];
+		storeViewController.delegate = self.sharedInstance;
+		[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:storeViewController animated:YES completion:^{
+			//Temporarily use a black status bar to match the StoreKit view.
+			[self setStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+			[[UIApplication sharedApplication]setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
+		}];
+	
+	//Use the standard openUrl method if StoreKit is unavailable.
+	} else {
+		
+		#if TARGET_IPHONE_SIMULATOR
+		NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
+		#else
+		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
+		#endif
+	}
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
@@ -409,6 +429,13 @@ static id<AppiraterDelegate> _delegate;
 		default:
 			break;
 	}
+}
+
+//Close the in-app rating (StoreKit) view and restore the previous status bar style.
+- (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
+	[[UIApplication sharedApplication]setStatusBarStyle:_statusBarStyle animated:YES];
+	[[UIApplication sharedApplication].keyWindow.rootViewController dismissViewControllerAnimated:YES completion:nil];
+	[self.class setStatusBarStyle:(UIStatusBarStyle)nil];
 }
 
 @end

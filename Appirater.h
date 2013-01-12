@@ -36,6 +36,7 @@
 
 #import <Foundation/Foundation.h>
 #import "AppiraterDelegate.h"
+#import <StoreKit/StoreKit.h>
 
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
@@ -84,7 +85,7 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 #define APPIRATER_RATE_LATER			NSLocalizedStringFromTable(@"Remind me later", @"AppiraterLocalizable", nil)
 
-@interface Appirater : NSObject <UIAlertViewDelegate> {
+@interface Appirater : NSObject <UIAlertViewDelegate, SKStoreProductViewControllerDelegate> {
 
 	UIAlertView		*ratingAlert;
 }

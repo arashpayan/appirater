@@ -10,10 +10,11 @@ Getting Started
 ---------------
 1. Add the Appirater code into your project.
 2. Add the `CFNetwork` and `SystemConfiguration` frameworks to your project.
-3. Call `[Appirater setAppId:@"yourAppId"]` with the app id provided by Apple. A good place to do this is at the beginning of your app delegate's `application:didFinishLaunchingWithOptions:` method.
-4. Call `[Appirater appLaunched:YES]` at the end of your app delegate's `application:didFinishLaunchingWithOptions:` method.
-5. Call `[Appirater appEnteredForeground:YES]` in your app delegate's `applicationWillEnterForeground:` method.
-6. (OPTIONAL) Call `[Appirater userDidSignificantEvent:YES]` when the user does something 'significant' in the app.
+3. If you want to take advantage of [StoreKit's in-app rating view](http://developer.apple.com/library/ios/#documentation/StoreKit/Reference/SKITunesProductViewController_Ref/Introduction/Introduction.html) (iOS 6), add the `StoreKit` framework. Be sure to **change Required to Optional** for StoreKit in your target's Build Phases » Link Binary with Libraries section.
+4. Call `[Appirater setAppId:@"yourAppId"]` with the app id provided by Apple. A good place to do this is at the beginning of your app delegate's `application:didFinishLaunchingWithOptions:` method.
+5. Call `[Appirater appLaunched:YES]` at the end of your app delegate's `application:didFinishLaunchingWithOptions:` method.
+6. Call `[Appirater appEnteredForeground:YES]` in your app delegate's `applicationWillEnterForeground:` method.
+7. (OPTIONAL) Call `[Appirater userDidSignificantEvent:YES]` when the user does something 'significant' in the app.
 
 Configuration
 -------------
