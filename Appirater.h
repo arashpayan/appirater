@@ -214,6 +214,11 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 + (void)setDelegate:(id<AppiraterDelegate>)delegate;
 
+/*
+ Set whether or not Appirater uses animation (currently respected when pushing modal StoreKit rating VCs).
+ */
++ (void)setUsesAnimation:(BOOL)animation;
+
 @end
 
 
