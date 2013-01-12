@@ -372,6 +372,20 @@ static BOOL _modalOpen = false;
                    });
 }
 
++ (id)getRootViewController {
+    UIWindow *window = [[UIApplication sharedApplication] keyWindow];
+    if (window.windowLevel != UIWindowLevelNormal) {
+        NSArray *windows = [[UIApplication sharedApplication] windows];
+        for(window in windows) {
+            if (window.windowLevel == UIWindowLevelNormal) {
+                break;
+            }
+        }
+    }
+    
+    return [[[window subviews] objectAtIndex:0] nextResponder];
+}
+
 + (void)rateApp {
 	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
@@ -386,7 +400,7 @@ static BOOL _modalOpen = false;
 		[storeViewController loadProductWithParameters:@{SKStoreProductParameterITunesItemIdentifier:appId} completionBlock:nil];
 		storeViewController.delegate = self.sharedInstance;
 		[self.sharedInstance.delegate appiraterWillPresentModalView:self.sharedInstance animated:_usesAnimation];
-		[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:storeViewController animated:_usesAnimation completion:^{
+		[[self getRootViewController] presentViewController:storeViewController animated:_usesAnimation completion:^{
 			[self setModalOpen:YES];
 			//Temporarily use a black status bar to match the StoreKit view.
 			[self setStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
