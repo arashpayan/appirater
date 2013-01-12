@@ -57,6 +57,7 @@ static BOOL _debug = NO;
 static id<AppiraterDelegate> _delegate;
 static BOOL _usesAnimation = TRUE;
 static UIStatusBarStyle _statusBarStyle;
+static BOOL _modalOpen = false;
 
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
@@ -102,6 +103,9 @@ static UIStatusBarStyle _statusBarStyle;
 }
 + (void)setStatusBarStyle:(UIStatusBarStyle)style {
 	_statusBarStyle = style;
+}
++ (void)setModalOpen:(BOOL)open {
+	_modalOpen = open;
 }
 
 - (BOOL)connectedToNetwork {
@@ -383,6 +387,7 @@ static UIStatusBarStyle _statusBarStyle;
 		storeViewController.delegate = self.sharedInstance;
 		[self.sharedInstance.delegate appiraterWillPresentModalView:self.sharedInstance animated:_usesAnimation];
 		[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:storeViewController animated:_usesAnimation completion:^{
+			[self setModalOpen:YES];
 			//Temporarily use a black status bar to match the StoreKit view.
 			[self setStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
 			[[UIApplication sharedApplication]setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:_usesAnimation];
@@ -436,12 +441,22 @@ static UIStatusBarStyle _statusBarStyle;
 	}
 }
 
-//Close the in-app rating (StoreKit) view and restore the previous status bar style.
+//Delegate call from the StoreKit view.
 - (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
-	[[UIApplication sharedApplication]setStatusBarStyle:_statusBarStyle animated:_usesAnimation];
-	[[UIApplication sharedApplication].keyWindow.rootViewController dismissViewControllerAnimated:_usesAnimation completion:nil];
-	[self.class setStatusBarStyle:(UIStatusBarStyle)nil];
-	[self.delegate appiraterDidDismissModalView:self animated:_usesAnimation];
+	[Appirater closeModal];
+}
+
+//Close the in-app rating (StoreKit) view and restore the previous status bar style.
++ (void)closeModal {
+	if (_modalOpen) {
+		[[UIApplication sharedApplication]setStatusBarStyle:_statusBarStyle animated:_usesAnimation];
+		BOOL usedAnimation = _usesAnimation;
+		[self setModalOpen:NO];
+		[[UIApplication sharedApplication].keyWindow.rootViewController dismissViewControllerAnimated:_usesAnimation completion:^{
+			[self.sharedInstance.delegate appiraterDidDismissModalView:(Appirater *)self animated:usedAnimation];
+		}];
+		[self.class setStatusBarStyle:(UIStatusBarStyle)nil];
+	}
 }
 
 @end
