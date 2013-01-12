@@ -401,11 +401,12 @@ static BOOL _modalOpen = false;
 		#else
 		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://google.com"]];
 		#endif
 	}
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	
 	switch (buttonIndex) {
