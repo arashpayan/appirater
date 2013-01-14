@@ -385,7 +385,9 @@ static BOOL _modalOpen = false;
 		NSNumber *appId = [NSNumber numberWithInteger:_appId.integerValue];
 		[storeViewController loadProductWithParameters:@{SKStoreProductParameterITunesItemIdentifier:appId} completionBlock:nil];
 		storeViewController.delegate = self.sharedInstance;
-		[self.sharedInstance.delegate appiraterWillPresentModalView:self.sharedInstance animated:_usesAnimation];
+		if ([self.sharedInstance.delegate respondsToSelector:@selector(appiraterWillPresentModalView:animated:)]) {
+			[self.sharedInstance.delegate appiraterWillPresentModalView:self.sharedInstance animated:_usesAnimation];
+		}
 		[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:storeViewController animated:_usesAnimation completion:^{
 			[self setModalOpen:YES];
 			//Temporarily use a black status bar to match the StoreKit view.
@@ -453,7 +455,9 @@ static BOOL _modalOpen = false;
 		BOOL usedAnimation = _usesAnimation;
 		[self setModalOpen:NO];
 		[[UIApplication sharedApplication].keyWindow.rootViewController dismissViewControllerAnimated:_usesAnimation completion:^{
-			[self.sharedInstance.delegate appiraterDidDismissModalView:(Appirater *)self animated:usedAnimation];
+			if ([self.sharedInstance.delegate respondsToSelector:@selector(appiraterDidDismissModalView:animated:)]) {
+				[self.sharedInstance.delegate appiraterDidDismissModalView:(Appirater *)self animated:usedAnimation];
+			}
 		}];
 		[self.class setStatusBarStyle:(UIStatusBarStyle)nil];
 	}
