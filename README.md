@@ -9,11 +9,12 @@ homepage] [homepage].
 Getting Started
 ---------------
 1. Add the Appirater code into your project.
-2. Add the `CFNetwork`, `SystemConfiguration`, and `StoreKit` frameworks to your project. Be sure to **change Required to Optional** for StoreKit in your target's Build Phases » Link Binary with Libraries section.
-3. Call `[Appirater setAppId:@"yourAppId"]` with the app id provided by Apple. A good place to do this is at the beginning of your app delegate's `application:didFinishLaunchingWithOptions:` method.
-4. Call `[Appirater appLaunched:YES]` at the end of your app delegate's `application:didFinishLaunchingWithOptions:` method.
-5. Call `[Appirater appEnteredForeground:YES]` in your app delegate's `applicationWillEnterForeground:` method.
-6. (OPTIONAL) Call `[Appirater userDidSignificantEvent:YES]` when the user does something 'significant' in the app.
+2. If your project doesn't use ARC, add the `-fobjc-arc` compiler flag to `Appirater.m` in your target's Build Phases » Compile Sources section.
+3. Add the `CFNetwork`, `SystemConfiguration`, and `StoreKit` frameworks to your project. Be sure to **change Required to Optional** for StoreKit in your target's Build Phases » Link Binary with Libraries section.
+4. Call `[Appirater setAppId:@"yourAppId"]` with the app id provided by Apple. A good place to do this is at the beginning of your app delegate's `application:didFinishLaunchingWithOptions:` method.
+5. Call `[Appirater appLaunched:YES]` at the end of your app delegate's `application:didFinishLaunchingWithOptions:` method.
+6. Call `[Appirater appEnteredForeground:YES]` in your app delegate's `applicationWillEnterForeground:` method.
+7. (OPTIONAL) Call `[Appirater userDidSignificantEvent:YES]` when the user does something 'significant' in the app.
 
 Configuration
 -------------
