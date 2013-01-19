@@ -38,6 +38,10 @@
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 NSString *const kAppiraterFirstUseDate				= @"kAppiraterFirstUseDate";
 NSString *const kAppiraterUseCount					= @"kAppiraterUseCount";
 NSString *const kAppiraterSignificantEventCount		= @"kAppiraterSignificantEventCount";
@@ -372,6 +376,20 @@ static BOOL _modalOpen = false;
                    });
 }
 
++ (id)getRootViewController {
+    UIWindow *window = [[UIApplication sharedApplication] keyWindow];
+    if (window.windowLevel != UIWindowLevelNormal) {
+        NSArray *windows = [[UIApplication sharedApplication] windows];
+        for(window in windows) {
+            if (window.windowLevel == UIWindowLevelNormal) {
+                break;
+            }
+        }
+    }
+    
+    return [[[window subviews] objectAtIndex:0] nextResponder];
+}
+
 + (void)rateApp {
 	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
@@ -388,7 +406,7 @@ static BOOL _modalOpen = false;
 		if ([self.sharedInstance.delegate respondsToSelector:@selector(appiraterWillPresentModalView:animated:)]) {
 			[self.sharedInstance.delegate appiraterWillPresentModalView:self.sharedInstance animated:_usesAnimation];
 		}
-		[[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:storeViewController animated:_usesAnimation completion:^{
+		[[self getRootViewController] presentViewController:storeViewController animated:_usesAnimation completion:^{
 			[self setModalOpen:YES];
 			//Temporarily use a black status bar to match the StoreKit view.
 			[self setStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
