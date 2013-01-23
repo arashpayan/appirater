@@ -21,12 +21,14 @@ Configuration
 
 Appirater provides class methods to configure its behavior. See [`Appirater.h`] [Appirater.h] for more information.
 
-    [Appirater setAppId:@"552035781"];
-    [Appirater setDaysUntilPrompt:1];
-    [Appirater setUsesUntilPrompt:10];
-    [Appirater setSignificantEventsUntilPrompt:-1];
-    [Appirater setTimeBeforeReminding:2];
-    [Appirater setDebug:YES];
+```objc
+[Appirater setAppId:@"552035781"];
+[Appirater setDaysUntilPrompt:1];
+[Appirater setUsesUntilPrompt:10];
+[Appirater setSignificantEventsUntilPrompt:-1];
+[Appirater setTimeBeforeReminding:2];
+[Appirater setDebug:YES];
+```
 
 License
 -------
