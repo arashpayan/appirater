@@ -387,7 +387,15 @@ static BOOL _modalOpen = false;
         }
     }
     
-    return [[[window subviews] objectAtIndex:0] nextResponder];
+    for (UIView *subView in [window subviews])
+    {
+        UIResponder *responder = [subView nextResponder];
+        if([responder isKindOfClass:[UIViewController class]]) {
+            return responder;
+        }
+    }
+    
+    return nil;
 }
 
 + (void)rateApp {
