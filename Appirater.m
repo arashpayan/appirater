@@ -391,11 +391,26 @@ static BOOL _modalOpen = false;
     {
         UIResponder *responder = [subView nextResponder];
         if([responder isKindOfClass:[UIViewController class]]) {
-            return responder;
+            return [self topMostViewController: (UIViewController *) responder];
         }
     }
     
     return nil;
+}
+
++ (UIViewController *) topMostViewController: (UIViewController *) controller {
+	BOOL isPresenting = NO;
+	do {
+		// this path is called only on iOS 6+, so -presentedViewController is fine here.
+		UIViewController *presented = [controller presentedViewController];
+		isPresenting = presented != nil;
+		if(presented != nil) {
+			controller = presented;
+		}
+		
+	} while (isPresenting);
+	
+	return controller;
 }
 
 + (void)rateApp {
@@ -480,7 +495,11 @@ static BOOL _modalOpen = false;
 		[[UIApplication sharedApplication]setStatusBarStyle:_statusBarStyle animated:_usesAnimation];
 		BOOL usedAnimation = _usesAnimation;
 		[self setModalOpen:NO];
-		[[UIApplication sharedApplication].keyWindow.rootViewController dismissViewControllerAnimated:_usesAnimation completion:^{
+		
+		// get the top most controller (= the StoreKit Controller) and dismiss it
+		UIViewController *presentingController = [UIApplication sharedApplication].keyWindow.rootViewController;
+		presentingController = [self topMostViewController: presentingController];
+		[presentingController dismissViewControllerAnimated:_usesAnimation completion:^{
 			if ([self.sharedInstance.delegate respondsToSelector:@selector(appiraterDidDismissModalView:animated:)]) {
 				[self.sharedInstance.delegate appiraterDidDismissModalView:(Appirater *)self animated:usedAnimation];
 			}
