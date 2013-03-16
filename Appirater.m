@@ -337,6 +337,10 @@ static BOOL _modalOpen = false;
 	}
 }
 
+- (BOOL)userHasDeclinedToRate {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterDeclinedToRate];
+}
+
 - (BOOL)userHasRatedCurrentVersion {
     return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterRatedCurrentVersion];
 }
@@ -382,6 +386,7 @@ static BOOL _modalOpen = false;
 
 + (void)showPrompt {
     if ([[Appirater sharedInstance] connectedToNetwork]
+        && ![[Appirater sharedInstance] userHasDeclinedToRate]
         && ![[Appirater sharedInstance] userHasRatedCurrentVersion]) {
         [[Appirater sharedInstance] showRatingAlert];
     }

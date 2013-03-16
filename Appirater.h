@@ -144,7 +144,8 @@ extern NSString *const kAppiraterReminderRequestDate;
 
 /*
  Tells Appirater to show the prompt (a rating alert). The prompt will be showed
- if there is connection available and the user hasn't rated current version.
+ if there is connection available, the user hasn't declined to rate
+ or hasn't rated current version.
  
  You could call to show the prompt regardless Appirater settings,
  e.g., in case of some special event in your app.
