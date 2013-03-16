@@ -19,4 +19,11 @@
 -(void)appiraterDidOptToRemindLater:(Appirater *)appirater;
 -(void)appiraterWillPresentModalView:(Appirater *)appirater animated:(BOOL)animated;
 -(void)appiraterDidDismissModalView:(Appirater *)appirater animated:(BOOL)animated;
+
+-(NSString *)titleForAppiraterRatingAlert:(Appirater *)appirater;
+-(NSString *)messageForAppiraterRatingAlert:(Appirater *)appirater;
+-(NSString *)titleForRateButtonInAppiraterRatingAlert:(Appirater *)appirater;
+-(NSString *)titleForRemindButtonInAppiraterRatingAlert:(Appirater *)appirater;
+-(NSString *)titleForCancelButtonInAppiraterRatingAlert:(Appirater *)appirater;
+
 @end

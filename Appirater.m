@@ -160,11 +160,43 @@ static BOOL _modalOpen = false;
 }
 
 - (void)showRatingAlert {
-	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
-														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+    NSString *title, *message, *cancelButtonTitle, *rateButtonTitle, *remindButtonTitle;
+    
+    if ([self.delegate respondsToSelector:@selector(titleForAppiraterRatingAlert:)]) {
+        title = [self.delegate titleForAppiraterRatingAlert:self];
+    } else {
+        title = APPIRATER_MESSAGE_TITLE;
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(messageForAppiraterRatingAlert:)]) {
+        message = [self.delegate messageForAppiraterRatingAlert:self];
+    } else {
+        message = APPIRATER_MESSAGE;
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(titleForCancelButtonInAppiraterRatingAlert:)]) {
+        cancelButtonTitle = [self.delegate titleForCancelButtonInAppiraterRatingAlert:self];
+    } else {
+        cancelButtonTitle = APPIRATER_CANCEL_BUTTON;
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(titleForRateButtonInAppiraterRatingAlert:)]) {
+        rateButtonTitle = [self.delegate titleForRateButtonInAppiraterRatingAlert:self];
+    } else {
+        rateButtonTitle = APPIRATER_RATE_BUTTON;
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(titleForRemindButtonInAppiraterRatingAlert:)]) {
+        remindButtonTitle = [self.delegate titleForRemindButtonInAppiraterRatingAlert:self];
+    } else {
+        remindButtonTitle = APPIRATER_RATE_LATER;
+    }
+    
+	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
+                                                        message:message
+                                                       delegate:self
+                                              cancelButtonTitle:cancelButtonTitle
+                                              otherButtonTitles:rateButtonTitle, remindButtonTitle, nil];
 	self.ratingAlert = alertView;
 	[alertView show];
 	
