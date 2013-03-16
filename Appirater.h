@@ -143,6 +143,15 @@ extern NSString *const kAppiraterReminderRequestDate;
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating;
 
 /*
+ Tells Appirater to show the prompt (a rating alert). The prompt will be showed
+ if there is connection available and the user hasn't rated current version.
+ 
+ You could call to show the prompt regardless Appirater settings,
+ e.g., in case of some special event in your app.
+ */
++ (void)showPrompt;
+
+/*
  Tells Appirater to open the App Store page where the user can specify a
  rating for the app. Also records the fact that this has happened, so the
  user won't be prompted again to rate the app.
