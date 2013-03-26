@@ -209,6 +209,11 @@ extern NSString *const kAppiraterReminderRequestDate;
 + (void) setTimeBeforeReminding:(double)value;
 
 /*
+ If you want that Appirater can prompt for rating only once for all app versions use YES. Default NO.
+*/
++ (void) setRestartTrackingOnNewAppVersion:(BOOL)value;
+
+/*
  'YES' will show the Appirater alert everytime. Useful for testing how your message
  looks and making sure the link to your app's review page works.
  */

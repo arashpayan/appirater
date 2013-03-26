@@ -57,6 +57,7 @@ static double _daysUntilPrompt = 30;
 static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
+static BOOL _restartTrackingOnNewAppVersion = TRUE;
 static BOOL _debug = NO;
 static id<AppiraterDelegate> _delegate;
 static BOOL _usesAnimation = TRUE;
@@ -95,6 +96,10 @@ static BOOL _modalOpen = false;
 
 + (void) setTimeBeforeReminding:(double)value {
     _timeBeforeReminding = value;
+}
+
++ (void) setRestartTrackingOnNewAppVersion:(BOOL)value {
+    _restartTrackingOnNewAppVersion = value;
 }
 
 + (void) setDebug:(BOOL)debug {
@@ -251,15 +256,19 @@ static BOOL _modalOpen = false;
 			NSLog(@"APPIRATER Use count: %d", useCount);
 	}
 	else
-	{
-		// it's a new version of the app, so restart tracking
+    {
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
-		[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterFirstUseDate];
-		[userDefaults setInteger:1 forKey:kAppiraterUseCount];
-		[userDefaults setInteger:0 forKey:kAppiraterSignificantEventCount];
-		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
-		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
-		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+        
+        if(_restartTrackingOnNewAppVersion)
+        {
+            // it's a new version of the app, so restart tracking
+            [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterFirstUseDate];
+            [userDefaults setInteger:1 forKey:kAppiraterUseCount];
+            [userDefaults setInteger:0 forKey:kAppiraterSignificantEventCount];
+            [userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
+            [userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
+            [userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+        }
 	}
 	
 	[userDefaults synchronize];
@@ -300,14 +309,18 @@ static BOOL _modalOpen = false;
 	}
 	else
 	{
-		// it's a new version of the app, so restart tracking
-		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
-		[userDefaults setDouble:0 forKey:kAppiraterFirstUseDate];
-		[userDefaults setInteger:0 forKey:kAppiraterUseCount];
-		[userDefaults setInteger:1 forKey:kAppiraterSignificantEventCount];
-		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
-		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
-		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+        [userDefaults setObject:version forKey:kAppiraterCurrentVersion];
+        
+        if(_restartTrackingOnNewAppVersion)
+        {
+            // it's a new version of the app, so restart tracking
+            [userDefaults setDouble:0 forKey:kAppiraterFirstUseDate];
+            [userDefaults setInteger:0 forKey:kAppiraterUseCount];
+            [userDefaults setInteger:1 forKey:kAppiraterSignificantEventCount];
+            [userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
+            [userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
+            [userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+        }
 	}
 	
 	[userDefaults synchronize];
