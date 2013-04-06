@@ -204,7 +204,7 @@ static BOOL _modalOpen = false;
 		return NO;
 	
 	// has the user already rated the app?
-	if ([userDefaults boolForKey:kAppiraterRatedCurrentVersion])
+	if ([self userHasRatedCurrentVersion])
 		return NO;
 	
 	// if the user wanted to be reminded later, has enough time passed?
@@ -341,6 +341,14 @@ static BOOL _modalOpen = false;
 	}
 }
 
+- (BOOL)userHasDeclinedToRate {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterDeclinedToRate];
+}
+
+- (BOOL)userHasRatedCurrentVersion {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterRatedCurrentVersion];
+}
+
 + (void)appLaunched {
 	[Appirater appLaunched:YES];
 }
@@ -378,6 +386,14 @@ static BOOL _modalOpen = false;
                    ^{
                        [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
                    });
+}
+
++ (void)showPrompt {
+    if ([[Appirater sharedInstance] connectedToNetwork]
+        && ![[Appirater sharedInstance] userHasDeclinedToRate]
+        && ![[Appirater sharedInstance] userHasRatedCurrentVersion]) {
+        [[Appirater sharedInstance] showRatingAlert];
+    }
 }
 
 + (id)getRootViewController {
