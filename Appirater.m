@@ -58,6 +58,7 @@ static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
+static BOOL _forceRatingConditionsMet = NO;
 static id<AppiraterDelegate> _delegate;
 static BOOL _usesAnimation = TRUE;
 static BOOL _openInAppStore = NO;
@@ -100,6 +101,25 @@ static BOOL _modalOpen = false;
 + (void) setDebug:(BOOL)debug {
     _debug = debug;
 }
+
++ (void) setForceRatingConditionsMet:(BOOL)forceRatingConditionsMet {
+	_forceRatingConditionsMet = forceRatingConditionsMet;
+}
+
++ (void) reset {
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+
+	[userDefaults removeObjectForKey:kAppiraterCurrentVersion];
+	[userDefaults removeObjectForKey:kAppiraterFirstUseDate];
+	[userDefaults removeObjectForKey:kAppiraterUseCount];
+	[userDefaults removeObjectForKey:kAppiraterSignificantEventCount];
+	[userDefaults removeObjectForKey:kAppiraterRatedCurrentVersion];
+	[userDefaults removeObjectForKey:kAppiraterDeclinedToRate];
+	[userDefaults removeObjectForKey:kAppiraterReminderRequestDate];
+
+	[userDefaults synchronize];
+}
+
 + (void)setDelegate:(id<AppiraterDelegate>)delegate{
 	_delegate = delegate;
 }
@@ -178,7 +198,7 @@ static BOOL _modalOpen = false;
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
-	if (_debug)
+	if (_forceRatingConditionsMet)
 		return YES;
 	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
@@ -191,12 +211,12 @@ static BOOL _modalOpen = false;
 	
 	// check if the app has been used enough
 	int useCount = [userDefaults integerForKey:kAppiraterUseCount];
-	if (useCount <= _usesUntilPrompt)
+	if (useCount < _usesUntilPrompt)
 		return NO;
 	
 	// check if the user has done enough significant events
 	int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
-	if (sigEventCount <= _significantEventsUntilPrompt)
+	if (sigEventCount < _significantEventsUntilPrompt)
 		return NO;
 	
 	// has the user previously declined to rate this version of the app?
