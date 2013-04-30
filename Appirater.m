@@ -58,7 +58,7 @@ static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
-static id<AppiraterDelegate> _delegate;
+__weak static id<AppiraterDelegate> _delegate;
 static BOOL _usesAnimation = TRUE;
 static BOOL _openInAppStore = NO;
 static UIStatusBarStyle _statusBarStyle;
