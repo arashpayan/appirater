@@ -77,9 +77,7 @@ static BOOL _modalOpen = false;
 - (void)hideRatingAlert;
 @end
 
-@implementation Appirater 
-
-@synthesize ratingAlert;
+@implementation Appirater
 
 + (void) setAppId:(NSString *)appId {
     _appId = appId;
@@ -168,6 +166,7 @@ static BOOL _modalOpen = false;
 }
 
 - (void)showRatingAlert {
+    if (self.ratingAlert) return; // We never want to show multiple alerts to the user
 	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
 														 message:APPIRATER_MESSAGE
 														delegate:self
