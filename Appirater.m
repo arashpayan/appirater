@@ -37,6 +37,7 @@
 #import "Appirater.h"
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
+#import <objc/runtime.h>
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -63,6 +64,8 @@ static BOOL _usesAnimation = TRUE;
 static BOOL _openInAppStore = NO;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
+
+static char SKStoreProductViewControllerPresentingController;
 
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
@@ -449,7 +452,9 @@ static BOOL _modalOpen = false;
 		if ([self.sharedInstance.delegate respondsToSelector:@selector(appiraterWillPresentModalView:animated:)]) {
 			[self.sharedInstance.delegate appiraterWillPresentModalView:self.sharedInstance animated:_usesAnimation];
 		}
-		[[self getRootViewController] presentViewController:storeViewController animated:_usesAnimation completion:^{
+		id rootViewController = [self getRootViewController];
+		objc_setAssociatedObject(self, &SKStoreProductViewControllerPresentingController, rootViewController, OBJC_ASSOCIATION_ASSIGN);
+		[rootViewController presentViewController:storeViewController animated:_usesAnimation completion:^{
 			[self setModalOpen:YES];
 			//Temporarily use a black status bar to match the StoreKit view.
 			[self setStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
@@ -516,9 +521,8 @@ static BOOL _modalOpen = false;
 		BOOL usedAnimation = _usesAnimation;
 		[self setModalOpen:NO];
 		
-		// get the top most controller (= the StoreKit Controller) and dismiss it
-		UIViewController *presentingController = [UIApplication sharedApplication].keyWindow.rootViewController;
-		presentingController = [self topMostViewController: presentingController];
+		// Retrieve a reference to the UIViewController used to present the StoreKit view controller
+		UIViewController *presentingController = objc_getAssociatedObject(self, &SKStoreProductViewControllerPresentingController);
 		[presentingController dismissViewControllerAnimated:_usesAnimation completion:^{
 			if ([self.sharedInstance.delegate respondsToSelector:@selector(appiraterDidDismissModalView:animated:)]) {
 				[self.sharedInstance.delegate appiraterDidDismissModalView:(Appirater *)self animated:usedAnimation];
