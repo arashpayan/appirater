@@ -212,6 +212,18 @@ extern NSString *const kAppiraterReminderRequestDate;
 
 
 /*
+ Present the alert if all requirements are met and ONLY after a significant 
+ event. So the alert will not pop up automatically on app start or becoming 
+ the foreground app if you pass in 'YES' to this method. This is particular 
+ useful if you have some sort of login and want to wait with the rating alert 
+ until login has completed. The default value is 'NO'.
+ ATTENTION: Specifying 'YES' and don't ever call 
+ + (void)userDidSignificantEvent:(BOOL)canPromptForRating 
+ will lead to that the alert is never shown.
+ */
++ (void) setOnlyAlertAfterSignificantEvents:(BOOL)promptAfterEvent;
+
+/*
  Once the rating alert is presented to the user, they might select
  'Remind me later'. This value specifies how long (in days) Appirater
  will wait before reminding them.
