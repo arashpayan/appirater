@@ -56,6 +56,7 @@ static NSString *_appId;
 static double _daysUntilPrompt = 30;
 static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
+static BOOL _onlyAlertAfterSignificantEvents = NO;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_5_0
@@ -95,6 +96,10 @@ static BOOL _modalOpen = false;
 
 + (void) setSignificantEventsUntilPrompt:(NSInteger)value {
     _significantEventsUntilPrompt = value;
+}
+
++ (void) setOnlyAlertAfterSignificantEvents:(BOOL)promptAfterEvent {
+	_onlyAlertAfterSignificantEvents = promptAfterEvent;
 }
 
 + (void) setTimeBeforeReminding:(double)value {
@@ -322,7 +327,8 @@ static BOOL _modalOpen = false;
 	
 	if (canPromptForRating &&
 		[self ratingConditionsHaveBeenMet] &&
-		[self connectedToNetwork])
+		[self connectedToNetwork] &&
+		!_onlyAlertAfterSignificantEvents)
 	{
         dispatch_async(dispatch_get_main_queue(),
                        ^{
