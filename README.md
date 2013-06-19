@@ -8,6 +8,13 @@ the library check out the [Appirater group] [appiratergroup].
 
 Getting Started
 ---------------
+
+###Cocoapods
+If you're new to Cocoapods [watch this](http://nsscreencast.com/episodes/5-cocoapods). To add Appirater to your app, add `pod "Appirater"` to your Podfile.
+
+Cocoapods support is still experimental, and might not work in all use cases. If you experience problems, open an issue and install via Git submodule
+
+###Git submodule
 1. Add the Appirater code into your project.
 2. If your project doesn't use ARC, add the `-fobjc-arc` compiler flag to `Appirater.m` in your target's Build Phases » Compile Sources section.
 3. Add the `CFNetwork`, `SystemConfiguration`, and `StoreKit` frameworks to your project. Be sure to **change Required to Optional** for StoreKit in your target's Build Phases » Link Binary with Libraries section.
