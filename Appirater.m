@@ -67,6 +67,7 @@ static BOOL _usesAnimation = TRUE;
 static BOOL _openInAppStore = NO;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
+static BOOL _alwaysUseMainBundle = NO;
 
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
@@ -118,6 +119,29 @@ static BOOL _modalOpen = false;
 }
 + (void)setModalOpen:(BOOL)open {
 	_modalOpen = open;
+}
++ (void)setAlwaysUseMainBundle:(BOOL)alwaysUseMainBundle {
+    _alwaysUseMainBundle = alwaysUseMainBundle;
+}
+
++ (NSBundle *)bundle
+{
+    NSBundle *bundle;
+
+    if (_alwaysUseMainBundle) {
+        bundle = [NSBundle mainBundle];
+    } else {
+        NSURL *appiraterBundleURL = [[NSBundle mainBundle] URLForResource:@"Appirater" withExtension:@"bundle"];
+
+        if (appiraterBundleURL) {
+            // Appirater.bundle will likely only exist when used via CocoaPods
+            bundle = [NSBundle bundleWithURL:appiraterBundleURL];
+        } else {
+            bundle = [NSBundle mainBundle];
+        }
+    }
+
+    return bundle;
 }
 
 - (BOOL)connectedToNetwork {
