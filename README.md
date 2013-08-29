@@ -49,6 +49,10 @@ This library is distributed under the terms of the MIT/X11.
 While not required, I greatly encourage and appreciate any improvements that you make
 to this library be contributed back for the benefit of all who use Appirater.
 
+Tips
+----
+Bitcoin tips are welcome: 1PxVtrzR4oHEKPojVx41JJnWGuPLggYDQy
+
 Ports for other SDKs
 --------------
 A few people have ported Appirater to other SDKs. The ports are listed here in hopes that they may assist developers of those SDKs. I don't know how closesly (if at all) they track the Objective-C version of Appirater. If you need support for any of the libraries, please contact the maintainer of the port.
