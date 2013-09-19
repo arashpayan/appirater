@@ -354,9 +354,9 @@ static BOOL _modalOpen = false;
     return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterRatedCurrentVersion];
 }
 
-+ (void)appLaunched {
-	[Appirater appLaunched:YES];
-}
+//+ (void)appLaunched {
+//	[Appirater appLaunched:YES];
+//}
 
 + (void)appLaunched:(BOOL)canPromptForRating {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),

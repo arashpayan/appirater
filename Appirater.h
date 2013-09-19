@@ -250,6 +250,6 @@ extern NSString *const kAppiraterReminderRequestDate;
  
  Calls [Appirater appLaunched:YES]. See appLaunched: for details of functionality.
  */
-+ (void)appLaunched __attribute__((deprecated)); 
+//+ (void)appLaunched __attribute__((deprecated)); 
 
 @end
