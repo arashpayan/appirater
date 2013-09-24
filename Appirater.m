@@ -51,7 +51,7 @@ NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
-NSString *templateReviewURLiOS7 = @"itms-apps://itunes.apple.com/LANGUAGE/app/idAPP_ID";
+NSString *templateReviewURLiOS7 = @"itms-apps://itunes.apple.com/app/idAPP_ID";
 
 static NSString *_appId;
 static double _daysUntilPrompt = 30;
@@ -501,7 +501,6 @@ static BOOL _alwaysUseMainBundle = NO;
 		// iOS 7 needs a different templateReviewURL @see https://github.com/arashpayan/appirater/issues/131
 		if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0) {
 			reviewURL = [templateReviewURLiOS7 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
-			reviewURL = [reviewURL stringByReplacingOccurrencesOfString:@"LANGUAGE" withString:[NSString stringWithFormat:@"%@", [[NSLocale preferredLanguages] objectAtIndex:0]]];
 		}
 
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
