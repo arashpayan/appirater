@@ -65,7 +65,6 @@ static BOOL _debug = NO;
 	__weak static id<AppiraterDelegate> _delegate;
 #endif
 static BOOL _usesAnimation = TRUE;
-static BOOL _openInAppStore = NO;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
 static BOOL _alwaysUseMainBundle = NO;
@@ -113,7 +112,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	_usesAnimation = animation;
 }
 + (void)setOpenInAppStore:(BOOL)openInAppStore {
-    _openInAppStore = openInAppStore;
+    [Appirater sharedInstance].openInAppStore = openInAppStore;
 }
 + (void)setStatusBarStyle:(UIStatusBarStyle)style {
 	_statusBarStyle = style;
@@ -143,6 +142,19 @@ static BOOL _alwaysUseMainBundle = NO;
     }
 
     return bundle;
+}
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        if ([[UIDevice currentDevice].systemVersion floatValue] >= 7.0) {
+            self.openInAppStore = YES;
+        } else {
+            self.openInAppStore = NO;
+        }
+    }
+    
+    return self;
 }
 
 - (BOOL)connectedToNetwork {
@@ -470,7 +482,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	[userDefaults synchronize];
 
 	//Use the in-app StoreKit view if available (iOS 6) and imported. This works in the simulator.
-	if (!_openInAppStore && NSStringFromClass([SKStoreProductViewController class]) != nil) {
+	if (![Appirater sharedInstance].openInAppStore && NSStringFromClass([SKStoreProductViewController class]) != nil) {
 		
 		SKStoreProductViewController *storeViewController = [[SKStoreProductViewController alloc] init];
 		NSNumber *appId = [NSNumber numberWithInteger:_appId.integerValue];
