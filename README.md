@@ -43,7 +43,7 @@ Requests for help, questions about usage, suggestions and other relevant topics 
 
 License
 -------
-Copyright 2012. [Arash Payan] [arash].
+Copyright 2013. [Arash Payan] [arash].
 This library is distributed under the terms of the MIT/X11.
 
 While not required, I greatly encourage and appreciate any improvements that you make
