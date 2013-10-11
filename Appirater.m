@@ -232,12 +232,12 @@ static BOOL _alwaysUseMainBundle = NO;
 		return NO;
 	
 	// check if the app has been used enough
-	int useCount = [userDefaults integerForKey:kAppiraterUseCount];
+	NSInteger useCount = [userDefaults integerForKey:kAppiraterUseCount];
 	if (useCount <= _usesUntilPrompt)
 		return NO;
 	
 	// check if the user has done enough significant events
-	int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
+	NSInteger sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 	if (sigEventCount <= _significantEventsUntilPrompt)
 		return NO;
 	
@@ -286,11 +286,11 @@ static BOOL _alwaysUseMainBundle = NO;
 		}
 		
 		// increment the use count
-		int useCount = [userDefaults integerForKey:kAppiraterUseCount];
+		NSInteger useCount = [userDefaults integerForKey:kAppiraterUseCount];
 		useCount++;
 		[userDefaults setInteger:useCount forKey:kAppiraterUseCount];
 		if (_debug)
-			NSLog(@"APPIRATER Use count: %d", useCount);
+			NSLog(@"APPIRATER Use count: %@", @(useCount));
 	}
 	else
 	{
@@ -334,11 +334,11 @@ static BOOL _alwaysUseMainBundle = NO;
 		}
 		
 		// increment the significant event count
-		int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
+		NSInteger sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 		sigEventCount++;
 		[userDefaults setInteger:sigEventCount forKey:kAppiraterSignificantEventCount];
 		if (_debug)
-			NSLog(@"APPIRATER Significant event count: %d", sigEventCount);
+			NSLog(@"APPIRATER Significant event count: %@", @(sigEventCount));
 	}
 	else
 	{
