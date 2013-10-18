@@ -35,6 +35,7 @@
  */
 
 #import "Appirater.h"
+#import "DefaultDataSource.h"
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
 
@@ -64,6 +65,7 @@ static BOOL _debug = NO;
 #else
 	__weak static id<AppiraterDelegate> _delegate;
 #endif
+static id<AppiraterDataSource>_dataSource;
 static BOOL _usesAnimation = TRUE;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
@@ -107,6 +109,9 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 + (void)setDelegate:(id<AppiraterDelegate>)delegate{
 	_delegate = delegate;
+}
++ (void)setDataSource:(id<AppiraterDataSource>)dataSource {
+	_dataSource = dataSource;
 }
 + (void)setUsesAnimation:(BOOL)animation {
 	_usesAnimation = animation;
@@ -196,6 +201,10 @@ static BOOL _alwaysUseMainBundle = NO;
         dispatch_once(&onceToken, ^{
             appirater = [[Appirater alloc] init];
 			appirater.delegate = _delegate;
+            if (_dataSource == nil) {
+                _dataSource = [[DefaultDataSource alloc] init];
+            }
+            appirater.dataSource = _dataSource;
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:
                 UIApplicationWillResignActiveNotification object:nil];
         });
@@ -205,11 +214,11 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)showRatingAlert {
-	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
+	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:_dataSource.messageTitle
+														 message:_dataSource.message
 														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+											   cancelButtonTitle:_dataSource.cancelButtonTitle
+											   otherButtonTitles:_dataSource.rateNowButtonTitle, _dataSource.rateLaterButtonTitle, nil];
 	self.ratingAlert = alertView;
     [alertView show];
 
