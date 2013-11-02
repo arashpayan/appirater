@@ -438,6 +438,21 @@ static BOOL _alwaysUseMainBundle = NO;
     }
 }
 
++ (void)showPromptIfRatingConditionsMet {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
+                   ^{
+                       if (canPromptForRating &&
+                           [self ratingConditionsHaveBeenMet] &&
+                           [self connectedToNetwork])
+                       {
+                           dispatch_async(dispatch_get_main_queue(),
+                                          ^{
+                                              [self showRatingAlert];
+                                          });
+                   });
+	}
+}
+
 + (id)getRootViewController {
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
     if (window.windowLevel != UIWindowLevelNormal) {

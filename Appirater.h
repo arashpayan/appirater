@@ -154,6 +154,14 @@ extern NSString *const kAppiraterReminderRequestDate;
 + (void)showPrompt;
 
 /*
+ Tells Appirater to show the prompt if the the rating conditions have been met
+ however it does not increment any of the rating conditions. This is useful
+ if you want to show the prompt in a place other than were a significant event
+ occurs.
+  */
++ (void)showPromptIfRatingConditionsMet;
+
+/*
  Tells Appirater to open the App Store page where the user can specify a
  rating for the app. Also records the fact that this has happened, so the
  user won't be prompted again to rate the app.
