@@ -71,7 +71,6 @@ static BOOL _modalOpen = false;
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
-- (void)showRatingAlert;
 - (BOOL)ratingConditionsHaveBeenMet;
 - (void)incrementUseCount;
 - (void)hideRatingAlert;
@@ -157,7 +156,7 @@ static BOOL _modalOpen = false;
 	{
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
-            appirater = [[Appirater alloc] init];
+            appirater = [[[self class] alloc] init];
 			appirater.delegate = _delegate;
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:
                 UIApplicationWillResignActiveNotification object:nil];
@@ -355,13 +354,13 @@ static BOOL _modalOpen = false;
 }
 
 + (void)appLaunched {
-	[Appirater appLaunched:YES];
+	[[self class] appLaunched:YES];
 }
 
 + (void)appLaunched:(BOOL)canPromptForRating {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
-                       [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+                       [[[self class] sharedInstance] incrementAndRate:canPromptForRating];
                    });
 }
 
@@ -376,28 +375,28 @@ static BOOL _modalOpen = false;
 + (void)appWillResignActive {
 	if (_debug)
 		NSLog(@"APPIRATER appWillResignActive");
-	[[Appirater sharedInstance] hideRatingAlert];
+	[[[self class] sharedInstance] hideRatingAlert];
 }
 
 + (void)appEnteredForeground:(BOOL)canPromptForRating {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
-                       [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+                       [[[self class] sharedInstance] incrementAndRate:canPromptForRating];
                    });
 }
 
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
-                       [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
+                       [[[self class] sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
                    });
 }
 
 + (void)showPrompt {
-    if ([[Appirater sharedInstance] connectedToNetwork]
-        && ![[Appirater sharedInstance] userHasDeclinedToRate]
-        && ![[Appirater sharedInstance] userHasRatedCurrentVersion]) {
-        [[Appirater sharedInstance] showRatingAlert];
+    if ([[[self class] sharedInstance] connectedToNetwork]
+        && ![[[self class] sharedInstance] userHasDeclinedToRate]
+        && ![[[self class] sharedInstance] userHasRatedCurrentVersion]) {
+        [[[self class] sharedInstance] showRatingAlert];
     }
 }
 
@@ -494,7 +493,7 @@ static BOOL _modalOpen = false;
 		case 1:
 		{
 			// they want to rate it
-			[Appirater rateApp];
+			[[self class] rateApp];
 			if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
 				[delegate appiraterDidOptToRate:self];
 			}
@@ -515,7 +514,7 @@ static BOOL _modalOpen = false;
 
 //Delegate call from the StoreKit view.
 - (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
-	[Appirater closeModal];
+	[[self class] closeModal];
 }
 
 //Close the in-app rating (StoreKit) view and restore the previous status bar style.
