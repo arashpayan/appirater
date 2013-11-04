@@ -241,6 +241,15 @@ extern NSString *const kAppiraterReminderRequestDate;
 
 @end
 
+@interface Appirater (SubclassingHooks)
+
+/*
+ Override this method in order to provide custom diealogs.
+ */
+- (void)showRatingAlert;
+
+@end
+
 
 @interface Appirater(Deprecated)
 
