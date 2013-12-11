@@ -144,14 +144,25 @@ extern NSString *const kAppiraterReminderRequestDate;
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating;
 
 /*!
- Tells Appirater to show the prompt (a rating alert). The prompt will be showed
+ Tells Appirater to try and show the prompt (a rating alert). The prompt will be showed
  if there is connection available, the user hasn't declined to rate
  or hasn't rated current version.
  
  You could call to show the prompt regardless Appirater settings,
  e.g., in case of some special event in your app.
  */
-+ (void)showPrompt;
++ (void)tryToShowPrompt;
+
+/*!
+ Tells Appirater to show the prompt (a rating alert).
+ Similar to tryToShowPrompt, but without checks (the prompt is always displayed).
+ Passing false will hide the rate later button on the prompt.
+  
+ The only case where you should call this is if your app has an
+ explicit "Rate this app" command somewhere. This is similar to rateApp,
+ but instead of jumping to the review directly, an intermediary prompt is displayed.
+ */
++ (void)forceShowPrompt:(BOOL)displayRateLaterButton;
 
 /*!
  Tells Appirater to open the App Store page where the user can specify a
@@ -271,5 +282,13 @@ extern NSString *const kAppiraterReminderRequestDate;
  Calls [Appirater appLaunched:YES]. See appLaunched: for details of functionality.
  */
 + (void)appLaunched __attribute__((deprecated)); 
+
+/*!
+ DEPRECATED: While still functional, it's better to use
+ tryToShowPrompt instead.
+ 
+ Calls [Appirater tryToShowPrompt]. See tryToShowPrompt for details of functionality.
+ */
++ (void)showPrompt __attribute__((deprecated));
 
 @end
