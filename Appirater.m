@@ -466,12 +466,12 @@ static BOOL _alwaysUseMainBundle = NO;
       displayRateLaterButton:(BOOL)displayRateLaterButton {
   bool showPrompt = true;
   if (withChecks) {
-    showPrompt = ([[Appirater sharedInstance] connectedToNetwork]
-              && ![[Appirater sharedInstance] userHasDeclinedToRate]
-              && ![[Appirater sharedInstance] userHasRatedCurrentVersion]);
+    showPrompt = ([self connectedToNetwork]
+              && ![self userHasDeclinedToRate]
+              && ![self userHasRatedCurrentVersion]);
   } 
   if (showPrompt) {
-    [[Appirater sharedInstance] showRatingAlert:displayRateLaterButton];
+    [self showRatingAlert:displayRateLaterButton];
   }
 }
 
