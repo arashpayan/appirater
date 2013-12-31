@@ -51,6 +51,7 @@ NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
+NSString *templateReviewURLiOS7 = @"itms-apps://itunes.apple.com/app/idAPP_ID";
 
 static NSString *_appId;
 static double _daysUntilPrompt = 30;
@@ -64,9 +65,9 @@ static BOOL _debug = NO;
 	__weak static id<AppiraterDelegate> _delegate;
 #endif
 static BOOL _usesAnimation = TRUE;
-static BOOL _openInAppStore = NO;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
+static BOOL _alwaysUseMainBundle = NO;
 
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
@@ -111,13 +112,49 @@ static BOOL _modalOpen = false;
 	_usesAnimation = animation;
 }
 + (void)setOpenInAppStore:(BOOL)openInAppStore {
-    _openInAppStore = openInAppStore;
+    [Appirater sharedInstance].openInAppStore = openInAppStore;
 }
 + (void)setStatusBarStyle:(UIStatusBarStyle)style {
 	_statusBarStyle = style;
 }
 + (void)setModalOpen:(BOOL)open {
 	_modalOpen = open;
+}
++ (void)setAlwaysUseMainBundle:(BOOL)alwaysUseMainBundle {
+    _alwaysUseMainBundle = alwaysUseMainBundle;
+}
+
++ (NSBundle *)bundle
+{
+    NSBundle *bundle;
+
+    if (_alwaysUseMainBundle) {
+        bundle = [NSBundle mainBundle];
+    } else {
+        NSURL *appiraterBundleURL = [[NSBundle mainBundle] URLForResource:@"Appirater" withExtension:@"bundle"];
+
+        if (appiraterBundleURL) {
+            // Appirater.bundle will likely only exist when used via CocoaPods
+            bundle = [NSBundle bundleWithURL:appiraterBundleURL];
+        } else {
+            bundle = [NSBundle mainBundle];
+        }
+    }
+
+    return bundle;
+}
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        if ([[UIDevice currentDevice].systemVersion floatValue] >= 7.0) {
+            self.openInAppStore = YES;
+        } else {
+            self.openInAppStore = NO;
+        }
+    }
+    
+    return self;
 }
 
 - (BOOL)connectedToNetwork {
@@ -195,12 +232,12 @@ static BOOL _modalOpen = false;
 		return NO;
 	
 	// check if the app has been used enough
-	int useCount = [userDefaults integerForKey:kAppiraterUseCount];
+	NSInteger useCount = [userDefaults integerForKey:kAppiraterUseCount];
 	if (useCount <= _usesUntilPrompt)
 		return NO;
 	
 	// check if the user has done enough significant events
-	int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
+	NSInteger sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 	if (sigEventCount <= _significantEventsUntilPrompt)
 		return NO;
 	
@@ -249,11 +286,11 @@ static BOOL _modalOpen = false;
 		}
 		
 		// increment the use count
-		int useCount = [userDefaults integerForKey:kAppiraterUseCount];
+		NSInteger useCount = [userDefaults integerForKey:kAppiraterUseCount];
 		useCount++;
 		[userDefaults setInteger:useCount forKey:kAppiraterUseCount];
 		if (_debug)
-			NSLog(@"APPIRATER Use count: %d", useCount);
+			NSLog(@"APPIRATER Use count: %@", @(useCount));
 	}
 	else
 	{
@@ -297,11 +334,11 @@ static BOOL _modalOpen = false;
 		}
 		
 		// increment the significant event count
-		int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
+		NSInteger sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 		sigEventCount++;
 		[userDefaults setInteger:sigEventCount forKey:kAppiraterSignificantEventCount];
 		if (_debug)
-			NSLog(@"APPIRATER Significant event count: %d", sigEventCount);
+			NSLog(@"APPIRATER Significant event count: %@", @(sigEventCount));
 	}
 	else
 	{
@@ -445,7 +482,7 @@ static BOOL _modalOpen = false;
 	[userDefaults synchronize];
 
 	//Use the in-app StoreKit view if available (iOS 6) and imported. This works in the simulator.
-	if (!_openInAppStore && NSStringFromClass([SKStoreProductViewController class]) != nil) {
+	if (![Appirater sharedInstance].openInAppStore && NSStringFromClass([SKStoreProductViewController class]) != nil) {
 		
 		SKStoreProductViewController *storeViewController = [[SKStoreProductViewController alloc] init];
 		NSNumber *appId = [NSNumber numberWithInteger:_appId.integerValue];
@@ -460,7 +497,9 @@ static BOOL _modalOpen = false;
 			[self setModalOpen:YES];
 			//Temporarily use a black status bar to match the StoreKit view.
 			[self setStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
-			[[UIApplication sharedApplication]setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:_usesAnimation];
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000
+			[[UIApplication sharedApplication]setStatusBarStyle:UIStatusBarStyleLightContent animated:_usesAnimation];
+#endif
 		}];
 	
 	//Use the standard openUrl method if StoreKit is unavailable.
@@ -470,6 +509,12 @@ static BOOL _modalOpen = false;
 		NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
 		#else
 		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+
+		// iOS 7 needs a different templateReviewURL @see https://github.com/arashpayan/appirater/issues/131
+		if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0) {
+			reviewURL = [templateReviewURLiOS7 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+		}
+
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
 		#endif
 	}
