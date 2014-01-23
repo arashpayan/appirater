@@ -59,6 +59,12 @@ static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
+static NSString *_appName;
+static NSString *_message;
+static NSString *_title;
+static NSString *_rateButtonText;
+static NSString *_cancelButtonText;
+static NSString *_rateLaterButtonText;
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_5_0
 	static id<AppiraterDelegate> _delegate;
 #else
@@ -68,6 +74,7 @@ static BOOL _usesAnimation = TRUE;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
 static BOOL _alwaysUseMainBundle = NO;
+
 
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
@@ -157,6 +164,89 @@ static BOOL _alwaysUseMainBundle = NO;
     return self;
 }
 
++ (void) setAppName:(NSString*)appName {
+    _appName = appName;
+}
++ (NSString*) appName {
+    if (_appName) {
+        return _appName;
+    }
+    NSString *kCFBundleDisplayNameKey = @"CFBundleDisplayName";
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSDictionary *localizedInfo = [mainBundle localizedInfoDictionary];
+    
+    NSString *localizedName = [localizedInfo objectForKey:kCFBundleDisplayNameKey];
+    if (localizedName) { // display name is not a required info field
+        return localizedName;
+    }
+    localizedName = [localizedInfo objectForKey:(NSString*)kCFBundleNameKey];
+    if (localizedName) {
+        return localizedName;
+    }
+
+    // fall back on non-localized name
+    NSDictionary *info = [mainBundle infoDictionary];
+    NSString *name = [info objectForKey:kCFBundleDisplayNameKey];
+    if (name) {
+        return name;
+    }
+    return [info objectForKey:(NSString*)kCFBundleNameKey];
+}
+
++ (void) setMessage:(NSString*)message {
+    _message = message;
+}
++ (NSString*) message {
+    if (_message) {
+        return _message;
+    }
+    NSString *messageFormat = NSLocalizedStringFromTable(@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!",
+                                                         @"AppiraterLocalizable", nil);
+    return [NSString stringWithFormat:messageFormat, [self appName]];
+}
+
++ (void) setTitle:(NSString*)title {
+    _title = title;
+}
++ (NSString*) title {
+    if (_title) {
+        return _title;
+    }
+    NSString *titleFormat = NSLocalizedStringFromTable(@"Rate %@", @"AppiraterLocalizable", nil);
+    return [NSString stringWithFormat:titleFormat, [self appName]];
+}
+
++ (void) setRateButtonText:(NSString*)rateButtonText {
+    _rateButtonText = rateButtonText;
+}
++ (NSString*) rateButtonText {
+    if (_rateButtonText) {
+        return _rateButtonText;
+    }
+    NSString *rateButtonTextFormat = NSLocalizedStringFromTable(@"Rate %@", @"AppiraterLocalizable", nil);
+    return [NSString stringWithFormat:rateButtonTextFormat, [self appName]];
+}
+
++ (void) setCancelButtonText:(NSString*)cancelButtonText {
+    _cancelButtonText = cancelButtonText;
+}
++ (NSString*) cancelButtonText {
+    if (_cancelButtonText) {
+        return _cancelButtonText;
+    }
+    return NSLocalizedStringFromTable(@"No, Thanks", @"AppiraterLocalizable", nil);
+}
+
++ (void) setRateLaterButtonText:(NSString*)rateLaterButtonText {
+    _rateLaterButtonText = rateLaterButtonText;
+}
++ (NSString*) rateLaterButtonText {
+    if (_rateLaterButtonText) {
+        return _rateLaterButtonText;
+    }
+    return NSLocalizedStringFromTable(@"Remind me later", @"AppiraterLocalizable", nil);
+}
+
 - (BOOL)connectedToNetwork {
     // Create zero addy
     struct sockaddr_in zeroAddress;
@@ -205,11 +295,11 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)showRatingAlert {
-	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
-														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:[Appirater title]
+                                                        message:[Appirater message]
+                                                       delegate:self
+                                              cancelButtonTitle:[Appirater cancelButtonText]
+                                              otherButtonTitles:[Appirater rateButtonText], [Appirater rateLaterButtonText], nil];
 	self.ratingAlert = alertView;
     [alertView show];
 
@@ -366,7 +456,34 @@ static BOOL _alwaysUseMainBundle = NO;
                        ^{
                            [self showRatingAlert];
                        });
-	}
+	} else {
+#if SHOW_APPIRATER_DEBUG_ALERTS
+        [self showProgressTowardsPrompt];
+#endif
+    }
+}
+
+- (void) showProgressTowardsPrompt {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        NSInteger numberOfEvents = [userDefaults integerForKey:kAppiraterSignificantEventCount];
+        NSInteger numberOfLaunches = [userDefaults integerForKey:kAppiraterUseCount];
+        NSDate *dateOfFirstLaunch = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterFirstUseDate]];
+        const double daysSinceFirstLaunch = [[NSDate date] timeIntervalSinceDate:dateOfFirstLaunch] / 60 / 60;
+        
+        NSString *message = [NSString stringWithFormat:@"%ld significant events so far (%ld to trigger rating prompt)\n\n"
+                                                       @"%ld launches so far (%ld to trigger)\n\n"
+                                                       @"%0.2f days since app install (%0.2f to trigger)",
+                                                       (long)numberOfEvents, (long)_significantEventsUntilPrompt,
+                                                       (long)numberOfLaunches, (long)_usesUntilPrompt,
+                                                       daysSinceFirstLaunch, _daysUntilPrompt];
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Appirater debug message"
+                                                            message:message
+                                                           delegate:nil
+                                                  cancelButtonTitle:@"Ok!"
+                                                  otherButtonTitles:nil];
+        [alertView show];
+    });
 }
 
 - (void)incrementSignificantEventAndRate:(BOOL)canPromptForRating {
@@ -380,7 +497,11 @@ static BOOL _alwaysUseMainBundle = NO;
                        ^{
                            [self showRatingAlert];
                        });
-	}
+	} else {
+#if SHOW_APPIRATER_DEBUG_ALERTS
+        [self showProgressTowardsPrompt];
+#endif
+    }
 }
 
 - (BOOL)userHasDeclinedToRate {
@@ -506,7 +627,11 @@ static BOOL _alwaysUseMainBundle = NO;
 	} else {
 		
 		#if TARGET_IPHONE_SIMULATOR
-		NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
+		[[[UIAlertView alloc] initWithTitle:nil
+           						    message:@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator."
+                                   delegate:nil
+                          cancelButtonTitle:@"Ok"
+                          otherButtonTitles:nil] show];
 		#else
 		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
 
