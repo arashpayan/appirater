@@ -471,11 +471,11 @@ static BOOL _alwaysUseMainBundle = NO;
         NSDate *dateOfFirstLaunch = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterFirstUseDate]];
         const double daysSinceFirstLaunch = [[NSDate date] timeIntervalSinceDate:dateOfFirstLaunch] / 60 / 60;
         
-        NSString *message = [NSString stringWithFormat:@"%d significant events so far (%d to trigger rating prompt)\n\n"
-                                                       @"%d launches so far (%d to trigger)\n\n"
+        NSString *message = [NSString stringWithFormat:@"%ld significant events so far (%ld to trigger rating prompt)\n\n"
+                                                       @"%ld launches so far (%ld to trigger)\n\n"
                                                        @"%0.2f days since app install (%0.2f to trigger)",
-                                                       numberOfEvents, _significantEventsUntilPrompt,
-                                                       numberOfLaunches, _usesUntilPrompt,
+                                                       (long)numberOfEvents, (long)_significantEventsUntilPrompt,
+                                                       (long)numberOfLaunches, (long)_usesUntilPrompt,
                                                        daysSinceFirstLaunch, _daysUntilPrompt];
         UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Appirater debug message"
                                                             message:message
