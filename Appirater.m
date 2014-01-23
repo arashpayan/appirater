@@ -38,6 +38,10 @@
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
 
+#if ! __has_feature(objc_arc)
+#warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
+#endif
+
 NSString *const kAppiraterFirstUseDate				= @"kAppiraterFirstUseDate";
 NSString *const kAppiraterUseCount					= @"kAppiraterUseCount";
 NSString *const kAppiraterSignificantEventCount		= @"kAppiraterSignificantEventCount";
@@ -47,6 +51,7 @@ NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
+NSString *templateReviewURLiOS7 = @"itms-apps://itunes.apple.com/app/idAPP_ID";
 
 static NSString *_appId;
 static double _daysUntilPrompt = 30;
@@ -54,13 +59,21 @@ static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
-static id<AppiraterDelegate> _delegate;
 static NSString *_appName;
 static NSString *_message;
 static NSString *_title;
 static NSString *_rateButtonText;
 static NSString *_cancelButtonText;
 static NSString *_rateLaterButtonText;
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_5_0
+	static id<AppiraterDelegate> _delegate;
+#else
+	__weak static id<AppiraterDelegate> _delegate;
+#endif
+static BOOL _usesAnimation = TRUE;
+static UIStatusBarStyle _statusBarStyle;
+static BOOL _modalOpen = false;
+static BOOL _alwaysUseMainBundle = NO;
 
 
 @interface Appirater ()
@@ -101,6 +114,54 @@ static NSString *_rateLaterButtonText;
 }
 + (void)setDelegate:(id<AppiraterDelegate>)delegate{
 	_delegate = delegate;
+}
++ (void)setUsesAnimation:(BOOL)animation {
+	_usesAnimation = animation;
+}
++ (void)setOpenInAppStore:(BOOL)openInAppStore {
+    [Appirater sharedInstance].openInAppStore = openInAppStore;
+}
++ (void)setStatusBarStyle:(UIStatusBarStyle)style {
+	_statusBarStyle = style;
+}
++ (void)setModalOpen:(BOOL)open {
+	_modalOpen = open;
+}
++ (void)setAlwaysUseMainBundle:(BOOL)alwaysUseMainBundle {
+    _alwaysUseMainBundle = alwaysUseMainBundle;
+}
+
++ (NSBundle *)bundle
+{
+    NSBundle *bundle;
+
+    if (_alwaysUseMainBundle) {
+        bundle = [NSBundle mainBundle];
+    } else {
+        NSURL *appiraterBundleURL = [[NSBundle mainBundle] URLForResource:@"Appirater" withExtension:@"bundle"];
+
+        if (appiraterBundleURL) {
+            // Appirater.bundle will likely only exist when used via CocoaPods
+            bundle = [NSBundle bundleWithURL:appiraterBundleURL];
+        } else {
+            bundle = [NSBundle mainBundle];
+        }
+    }
+
+    return bundle;
+}
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        if ([[UIDevice currentDevice].systemVersion floatValue] >= 7.0) {
+            self.openInAppStore = YES;
+        } else {
+            self.openInAppStore = NO;
+        }
+    }
+    
+    return self;
 }
 
 + (void) setAppName:(NSString*)appName {
@@ -240,11 +301,12 @@ static NSString *_rateLaterButtonText;
                                               cancelButtonTitle:[Appirater cancelButtonText]
                                               otherButtonTitles:[Appirater rateButtonText], [Appirater rateLaterButtonText], nil];
 	self.ratingAlert = alertView;
-	[alertView show];
-	
-	if(self.delegate && [self.delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]){
-		[self.delegate appiraterDidDisplayAlert:self];
-	}
+    [alertView show];
+
+    id <AppiraterDelegate> delegate = _delegate;
+    if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
+             [delegate appiraterDidDisplayAlert:self];
+    }
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
@@ -260,13 +322,13 @@ static NSString *_rateLaterButtonText;
 		return NO;
 	
 	// check if the app has been used enough
-	int useCount = [userDefaults integerForKey:kAppiraterUseCount];
-	if (useCount < _usesUntilPrompt)
+	NSInteger useCount = [userDefaults integerForKey:kAppiraterUseCount];
+	if (useCount <= _usesUntilPrompt)
 		return NO;
 	
 	// check if the user has done enough significant events
-	int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
-	if (sigEventCount < _significantEventsUntilPrompt)
+	NSInteger sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
+	if (sigEventCount <= _significantEventsUntilPrompt)
 		return NO;
 	
 	// has the user previously declined to rate this version of the app?
@@ -274,7 +336,7 @@ static NSString *_rateLaterButtonText;
 		return NO;
 	
 	// has the user already rated the app?
-	if ([userDefaults boolForKey:kAppiraterRatedCurrentVersion])
+	if ([self userHasRatedCurrentVersion])
 		return NO;
 	
 	// if the user wanted to be reminded later, has enough time passed?
@@ -314,11 +376,11 @@ static NSString *_rateLaterButtonText;
 		}
 		
 		// increment the use count
-		int useCount = [userDefaults integerForKey:kAppiraterUseCount];
+		NSInteger useCount = [userDefaults integerForKey:kAppiraterUseCount];
 		useCount++;
 		[userDefaults setInteger:useCount forKey:kAppiraterUseCount];
 		if (_debug)
-			NSLog(@"APPIRATER Use count: %d", useCount);
+			NSLog(@"APPIRATER Use count: %@", @(useCount));
 	}
 	else
 	{
@@ -362,11 +424,11 @@ static NSString *_rateLaterButtonText;
 		}
 		
 		// increment the significant event count
-		int sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
+		NSInteger sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 		sigEventCount++;
 		[userDefaults setInteger:sigEventCount forKey:kAppiraterSignificantEventCount];
 		if (_debug)
-			NSLog(@"APPIRATER Significant event count: %d", sigEventCount);
+			NSLog(@"APPIRATER Significant event count: %@", @(sigEventCount));
 	}
 	else
 	{
@@ -442,6 +504,14 @@ static NSString *_rateLaterButtonText;
     }
 }
 
+- (BOOL)userHasDeclinedToRate {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterDeclinedToRate];
+}
+
+- (BOOL)userHasRatedCurrentVersion {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterRatedCurrentVersion];
+}
+
 + (void)appLaunched {
 	[Appirater appLaunched:YES];
 }
@@ -481,27 +551,104 @@ static NSString *_rateLaterButtonText;
                    });
 }
 
-+ (void)rateApp {
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
-    [userDefaults synchronize];
-    
-#if TARGET_IPHONE_SIMULATOR
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil
-                                                        message:@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator."
-                                                       delegate:nil
-                                              cancelButtonTitle:@"Ok"
-                                              otherButtonTitles:nil];
-    [alertView show];
-#else
-	// this URL Scheme should work in the iOS 6 App Store in addition to older stores
-	NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
-	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
-#endif
++ (void)showPrompt {
+    if ([[Appirater sharedInstance] connectedToNetwork]
+        && ![[Appirater sharedInstance] userHasDeclinedToRate]
+        && ![[Appirater sharedInstance] userHasRatedCurrentVersion]) {
+        [[Appirater sharedInstance] showRatingAlert];
+    }
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
++ (id)getRootViewController {
+    UIWindow *window = [[UIApplication sharedApplication] keyWindow];
+    if (window.windowLevel != UIWindowLevelNormal) {
+        NSArray *windows = [[UIApplication sharedApplication] windows];
+        for(window in windows) {
+            if (window.windowLevel == UIWindowLevelNormal) {
+                break;
+            }
+        }
+    }
+    
+    for (UIView *subView in [window subviews])
+    {
+        UIResponder *responder = [subView nextResponder];
+        if([responder isKindOfClass:[UIViewController class]]) {
+            return [self topMostViewController: (UIViewController *) responder];
+        }
+    }
+    
+    return nil;
+}
+
++ (UIViewController *) topMostViewController: (UIViewController *) controller {
+	BOOL isPresenting = NO;
+	do {
+		// this path is called only on iOS 6+, so -presentedViewController is fine here.
+		UIViewController *presented = [controller presentedViewController];
+		isPresenting = presented != nil;
+		if(presented != nil) {
+			controller = presented;
+		}
+		
+	} while (isPresenting);
+	
+	return controller;
+}
+
++ (void)rateApp {
+	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+	[userDefaults synchronize];
+
+	//Use the in-app StoreKit view if available (iOS 6) and imported. This works in the simulator.
+	if (![Appirater sharedInstance].openInAppStore && NSStringFromClass([SKStoreProductViewController class]) != nil) {
+		
+		SKStoreProductViewController *storeViewController = [[SKStoreProductViewController alloc] init];
+		NSNumber *appId = [NSNumber numberWithInteger:_appId.integerValue];
+		[storeViewController loadProductWithParameters:@{SKStoreProductParameterITunesItemIdentifier:appId} completionBlock:nil];
+		storeViewController.delegate = self.sharedInstance;
+        
+        id <AppiraterDelegate> delegate = self.sharedInstance.delegate;
+		if ([delegate respondsToSelector:@selector(appiraterWillPresentModalView:animated:)]) {
+			[delegate appiraterWillPresentModalView:self.sharedInstance animated:_usesAnimation];
+		}
+		[[self getRootViewController] presentViewController:storeViewController animated:_usesAnimation completion:^{
+			[self setModalOpen:YES];
+			//Temporarily use a black status bar to match the StoreKit view.
+			[self setStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000
+			[[UIApplication sharedApplication]setStatusBarStyle:UIStatusBarStyleLightContent animated:_usesAnimation];
+#endif
+		}];
+	
+	//Use the standard openUrl method if StoreKit is unavailable.
+	} else {
+		
+		#if TARGET_IPHONE_SIMULATOR
+		[[[UIAlertView alloc] initWithTitle:nil
+           						    message:@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator."
+                                   delegate:nil
+                          cancelButtonTitle:@"Ok"
+                          otherButtonTitles:nil] show];
+		#else
+		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+
+		// iOS 7 needs a different templateReviewURL @see https://github.com/arashpayan/appirater/issues/131
+		if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0) {
+			reviewURL = [templateReviewURLiOS7 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+		}
+
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
+		#endif
+	}
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    id <AppiraterDelegate> delegate = _delegate;
 	
 	switch (buttonIndex) {
 		case 0:
@@ -509,8 +656,8 @@ static NSString *_rateLaterButtonText;
 			// they don't want to rate it
 			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
 			[userDefaults synchronize];
-			if(self.delegate && [self.delegate respondsToSelector:@selector(appiraterDidDeclineToRate:)]){
-				[self.delegate appiraterDidDeclineToRate:self];
+			if(delegate && [delegate respondsToSelector:@selector(appiraterDidDeclineToRate:)]){
+				[delegate appiraterDidDeclineToRate:self];
 			}
 			break;
 		}
@@ -518,8 +665,8 @@ static NSString *_rateLaterButtonText;
 		{
 			// they want to rate it
 			[Appirater rateApp];
-			if(self.delegate && [self.delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
-				[self.delegate appiraterDidOptToRate:self];
+			if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
+				[delegate appiraterDidOptToRate:self];
 			}
 			break;
 		}
@@ -527,12 +674,37 @@ static NSString *_rateLaterButtonText;
 			// remind them later
 			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
 			[userDefaults synchronize];
-			if(self.delegate && [self.delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
-				[self.delegate appiraterDidOptToRemindLater:self];
+			if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
+				[delegate appiraterDidOptToRemindLater:self];
 			}
 			break;
 		default:
 			break;
+	}
+}
+
+//Delegate call from the StoreKit view.
+- (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
+	[Appirater closeModal];
+}
+
+//Close the in-app rating (StoreKit) view and restore the previous status bar style.
++ (void)closeModal {
+	if (_modalOpen) {
+		[[UIApplication sharedApplication]setStatusBarStyle:_statusBarStyle animated:_usesAnimation];
+		BOOL usedAnimation = _usesAnimation;
+		[self setModalOpen:NO];
+		
+		// get the top most controller (= the StoreKit Controller) and dismiss it
+		UIViewController *presentingController = [UIApplication sharedApplication].keyWindow.rootViewController;
+		presentingController = [self topMostViewController: presentingController];
+		[presentingController dismissViewControllerAnimated:_usesAnimation completion:^{
+            id <AppiraterDelegate> delegate = self.sharedInstance.delegate;
+			if ([delegate respondsToSelector:@selector(appiraterDidDismissModalView:animated:)]) {
+				[delegate appiraterDidDismissModalView:(Appirater *)self animated:usedAnimation];
+			}
+		}];
+		[self.class setStatusBarStyle:(UIStatusBarStyle)nil];
 	}
 }
 
