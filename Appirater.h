@@ -47,14 +47,26 @@ extern NSString *const kAppiraterDeclinedToRate;
 extern NSString *const kAppiraterReminderRequestDate;
 
 /*!
+ Your localized special app's name.
+ to override the localized app display name: CFBundleDisplayName
+ */
+#define APPIRATER_LOCALIZED_SPECIAL_APP_NAME    [[[NSBundle mainBundle] localizedInfoDictionary] objectForKey:@"ARAppName"]
+
+/*!
  Your localized app's name.
  */
-#define APPIRATER_LOCALIZED_APP_NAME    [[[NSBundle mainBundle] localizedInfoDictionary] objectForKey:@"CFBundleDisplayName"]
+#define APPIRATER_LOCALIZED_APP_NAME    APPIRATER_LOCALIZED_SPECIAL_APP_NAME ? APPIRATER_LOCALIZED_SPECIAL_APP_NAME : [[[NSBundle mainBundle] localizedInfoDictionary] objectForKey:@"CFBundleDisplayName"]
+
+/*!
+ Your special app's name.
+ to override the app display name: CFBundleDisplayName
+ */
+#define APPIRATER_SPECIAL_APP_NAME				APPIRATER_LOCALIZED_APP_NAME ? APPIRATER_LOCALIZED_APP_NAME : [[[NSBundle mainBundle] infoDictionary] objectForKey:@"ARAppName"]
 
 /*!
  Your app's name.
  */
-#define APPIRATER_APP_NAME				APPIRATER_LOCALIZED_APP_NAME ? APPIRATER_LOCALIZED_APP_NAME : [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"]
+#define APPIRATER_APP_NAME				APPIRATER_SPECIAL_APP_NAME ? APPIRATER_SPECIAL_APP_NAME : [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"]
 
 /*!
  This is the message your users will see once they've passed the day+launches
