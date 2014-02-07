@@ -72,6 +72,9 @@ static BOOL _alwaysUseMainBundle = NO;
 @interface Appirater ()
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
+- (void)showPromptWithChecks:(BOOL)withChecks
+      displayRateLaterButton:(BOOL)displayRateLaterButton;
+- (void)showRatingAlert:(BOOL)displayRateLaterButton;
 - (void)showRatingAlert;
 - (BOOL)ratingConditionsHaveBeenMet;
 - (void)incrementUseCount;
@@ -204,12 +207,22 @@ static BOOL _alwaysUseMainBundle = NO;
 	return appirater;
 }
 
-- (void)showRatingAlert {
-	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
-														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+- (void)showRatingAlert:(BOOL)displayRateLaterButton {
+  UIAlertView *alertView = nil;
+  if (displayRateLaterButton) {
+  	alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+                                           message:APPIRATER_MESSAGE
+                                          delegate:self
+                                 cancelButtonTitle:APPIRATER_CANCEL_BUTTON
+                                 otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+  } else {
+  	alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+                                           message:APPIRATER_MESSAGE
+                                          delegate:self
+                                 cancelButtonTitle:APPIRATER_CANCEL_BUTTON
+                                 otherButtonTitles:APPIRATER_RATE_BUTTON, nil];
+  }
+
 	self.ratingAlert = alertView;
     [alertView show];
 
@@ -217,6 +230,11 @@ static BOOL _alwaysUseMainBundle = NO;
     if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
              [delegate appiraterDidDisplayAlert:self];
     }
+}
+
+- (void)showRatingAlert
+{
+  [self showRatingAlert:true];
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
@@ -431,11 +449,30 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 + (void)showPrompt {
-    if ([[Appirater sharedInstance] connectedToNetwork]
-        && ![[Appirater sharedInstance] userHasDeclinedToRate]
-        && ![[Appirater sharedInstance] userHasRatedCurrentVersion]) {
-        [[Appirater sharedInstance] showRatingAlert];
-    }
+  [Appirater tryToShowPrompt];
+}
+
++ (void)tryToShowPrompt {
+  [[Appirater sharedInstance] showPromptWithChecks:true
+                            displayRateLaterButton:true];
+}
+
++ (void)forceShowPrompt:(BOOL)displayRateLaterButton {
+  [[Appirater sharedInstance] showPromptWithChecks:false
+                            displayRateLaterButton:displayRateLaterButton];
+}
+
+- (void)showPromptWithChecks:(BOOL)withChecks
+      displayRateLaterButton:(BOOL)displayRateLaterButton {
+  bool showPrompt = true;
+  if (withChecks) {
+    showPrompt = ([self connectedToNetwork]
+              && ![self userHasDeclinedToRate]
+              && ![self userHasRatedCurrentVersion]);
+  } 
+  if (showPrompt) {
+    [self showRatingAlert:displayRateLaterButton];
+  }
 }
 
 + (id)getRootViewController {
