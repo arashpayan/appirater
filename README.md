@@ -59,8 +59,8 @@ If you wanted to show the request after 5 days only you can set the following:
 
 ```objc
 [Appirater setAppId:@"770699556"];
-[Appirater setDaysUntilPrompt:-1];
-[Appirater setUsesUntilPrompt:5];
+[Appirater setDaysUntilPrompt:5];
+[Appirater setUsesUntilPrompt:0];
 [Appirater setSignificantEventsUntilPrompt:-1];
 [Appirater setTimeBeforeReminding:2];
 [Appirater setDebug:NO];
