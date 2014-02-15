@@ -49,6 +49,7 @@ NSString *const kAppiraterCurrentVersion			= @"kAppiraterCurrentVersion";
 NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion";
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
+NSString *const kAppiraterShowRatingAlert           = @"kShowRatingAlert";
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 NSString *templateReviewURLiOS7 = @"itms-apps://itunes.apple.com/app/idAPP_ID";
@@ -59,6 +60,7 @@ static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
+static BOOL _showAlert = YES;
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_5_0
 	static id<AppiraterDelegate> _delegate;
 #else
@@ -107,6 +109,9 @@ static BOOL _alwaysUseMainBundle = NO;
 
 + (void) setDebug:(BOOL)debug {
     _debug = debug;
+}
++ (void) setShowAlert:(BOOL)showAlert {
+    _showAlert = showAlert;
 }
 + (void)setDelegate:(id<AppiraterDelegate>)delegate{
 	_delegate = delegate;
@@ -208,23 +213,26 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
-  UIAlertView *alertView = nil;
-  if (displayRateLaterButton) {
-  	alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-                                           message:APPIRATER_MESSAGE
-                                          delegate:self
-                                 cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-                                 otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
-  } else {
-  	alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-                                           message:APPIRATER_MESSAGE
-                                          delegate:self
-                                 cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-                                 otherButtonTitles:APPIRATER_RATE_BUTTON, nil];
-  }
-
-	self.ratingAlert = alertView;
-    [alertView show];
+	if (_showAlert) {
+        UIAlertView *alertView = nil;
+		if (displayRateLaterButton) {
+			alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+		                                       message:APPIRATER_MESSAGE
+		                                      delegate:self
+		                             cancelButtonTitle:APPIRATER_CANCEL_BUTTON
+		                             otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+		} else {
+			alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+		                                       message:APPIRATER_MESSAGE
+		                                      delegate:self
+		                             cancelButtonTitle:APPIRATER_CANCEL_BUTTON
+		                             otherButtonTitles:APPIRATER_RATE_BUTTON, nil];
+		}
+        self.ratingAlert = alertView;
+        [alertView show];
+    } else {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kAppiraterShowRatingAlert object:nil];
+    }
 
     id <AppiraterDelegate> delegate = _delegate;
     if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
