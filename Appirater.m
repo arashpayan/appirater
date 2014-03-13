@@ -147,6 +147,10 @@ static BOOL _alwaysUseMainBundle = NO;
     return bundle;
 }
 
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (id)init {
     self = [super init];
     if (self) {
