@@ -144,6 +144,12 @@ extern NSString *const kAppiraterReminderRequestDate;
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating;
 
 /*!
+ Similar to +userDidSignificantEvent: but this method will increase the significant
+ event count by the quantity provided.
+ */
++ (void)userDidSignificantEvent:(BOOL)canPromptForRating withQuantity:(NSInteger)quantity;
+
+/*!
  Tells Appirater to try and show the prompt (a rating alert). The prompt will be showed
  if there is connection available, the user hasn't declined to rate
  or hasn't rated current version.
