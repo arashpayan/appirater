@@ -45,6 +45,7 @@ extern NSString *const kAppiraterCurrentVersion;
 extern NSString *const kAppiraterRatedCurrentVersion;
 extern NSString *const kAppiraterDeclinedToRate;
 extern NSString *const kAppiraterReminderRequestDate;
+extern NSString *const kAppiraterShowRatingAlert;
 
 /*!
  Your localized app's name.
@@ -235,6 +236,8 @@ extern NSString *const kAppiraterReminderRequestDate;
  looks and making sure the link to your app's review page works.
  */
 + (void) setDebug:(BOOL)debug;
+
++ (void) setShowAlert:(BOOL)showAlert;
 
 /*!
  Set the delegate if you want to know when Appirater does something
