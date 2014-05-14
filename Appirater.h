@@ -57,7 +57,20 @@ extern NSString *const kAppiraterReminderRequestDate;
 #define APPIRATER_APP_NAME				APPIRATER_LOCALIZED_APP_NAME ? APPIRATER_LOCALIZED_APP_NAME : [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"]
 
 /*!
- This is the message your users will see once they've passed the day+launches
+ This is first message your users will see once they've passed the day+launches
+ threshold.
+ */
+#define APPIRATER_LOCALIZED_PRELIMINARY_MESSAGE_TITLE   NSLocalizedStringFromTableInBundle(@"%@", @"AppiraterLocalizable", [Appirater bundle], nil)
+#define APPIRATER_PRELIMINARY_MESSAGE_TITLE             [NSString stringWithFormat:APPIRATER_LOCALIZED_PRELIMINARY_MESSAGE_TITLE, APPIRATER_APP_NAME]
+
+#define APPIRATER_LOCALIZED_PRELIMINARY_MESSAGE         NSLocalizedStringFromTableInBundle(@"Are you enjoying %@?", @"AppiraterLocalizable", [Appirater bundle], nil)
+#define APPIRATER_PRELIMINARY_MESSAGE                   [NSString stringWithFormat:APPIRATER_LOCALIZED_PRELIMINARY_MESSAGE, APPIRATER_APP_NAME]
+
+#define APPIRATER_PRELIMINARY_MESSAGE_YES_BUTTON        NSLocalizedStringFromTableInBundle(@"Yes", @"AppiraterLocalizable", [Appirater bundle], nil)
+#define APPIRATER_PRELIMINARY_MESSAGE_NO_BUTTON         NSLocalizedStringFromTableInBundle(@"No", @"AppiraterLocalizable", [Appirater bundle], nil)
+
+/*!
+ This is the message your users will see once they've seen the first message
  threshold.
  */
 #define APPIRATER_LOCALIZED_MESSAGE     NSLocalizedStringFromTableInBundle(@"If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", @"AppiraterLocalizable", [Appirater bundle], nil)
@@ -190,6 +203,11 @@ extern NSString *const kAppiraterReminderRequestDate;
  Set your Apple generated software id here.
  */
 + (void) setAppId:(NSString*)appId;
+
+/*!
+ Users will see a preliminary message before asked to rate the app.
+ */
++ (void) setShowPreliminaryMessage:(BOOL)showPreliminaryMessage;
 
 /*!
  Users will need to have the same version of your app installed for this many

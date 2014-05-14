@@ -13,6 +13,10 @@
 @protocol AppiraterDelegate <NSObject>
 
 @optional
+-(void)appiraterDidDisplayPreliminaryAlert:(Appirater *)appirater;
+-(void)appiraterDidDeclinePreliminaryAlert:(Appirater *)appirater;
+-(void)appiraterDidAcceptPreliminaryAlert:(Appirater *)appirater;
+
 -(void)appiraterDidDisplayAlert:(Appirater *)appirater;
 -(void)appiraterDidDeclineToRate:(Appirater *)appirater;
 -(void)appiraterDidOptToRate:(Appirater *)appirater;
