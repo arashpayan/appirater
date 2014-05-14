@@ -53,7 +53,21 @@ NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 NSString *templateReviewURLiOS7 = @"itms-apps://itunes.apple.com/app/idAPP_ID";
 
+static const NSInteger AlertButtonIndexInvalid = -1;
+
+typedef NS_ENUM(NSInteger, PreliminaryAlertButtonIndex) {
+    PreliminaryAlertButtonNo = 0,
+    PreliminaryAlertButtonYes
+};
+
+typedef NS_ENUM(NSInteger, RateAlertButtonIndex) {
+    RateAlertButtonIndexRateNow = 0,
+    RateAlertButtonIndexDontRate,
+    RateAlertButtonIndexRateLater
+};
+
 static NSString *_appId;
+static BOOL _showPreliminaryMessage = NO;
 static double _daysUntilPrompt = 30;
 static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
@@ -64,21 +78,18 @@ static BOOL _debug = NO;
 #else
 	__weak static id<AppiraterDelegate> _delegate;
 #endif
-static BOOL _usesAnimation = TRUE;
+static BOOL _usesAnimation = YES;
 static UIStatusBarStyle _statusBarStyle;
-static BOOL _modalOpen = false;
+static BOOL _modalOpen = NO;
 static BOOL _alwaysUseMainBundle = NO;
 
-@interface Appirater ()
-- (BOOL)connectedToNetwork;
-+ (Appirater*)sharedInstance;
-- (void)showPromptWithChecks:(BOOL)withChecks
-      displayRateLaterButton:(BOOL)displayRateLaterButton;
-- (void)showRatingAlert:(BOOL)displayRateLaterButton;
-- (void)showRatingAlert;
-- (BOOL)ratingConditionsHaveBeenMet;
-- (void)incrementUseCount;
-- (void)hideRatingAlert;
+static const NSInteger kPreliminaryAlertViewTag = 1000;
+static const NSInteger kRateAlertViewTag        = 1001;
+
+@interface Appirater () {
+    BOOL _shouldShowRateLaterButton;
+}
+
 @end
 
 @implementation Appirater 
@@ -87,6 +98,10 @@ static BOOL _alwaysUseMainBundle = NO;
 
 + (void) setAppId:(NSString *)appId {
     _appId = appId;
+}
+
++ (void) setShowPreliminaryMessage:(BOOL)showPreliminaryMessage {
+    _showPreliminaryMessage = showPreliminaryMessage;
 }
 
 + (void) setDaysUntilPrompt:(double)value {
@@ -180,7 +195,9 @@ static BOOL _alwaysUseMainBundle = NO;
 	
     if (!didRetrieveFlags)
     {
-        NSLog(@"Error. Could not recover network reachability flags");
+        if (_debug) {
+            NSLog(@"Error. Could not recover network reachability flags");
+        }
         return NO;
     }
 	
@@ -212,33 +229,61 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
-  UIAlertView *alertView = nil;
-  if (displayRateLaterButton) {
-  	alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-                                           message:APPIRATER_MESSAGE
-                                          delegate:self
-                                 cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-                                 otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
-  } else {
-  	alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-                                           message:APPIRATER_MESSAGE
-                                          delegate:self
-                                 cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-                                 otherButtonTitles:APPIRATER_RATE_BUTTON, nil];
-  }
-
-	self.ratingAlert = alertView;
-    [alertView show];
-
-    id <AppiraterDelegate> delegate = _delegate;
-    if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
-             [delegate appiraterDidDisplayAlert:self];
+    if (_showPreliminaryMessage) {
+        _shouldShowRateLaterButton = displayRateLaterButton;
+        [self reallyShowPreliminaryAlert];
+    } else {
+        [self reallyShowRatingAlert:displayRateLaterButton];
     }
 }
 
 - (void)showRatingAlert
 {
-  [self showRatingAlert:true];
+    [self showRatingAlert:YES];
+}
+
+- (void)reallyShowPreliminaryAlert {
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_PRELIMINARY_MESSAGE_TITLE
+                                                        message:APPIRATER_PRELIMINARY_MESSAGE
+                                                       delegate:self
+                                              cancelButtonTitle:APPIRATER_PRELIMINARY_MESSAGE_NO_BUTTON
+                                              otherButtonTitles:APPIRATER_PRELIMINARY_MESSAGE_YES_BUTTON, nil];
+    alertView.tag = kPreliminaryAlertViewTag;
+    
+	self.ratingAlert = alertView;
+    [alertView show];
+    
+    id <AppiraterDelegate> delegate = _delegate;
+    if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayPreliminaryAlert:)]) {
+        [delegate appiraterDidDisplayPreliminaryAlert:self];
+    }
+}
+
+- (void)reallyShowRatingAlert:(BOOL)displayRateLaterButton {
+    UIAlertView *alertView = nil;
+    if (displayRateLaterButton) {
+        alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+                                               message:APPIRATER_MESSAGE
+                                              delegate:self
+                                     cancelButtonTitle:APPIRATER_CANCEL_BUTTON
+                                     otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+    } else {
+        alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+                                               message:APPIRATER_MESSAGE
+                                              delegate:self
+                                     cancelButtonTitle:APPIRATER_CANCEL_BUTTON
+                                     otherButtonTitles:APPIRATER_RATE_BUTTON, nil];
+    }
+    
+    alertView.tag = kRateAlertViewTag;
+    
+	self.ratingAlert = alertView;
+    [alertView show];
+    
+    id <AppiraterDelegate> delegate = _delegate;
+    if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
+        [delegate appiraterDidDisplayAlert:self];
+    }
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
@@ -428,7 +473,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	if (self.ratingAlert.visible) {
 		if (_debug)
 			NSLog(@"APPIRATER Hiding Alert");
-		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
+		[self.ratingAlert dismissWithClickedButtonIndex:AlertButtonIndexInvalid animated:NO];
 	}	
 }
 
@@ -457,18 +502,18 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 + (void)tryToShowPrompt {
-  [[Appirater sharedInstance] showPromptWithChecks:true
-                            displayRateLaterButton:true];
+  [[Appirater sharedInstance] showPromptWithChecks:YES
+                            displayRateLaterButton:YES];
 }
 
 + (void)forceShowPrompt:(BOOL)displayRateLaterButton {
-  [[Appirater sharedInstance] showPromptWithChecks:false
+  [[Appirater sharedInstance] showPromptWithChecks:NO
                             displayRateLaterButton:displayRateLaterButton];
 }
 
 - (void)showPromptWithChecks:(BOOL)withChecks
       displayRateLaterButton:(BOOL)displayRateLaterButton {
-  bool showPrompt = true;
+  BOOL showPrompt = NO;
   if (withChecks) {
     showPrompt = ([self connectedToNetwork]
               && ![self userHasDeclinedToRate]
@@ -526,7 +571,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	if (![Appirater sharedInstance].openInAppStore && NSStringFromClass([SKStoreProductViewController class]) != nil) {
 		
 		SKStoreProductViewController *storeViewController = [[SKStoreProductViewController alloc] init];
-		NSNumber *appId = [NSNumber numberWithInteger:_appId.integerValue];
+		NSNumber *appId = @(_appId.integerValue);
 		[storeViewController loadProductWithParameters:@{SKStoreProductParameterITunesItemIdentifier:appId} completionBlock:nil];
 		storeViewController.delegate = self.sharedInstance;
         
@@ -562,41 +607,73 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+
     id <AppiraterDelegate> delegate = _delegate;
-	
-	switch (buttonIndex) {
-		case 0:
-		{
-			// they don't want to rate it
-			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
-			[userDefaults synchronize];
-			if(delegate && [delegate respondsToSelector:@selector(appiraterDidDeclineToRate:)]){
-				[delegate appiraterDidDeclineToRate:self];
-			}
-			break;
-		}
-		case 1:
-		{
-			// they want to rate it
-			[Appirater rateApp];
-			if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
-				[delegate appiraterDidOptToRate:self];
-			}
-			break;
-		}
-		case 2:
-			// remind them later
-			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
-			[userDefaults synchronize];
-			if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
-				[delegate appiraterDidOptToRemindLater:self];
-			}
-			break;
-		default:
-			break;
-	}
+    
+    switch (alertView.tag) {
+        case kPreliminaryAlertViewTag:
+        {
+            switch (buttonIndex) {
+                case PreliminaryAlertButtonNo:
+                    [self didDeclineToRate];
+                    
+                    if ([delegate respondsToSelector:@selector(appiraterDidDeclinePreliminaryAlert:)]) {
+                        [delegate appiraterDidDeclinePreliminaryAlert:self];
+                    }
+                    
+                    break;
+                case PreliminaryAlertButtonYes:
+                    [self reallyShowRatingAlert:_shouldShowRateLaterButton];
+                    
+                    if ([delegate respondsToSelector:@selector(appiraterDidAcceptPreliminaryAlert:)]) {
+                        [delegate appiraterDidAcceptPreliminaryAlert:self];
+                    }
+                    
+                    break;
+            }
+        }
+            break;
+        case kRateAlertViewTag:
+        {
+            switch (buttonIndex) {
+                case RateAlertButtonIndexDontRate:
+                {
+                    [self didDeclineToRate];
+                    break;
+                }
+                case RateAlertButtonIndexRateNow:
+                {
+                    [Appirater rateApp];
+                    if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
+                        [delegate appiraterDidOptToRate:self];
+                    }
+                    break;
+                }
+                case RateAlertButtonIndexRateLater:
+                    [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+                    [userDefaults synchronize];
+                    if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
+                        [delegate appiraterDidOptToRemindLater:self];
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        default:
+            break;
+    }
+}
+
+- (void)didDeclineToRate {
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    [userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
+    [userDefaults synchronize];
+    if(_delegate && [_delegate respondsToSelector:@selector(appiraterDidDeclineToRate:)]){
+        [_delegate appiraterDidDeclineToRate:self];
+    }
 }
 
 //Delegate call from the StoreKit view.
