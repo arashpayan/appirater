@@ -230,6 +230,12 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 + (void) setTimeBeforeReminding:(double)value;
 
++ (void) setCustomAlertTitle:(NSString *)title;
++ (void) setCustomAlertMessage:(NSString *)message;
++ (void) setCustomAlertCancelButtonTitle:(NSString *)cancelTitle;
++ (void) setCustomAlertRateButtonTitle:(NSString *)rateTitle;
++ (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle;
+
 /*!
  'YES' will show the Appirater alert everytime. Useful for testing how your message
  looks and making sure the link to your app's review page works.

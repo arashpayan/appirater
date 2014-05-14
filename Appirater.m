@@ -70,6 +70,11 @@ static BOOL _modalOpen = false;
 static BOOL _alwaysUseMainBundle = NO;
 
 @interface Appirater ()
+@property (nonatomic, copy) NSString *alertTitle;
+@property (nonatomic, copy) NSString *alertMessage;
+@property (nonatomic, copy) NSString *alertCancelTitle;
+@property (nonatomic, copy) NSString *alertRateTitle;
+@property (nonatomic, copy) NSString *alertRateLaterTitle;
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
 - (void)showPromptWithChecks:(BOOL)withChecks
@@ -103,6 +108,31 @@ static BOOL _alwaysUseMainBundle = NO;
 
 + (void) setTimeBeforeReminding:(double)value {
     _timeBeforeReminding = value;
+}
+
++ (void) setCustomAlertTitle:(NSString *)title
+{
+    [self sharedInstance].alertTitle = title;
+}
+
++ (void) setCustomAlertMessage:(NSString *)message
+{
+    [self sharedInstance].alertMessage = message;
+}
+
++ (void) setCustomAlertCancelButtonTitle:(NSString *)cancelTitle
+{
+    [self sharedInstance].alertCancelTitle = cancelTitle;
+}
+
++ (void) setCustomAlertRateButtonTitle:(NSString *)rateTitle
+{
+    [self sharedInstance].alertRateTitle = rateTitle;
+}
+
++ (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle
+{
+    [self sharedInstance].alertRateLaterTitle = rateLaterTitle;
 }
 
 + (void) setDebug:(BOOL)debug {
@@ -145,6 +175,31 @@ static BOOL _alwaysUseMainBundle = NO;
     }
 
     return bundle;
+}
+
+- (NSString *)alertTitle
+{
+    return _alertTitle ? _alertTitle : APPIRATER_MESSAGE_TITLE;
+}
+
+- (NSString *)alertMessage
+{
+    return _alertMessage ? _alertMessage : APPIRATER_MESSAGE;
+}
+
+- (NSString *)alertCancelTitle
+{
+    return _alertCancelTitle ? _alertCancelTitle : APPIRATER_CANCEL_BUTTON;
+}
+
+- (NSString *)alertRateTitle
+{
+    return _alertRateTitle ? _alertRateTitle : APPIRATER_RATE_BUTTON;
+}
+
+- (NSString *)alertRateLaterTitle
+{
+    return _alertRateLaterTitle ? _alertRateLaterTitle : APPIRATER_RATE_LATER;
 }
 
 - (void)dealloc {
@@ -214,17 +269,17 @@ static BOOL _alwaysUseMainBundle = NO;
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
   UIAlertView *alertView = nil;
   if (displayRateLaterButton) {
-  	alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-                                           message:APPIRATER_MESSAGE
+  	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
+                                           message:self.alertMessage
                                           delegate:self
-                                 cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-                                 otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+                                 cancelButtonTitle:self.alertCancelTitle
+                                 otherButtonTitles:self.alertRateTitle, _alertRateLaterTitle, nil];
   } else {
-  	alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-                                           message:APPIRATER_MESSAGE
+  	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
+                                           message:self.alertMessage
                                           delegate:self
-                                 cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-                                 otherButtonTitles:APPIRATER_RATE_BUTTON, nil];
+                                 cancelButtonTitle:self.alertCancelTitle
+                                 otherButtonTitles:self.alertRateTitle, nil];
   }
 
 	self.ratingAlert = alertView;
