@@ -58,6 +58,11 @@ static double _daysUntilPrompt = 30;
 static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
+static NSString *_alertTitle = APPIRATER_MESSAGE_TITLE;
+static NSString *_alertMessage = APPIRATER_MESSAGE;
+static NSString *_alertCancelTitle = APPIRATER_CANCEL_BUTTON;
+static NSString *_alertRateTitle = APPIRATER_RATE_BUTTON;
+static NSString *_alertRateLaterTitle = APPIRATER_RATE_LATER;
 static BOOL _debug = NO;
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_5_0
 	static id<AppiraterDelegate> _delegate;
@@ -103,6 +108,31 @@ static BOOL _alwaysUseMainBundle = NO;
 
 + (void) setTimeBeforeReminding:(double)value {
     _timeBeforeReminding = value;
+}
+
++ (void) setCustomAlertTitle:(NSString *)title
+{
+    _alertTitle = title;
+}
+
++ (void) setCustomAlertMessage:(NSString *)message
+{
+    _alertMessage = message;
+}
+
++ (void) setCustomAlertCancelButtonTitle:(NSString *)cancelTitle
+{
+    _alertCancelTitle = cancelTitle;
+}
+
++ (void) setCustomAlertRateButtonTitle:(NSString *)rateTitle
+{
+    _alertRateTitle = rateTitle;
+}
+
++ (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle
+{
+    _alertRateLaterTitle = rateLaterTitle;
 }
 
 + (void) setDebug:(BOOL)debug {
@@ -214,17 +244,17 @@ static BOOL _alwaysUseMainBundle = NO;
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
   UIAlertView *alertView = nil;
   if (displayRateLaterButton) {
-  	alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-                                           message:APPIRATER_MESSAGE
+  	alertView = [[UIAlertView alloc] initWithTitle:_alertTitle
+                                           message:_alertMessage
                                           delegate:self
-                                 cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-                                 otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+                                 cancelButtonTitle:_alertCancelTitle
+                                 otherButtonTitles:_alertRateTitle, _alertRateLaterTitle, nil];
   } else {
-  	alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-                                           message:APPIRATER_MESSAGE
+  	alertView = [[UIAlertView alloc] initWithTitle:_alertTitle
+                                           message:_alertMessage
                                           delegate:self
-                                 cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-                                 otherButtonTitles:APPIRATER_RATE_BUTTON, nil];
+                                 cancelButtonTitle:_alertCancelTitle
+                                 otherButtonTitles:_alertRateTitle, nil];
   }
 
 	self.ratingAlert = alertView;
