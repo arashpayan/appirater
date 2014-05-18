@@ -231,6 +231,31 @@ extern NSString *const kAppiraterReminderRequestDate;
 + (void) setTimeBeforeReminding:(double)value;
 
 /*!
+ Set customized title for alert view.
+ */
++ (void) setCustomAlertTitle:(NSString *)title;
+
+/*!
+ Set customized message for alert view.
+ */
++ (void) setCustomAlertMessage:(NSString *)message;
+
+/*!
+ Set customized cancel button title for alert view.
+ */
++ (void) setCustomAlertCancelButtonTitle:(NSString *)cancelTitle;
+
+/*!
+ Set customized rate button title for alert view.
+ */
++ (void) setCustomAlertRateButtonTitle:(NSString *)rateTitle;
+
+/*!
+ Set customized rate later button title for alert view.
+ */
++ (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle;
+
+/*!
  'YES' will show the Appirater alert everytime. Useful for testing how your message
  looks and making sure the link to your app's review page works.
  */
