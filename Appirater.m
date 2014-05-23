@@ -61,8 +61,8 @@ typedef NS_ENUM(NSInteger, PreliminaryAlertButtonIndex) {
 };
 
 typedef NS_ENUM(NSInteger, RateAlertButtonIndex) {
-    RateAlertButtonIndexRateNow = 0,
-    RateAlertButtonIndexDontRate,
+    RateAlertButtonIndexDontRate = 0,
+    RateAlertButtonIndexRateNow,
     RateAlertButtonIndexRateLater
 };
 
