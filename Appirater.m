@@ -273,7 +273,7 @@ static BOOL _alwaysUseMainBundle = NO;
                                            message:self.alertMessage
                                           delegate:self
                                  cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, _alertRateLaterTitle, nil];
+                                 otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
   } else {
   	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
                                            message:self.alertMessage
