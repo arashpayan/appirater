@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.summary               = "A utility that reminds your iPhone app's users to review the app."
   s.homepage              = 'http://arashpayan.com/blog/2009/09/07/presenting-appirater/'
   s.author                = { 'Arash Payan' => 'arash.payan@gmail.com' }
-  s.source                = { :git => 'https://github.com/arashpayan/appirater.git', :tag => '2.0.3' }
+  s.source                = { :git => 'https://github.com/arashpayan/appirater.git', :tag => '2.0.4' }
   s.source_files          = '*.{h,m}'
   s.resource_bundles      = { 'Appirater' => ['*.lproj'] }
   s.requires_arc          = true
