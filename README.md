@@ -14,7 +14,7 @@ If you're new to Cocoapods [watch this](http://nsscreencast.com/episodes/5-cocoa
 
 Cocoapods support is still experimental, and might not work in all use cases. If you experience problems, open an issue and install via Git submodule
 
-###Git submodule
+###Manually
 1. Add the Appirater code into your project.
 2. If your project doesn't use ARC, add the `-fobjc-arc` compiler flag to `Appirater.m` in your target's Build Phases » Compile Sources section.
 3. Add the `CFNetwork`, `SystemConfiguration`, and `StoreKit` frameworks to your project. Be sure to **change Required to Optional** for StoreKit in your target's Build Phases » Link Binary with Libraries section.
@@ -73,15 +73,11 @@ Requests for help, questions about usage, suggestions and other relevant topics 
 
 License
 -------
-Copyright 2013. [Arash Payan] [arash].
+Copyright 2014. [Arash Payan] [arash].
 This library is distributed under the terms of the MIT/X11.
 
 While not required, I greatly encourage and appreciate any improvements that you make
 to this library be contributed back for the benefit of all who use Appirater.
-
-Tips
-----
-Bitcoin tips are welcome: 1PxVtrzR4oHEKPojVx41JJnWGuPLggYDQy
 
 Ports for other SDKs
 --------------
