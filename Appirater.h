@@ -272,7 +272,7 @@ extern NSString *const kAppiraterReminderRequestDate;
 + (void)setUsesAnimation:(BOOL)animation;
 
 /*!
- If set to YES, Appirater will open App Store link (instead of SKStoreProductViewController on iOS 6). Default NO.
+ If set to YES, Appirater will open App Store link (instead of SKStoreProductViewController on iOS 6). Default YES.
  */
 + (void)setOpenInAppStore:(BOOL)openInAppStore;
 
