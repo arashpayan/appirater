@@ -168,8 +168,22 @@ static BOOL _alwaysUseMainBundle = NO;
         NSURL *appiraterBundleURL = [[NSBundle mainBundle] URLForResource:@"Appirater" withExtension:@"bundle"];
 
         if (appiraterBundleURL) {
+            NSBundle *myLanguageResourcesBundle = nil;
             // Appirater.bundle will likely only exist when used via CocoaPods
             bundle = [NSBundle bundleWithURL:appiraterBundleURL];
+            
+            for(NSString *language in [NSLocale preferredLanguages])
+            {
+                myLanguageResourcesBundle = [NSBundle bundleWithPath:[bundle pathForResource:language ofType:@"lproj"]];
+                if(myLanguageResourcesBundle)
+                    break;
+            }
+            
+            if( myLanguageResourcesBundle == nil )
+            {
+                myLanguageResourcesBundle = bundle;
+            }
+            bundle = myLanguageResourcesBundle;
         } else {
             bundle = [NSBundle mainBundle];
         }
