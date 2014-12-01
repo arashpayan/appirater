@@ -548,7 +548,8 @@ static BOOL _alwaysUseMainBundle = NO;
   if (withChecks) {
     showPrompt = ([self connectedToNetwork]
               && ![self userHasDeclinedToRate]
-              && ![self userHasRatedCurrentVersion]);
+              && ![self userHasRatedCurrentVersion]
+              &&  [self ratingConditionsHaveBeenMet]);
   } 
   if (showPrompt) {
     [self showRatingAlert:displayRateLaterButton];
