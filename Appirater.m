@@ -78,7 +78,7 @@ static BOOL _alwaysUseMainBundle = NO;
 @property (nonatomic, copy) NSString *alertRateLaterTitle;
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
-- (void)showPromptWithChecks:(BOOL)withChecks
+- (BOOL)showPromptWithChecks:(BOOL)withChecks
       displayRateLaterButton:(BOOL)displayRateLaterButton;
 - (void)showRatingAlert:(BOOL)displayRateLaterButton;
 - (void)showRatingAlert;
@@ -532,8 +532,8 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 #pragma GCC diagnostic pop
 
-+ (void)tryToShowPrompt {
-  [[Appirater sharedInstance] showPromptWithChecks:true
++ (BOOL)tryToShowPrompt {
+  return [[Appirater sharedInstance] showPromptWithChecks:true
                             displayRateLaterButton:true];
 }
 
@@ -542,7 +542,7 @@ static BOOL _alwaysUseMainBundle = NO;
                             displayRateLaterButton:displayRateLaterButton];
 }
 
-- (void)showPromptWithChecks:(BOOL)withChecks
+- (BOOL)showPromptWithChecks:(BOOL)withChecks
       displayRateLaterButton:(BOOL)displayRateLaterButton {
   bool showPrompt = true;
   if (withChecks) {
@@ -553,6 +553,7 @@ static BOOL _alwaysUseMainBundle = NO;
   if (showPrompt) {
     [self showRatingAlert:displayRateLaterButton];
   }
+  return showPrompt;
 }
 
 + (id)getRootViewController {
