@@ -182,6 +182,16 @@ extern NSString *const kAppiraterReminderRequestDate;
 */
 + (void)closeModal;
 
+/*!
+ Asks Appirater if the user has declined to rate;
+*/
+- (BOOL)userHasDeclinedToRate;
+
+/*!
+ Asks Appirater if the user has rated the current version.
+*/
+- (BOOL)userHasRatedCurrentVersion;
+
 @end
 
 @interface Appirater(Configuration)
