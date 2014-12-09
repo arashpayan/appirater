@@ -256,6 +256,16 @@ extern NSString *const kAppiraterReminderRequestDate;
 + (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle;
 
 /*!
+ 'NO' will not display rate later button in alert. Default is 'YES'.
+ */
++ (void) setDisplayRateLaterButton:(BOOL)displayRateLaterButton;
+
+/*!
+ 'YES' allow Appirater rate app only once for all versions. Default is 'NO'.
+ */
++ (void) setRateOnce:(BOOL)rateOnce;
+
+/*!
  'YES' will show the Appirater alert everytime. Useful for testing how your message
  looks and making sure the link to your app's review page works.
  */
