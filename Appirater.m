@@ -552,14 +552,20 @@ static BOOL _alwaysUseMainBundle = NO;
         }
     }
     
-    for (UIView *subView in [window subviews])
-    {
+    return [Appirater iterateSubViewsForViewController:window]; // iOS 8+ deep traverse
+}
+
++ (id)iterateSubViewsForViewController:(UIView *) parentView {
+    for (UIView *subView in [parentView subviews]) {
         UIResponder *responder = [subView nextResponder];
         if([responder isKindOfClass:[UIViewController class]]) {
             return [self topMostViewController: (UIViewController *) responder];
         }
+        id found = [Appirater iterateSubViewsForViewController:subView];
+        if( nil != found) {
+            return found;
+        }
     }
-    
     return nil;
 }
 
