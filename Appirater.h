@@ -182,6 +182,18 @@ extern NSString *const kAppiraterReminderRequestDate;
 */
 + (void)closeModal;
 
+/*!
+ Asks Appirater if the user has declined to rate;
+*/
+- (BOOL)userHasDeclinedToRate;
+
+/*!
+ Asks Appirater if the user has rated the current version.
+ Note that this is not a guarantee that the user has actually rated the app in the 
+ app store, but they've just clicked the rate button on the Appirater dialog. 
+*/
+- (BOOL)userHasRatedCurrentVersion;
+
 @end
 
 @interface Appirater(Configuration)
