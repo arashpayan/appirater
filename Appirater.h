@@ -151,7 +151,7 @@ extern NSString *const kAppiraterReminderRequestDate;
  You could call to show the prompt regardless Appirater settings,
  e.g., in case of some special event in your app.
  */
-+ (void)tryToShowPrompt;
++ (BOOL)tryToShowPrompt;
 
 /*!
  Tells Appirater to show the prompt (a rating alert).

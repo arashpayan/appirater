@@ -78,7 +78,7 @@ static BOOL _alwaysUseMainBundle = NO;
 @property (nonatomic, copy) NSString *alertRateLaterTitle;
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
-- (void)showPromptWithChecks:(BOOL)withChecks
+- (BOOL)showPromptWithChecks:(BOOL)withChecks
       displayRateLaterButton:(BOOL)displayRateLaterButton;
 - (void)showRatingAlert:(BOOL)displayRateLaterButton;
 - (void)showRatingAlert;
@@ -168,8 +168,22 @@ static BOOL _alwaysUseMainBundle = NO;
         NSURL *appiraterBundleURL = [[NSBundle mainBundle] URLForResource:@"Appirater" withExtension:@"bundle"];
 
         if (appiraterBundleURL) {
+            NSBundle *myLanguageResourcesBundle = nil;
             // Appirater.bundle will likely only exist when used via CocoaPods
             bundle = [NSBundle bundleWithURL:appiraterBundleURL];
+            
+            for(NSString *language in [NSLocale preferredLanguages])
+            {
+                myLanguageResourcesBundle = [NSBundle bundleWithPath:[bundle pathForResource:language ofType:@"lproj"]];
+                if(myLanguageResourcesBundle)
+                    break;
+            }
+            
+            if( myLanguageResourcesBundle == nil )
+            {
+                myLanguageResourcesBundle = bundle;
+            }
+            bundle = myLanguageResourcesBundle;
         } else {
             bundle = [NSBundle mainBundle];
         }
@@ -518,8 +532,8 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 #pragma GCC diagnostic pop
 
-+ (void)tryToShowPrompt {
-  [[Appirater sharedInstance] showPromptWithChecks:true
++ (BOOL)tryToShowPrompt {
+  return [[Appirater sharedInstance] showPromptWithChecks:true
                             displayRateLaterButton:true];
 }
 
@@ -528,17 +542,19 @@ static BOOL _alwaysUseMainBundle = NO;
                             displayRateLaterButton:displayRateLaterButton];
 }
 
-- (void)showPromptWithChecks:(BOOL)withChecks
+- (BOOL)showPromptWithChecks:(BOOL)withChecks
       displayRateLaterButton:(BOOL)displayRateLaterButton {
   bool showPrompt = true;
   if (withChecks) {
     showPrompt = ([self connectedToNetwork]
               && ![self userHasDeclinedToRate]
-              && ![self userHasRatedCurrentVersion]);
+              && ![self userHasRatedCurrentVersion]
+              &&  [self ratingConditionsHaveBeenMet]);
   } 
   if (showPrompt) {
     [self showRatingAlert:displayRateLaterButton];
   }
+  return showPrompt;
 }
 
 + (id)getRootViewController {
