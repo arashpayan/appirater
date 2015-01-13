@@ -82,6 +82,7 @@ static BOOL _alwaysUseMainBundle = NO;
       displayRateLaterButton:(BOOL)displayRateLaterButton;
 - (void)showRatingAlert:(BOOL)displayRateLaterButton;
 - (void)showRatingAlert;
+- (BOOL)ratingAlertIsAppropriate;
 - (BOOL)ratingConditionsHaveBeenMet;
 - (void)incrementUseCount;
 - (void)hideRatingAlert;
@@ -297,6 +298,37 @@ static BOOL _alwaysUseMainBundle = NO;
   [self showRatingAlert:true];
 }
 
+// is this an ok time to show the alert? (regardless of whether the rating conditions have been met)
+//
+// things checked here:
+// * connectivity with network
+// * whether user has rated before
+// * whether user has declined to rate
+// * whether rating alert is currently showing visibly
+// things NOT checked here:
+// * time since first launch
+// * number of uses of app
+// * number of significant events
+// * time since last reminder
+- (BOOL)ratingAlertIsAppropriate {
+    return ([self connectedToNetwork]
+            && ![self userHasDeclinedToRate]
+            && !self.ratingAlert.visible
+            && ![self userHasRatedCurrentVersion]);
+}
+
+// have the rating conditions been met/earned? (regardless of whether this would be a moment when it's appropriate to show a new rating alert)
+//
+// things checked here:
+// * time since first launch
+// * number of uses of app
+// * number of significant events
+// * time since last reminder
+// things NOT checked here:
+// * connectivity with network
+// * whether user has rated before
+// * whether user has declined to rate
+// * whether rating alert is currently showing visibly
 - (BOOL)ratingConditionsHaveBeenMet {
 	if (_debug)
 		return YES;
@@ -317,14 +349,6 @@ static BOOL _alwaysUseMainBundle = NO;
 	// check if the user has done enough significant events
 	NSInteger sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
 	if (sigEventCount < _significantEventsUntilPrompt)
-		return NO;
-	
-	// has the user previously declined to rate this version of the app?
-	if ([userDefaults boolForKey:kAppiraterDeclinedToRate])
-		return NO;
-	
-	// has the user already rated the app?
-	if ([self userHasRatedCurrentVersion])
 		return NO;
 	
 	// if the user wanted to be reminded later, has enough time passed?
@@ -437,8 +461,8 @@ static BOOL _alwaysUseMainBundle = NO;
 	[self incrementUseCount];
 	
 	if (canPromptForRating &&
-		[self ratingConditionsHaveBeenMet] &&
-		[self connectedToNetwork])
+        [self ratingConditionsHaveBeenMet] &&
+        [self ratingAlertIsAppropriate])
 	{
         dispatch_async(dispatch_get_main_queue(),
                        ^{
@@ -450,9 +474,9 @@ static BOOL _alwaysUseMainBundle = NO;
 - (void)incrementSignificantEventAndRate:(BOOL)canPromptForRating {
 	[self incrementSignificantEventCount];
 	
-	if (canPromptForRating &&
-		[self ratingConditionsHaveBeenMet] &&
-		[self connectedToNetwork])
+    if (canPromptForRating &&
+        [self ratingConditionsHaveBeenMet] &&
+        [self ratingAlertIsAppropriate])
 	{
         dispatch_async(dispatch_get_main_queue(),
                        ^{
@@ -530,13 +554,7 @@ static BOOL _alwaysUseMainBundle = NO;
 
 - (void)showPromptWithChecks:(BOOL)withChecks
       displayRateLaterButton:(BOOL)displayRateLaterButton {
-  bool showPrompt = true;
-  if (withChecks) {
-    showPrompt = ([self connectedToNetwork]
-              && ![self userHasDeclinedToRate]
-              && ![self userHasRatedCurrentVersion]);
-  } 
-  if (showPrompt) {
+  if (withChecks == NO || [self ratingAlertIsAppropriate]) {
     [self showRatingAlert:displayRateLaterButton];
   }
 }
