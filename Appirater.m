@@ -76,6 +76,7 @@ static BOOL _alwaysUseMainBundle = NO;
 @property (nonatomic, copy) NSString *alertCancelTitle;
 @property (nonatomic, copy) NSString *alertRateTitle;
 @property (nonatomic, copy) NSString *alertRateLaterTitle;
+@property (nonatomic) BOOL showsRateLaterButton;
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
 - (void)showPromptWithChecks:(BOOL)withChecks
@@ -134,6 +135,11 @@ static BOOL _alwaysUseMainBundle = NO;
 + (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle
 {
     [self sharedInstance].alertRateLaterTitle = rateLaterTitle;
+}
+
++ (void) setShowsRateLaterButton:(BOOL)showsRateLaterButton
+{
+    [self sharedInstance].showsRateLaterButton = showsRateLaterButton;
 }
 
 + (void) setDebug:(BOOL)debug {
@@ -269,7 +275,7 @@ static BOOL _alwaysUseMainBundle = NO;
 
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
   UIAlertView *alertView = nil;
-  if (displayRateLaterButton) {
+  if (displayRateLaterButton && self.showsRateLaterButton) {
   	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
                                            message:self.alertMessage
                                           delegate:self
