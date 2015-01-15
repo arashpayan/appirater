@@ -620,7 +620,7 @@ static BOOL _alwaysUseMainBundle = NO;
 		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
 
 		// iOS 7 needs a different templateReviewURL @see https://github.com/arashpayan/appirater/issues/131
-		if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 && [[[UIDevice currentDevice] systemVersion] floatValue] < 7.1) {
+		if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 && [[[UIDevice currentDevice] systemVersion] floatValue] < 8.0) {
 			reviewURL = [templateReviewURLiOS7 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
 		}
         // iOS 8 needs a different templateReviewURL also @see https://github.com/arashpayan/appirater/issues/182
