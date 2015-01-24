@@ -35,6 +35,7 @@
  */
 
 #import "Appirater.h"
+#import "AppiraterMetrics.h"
 #import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
 
@@ -49,6 +50,11 @@ NSString *const kAppiraterCurrentVersion			= @"kAppiraterCurrentVersion";
 NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion";
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
+
+NSString *const ARAppiraterDidDisplayAlertNotification = @"ARAppiraterDidDisplayAlertNotification";
+NSString *const ARAppiraterDidDeclineToRateNotification = @"ARAppiraterDidDeclineToRateNotification";
+NSString *const ARAppiraterDidOptToRateNotification = @"ARAppiraterDidOptToRateNotification";
+NSString *const ARAppiraterDidOptToRemindLaterNotification = @"ARAppiraterDidOptToRemindLaterNotification";
 
 NSString *templateReviewURL = @"itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID";
 NSString *templateReviewURLiOS7 = @"itms-apps://itunes.apple.com/app/idAPP_ID";
@@ -291,6 +297,7 @@ static BOOL _alwaysUseMainBundle = NO;
     if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
              [delegate appiraterDidDisplayAlert:self];
     }
+    [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidDisplayAlertNotification object:self];
 }
 
 - (void)showRatingAlert
@@ -667,6 +674,7 @@ static BOOL _alwaysUseMainBundle = NO;
 			if(delegate && [delegate respondsToSelector:@selector(appiraterDidDeclineToRate:)]){
 				[delegate appiraterDidDeclineToRate:self];
 			}
+            [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidDeclineToRateNotification object:self];
 			break;
 		}
 		case 1:
@@ -676,6 +684,7 @@ static BOOL _alwaysUseMainBundle = NO;
 			if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
 				[delegate appiraterDidOptToRate:self];
 			}
+            [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidOptToRateNotification object:self];
 			break;
 		}
 		case 2:
@@ -685,6 +694,7 @@ static BOOL _alwaysUseMainBundle = NO;
 			if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
 				[delegate appiraterDidOptToRemindLater:self];
 			}
+            [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidOptToRemindLaterNotification object:self];
 			break;
 		default:
 			break;
