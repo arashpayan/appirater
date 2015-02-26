@@ -299,7 +299,7 @@ extern NSString *const kAppiraterReminderRequestDate;
  
  Calls [Appirater appLaunched:YES]. See appLaunched: for details of functionality.
  */
-+ (void)appLaunched __attribute__((deprecated)); 
++ (void)appLaunched;
 
 /*!
  DEPRECATED: While still functional, it's better to use
@@ -307,6 +307,6 @@ extern NSString *const kAppiraterReminderRequestDate;
  
  Calls [Appirater tryToShowPrompt]. See tryToShowPrompt for details of functionality.
  */
-+ (void)showPrompt __attribute__((deprecated));
++ (void)showPrompt;
 
 @end
