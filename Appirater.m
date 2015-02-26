@@ -190,7 +190,7 @@ static const NSInteger kRateAlertViewTag        = 1001;
     SCNetworkReachabilityRef defaultRouteReachability = SCNetworkReachabilityCreateWithAddress(NULL, (struct sockaddr *)&zeroAddress);
     SCNetworkReachabilityFlags flags;
 	
-    BOOL didRetrieveFlags = SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags);
+    BOOL didRetrieveFlags = (BOOL)SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags);
     CFRelease(defaultRouteReachability);
 	
     if (!didRetrieveFlags)
