@@ -46,7 +46,7 @@ NSString *const kAppiraterFirstUseDate				= @"kAppiraterFirstUseDate";
 NSString *const kAppiraterUseCount					= @"kAppiraterUseCount";
 NSString *const kAppiraterSignificantEventCount		= @"kAppiraterSignificantEventCount";
 NSString *const kAppiraterCurrentVersion			= @"kAppiraterCurrentVersion";
-NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion";
+NSString *const kAppiraterRated                     = @"kAppiraterRated";
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
 NSString *const kAppiraterReminderRequestDate		= @"kAppiraterReminderRequestDate";
 
@@ -313,7 +313,7 @@ static const NSInteger kRateAlertViewTag        = 1001;
 		return NO;
 	
 	// has the user already rated the app?
-	if ([self userHasRatedCurrentVersion])
+	if ([self userHasRatedApp])
 		return NO;
 	
 	// if the user wanted to be reminded later, has enough time passed?
@@ -366,7 +366,7 @@ static const NSInteger kRateAlertViewTag        = 1001;
 		[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterFirstUseDate];
 		[userDefaults setInteger:1 forKey:kAppiraterUseCount];
 		[userDefaults setInteger:0 forKey:kAppiraterSignificantEventCount];
-		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
+		[userDefaults setBool:NO forKey:kAppiraterRated];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
 	}
@@ -414,7 +414,7 @@ static const NSInteger kRateAlertViewTag        = 1001;
 		[userDefaults setDouble:0 forKey:kAppiraterFirstUseDate];
 		[userDefaults setInteger:0 forKey:kAppiraterUseCount];
 		[userDefaults setInteger:1 forKey:kAppiraterSignificantEventCount];
-		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
+		[userDefaults setBool:NO forKey:kAppiraterRated];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
 	}
@@ -454,8 +454,8 @@ static const NSInteger kRateAlertViewTag        = 1001;
     return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterDeclinedToRate];
 }
 
-- (BOOL)userHasRatedCurrentVersion {
-    return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterRatedCurrentVersion];
+- (BOOL)userHasRatedApp {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:kAppiraterRated];
 }
 
 + (void)appLaunched {
@@ -517,7 +517,8 @@ static const NSInteger kRateAlertViewTag        = 1001;
   if (withChecks) {
     showPrompt = ([self connectedToNetwork]
               && ![self userHasDeclinedToRate]
-              && ![self userHasRatedCurrentVersion]);
+              && ![self userHasRatedApp]
+              && [self ratingConditionsHaveBeenMet]);
   } 
   if (showPrompt) {
     [self showRatingAlert:displayRateLaterButton];
@@ -564,7 +565,7 @@ static const NSInteger kRateAlertViewTag        = 1001;
 + (void)rateApp {
 	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+	[userDefaults setBool:YES forKey:kAppiraterRated];
 	[userDefaults synchronize];
 
 	//Use the in-app StoreKit view if available (iOS 6) and imported. This works in the simulator.
