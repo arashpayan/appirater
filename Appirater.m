@@ -515,11 +515,11 @@ static const NSInteger kRateAlertViewTag        = 1001;
       displayRateLaterButton:(BOOL)displayRateLaterButton {
   BOOL showPrompt = YES;
   if (withChecks) {
-    showPrompt = ([self connectedToNetwork]
-              && ![self userHasDeclinedToRate]
-              && ![self userHasRatedApp]
-              && [self ratingConditionsHaveBeenMet]);
-  } 
+      showPrompt = ([self connectedToNetwork]
+                    && ![self userHasDeclinedToRate]
+                    && ![self userHasRatedApp]
+                    && [self ratingConditionsHaveBeenMet]);
+  }
   if (showPrompt) {
     [self showRatingAlert:displayRateLaterButton];
   }
