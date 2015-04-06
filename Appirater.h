@@ -54,7 +54,7 @@ extern NSString *const kAppiraterReminderRequestDate;
 /*!
  Your app's name.
  */
-#define APPIRATER_APP_NAME				APPIRATER_LOCALIZED_APP_NAME ? APPIRATER_LOCALIZED_APP_NAME : [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"]
+#define APPIRATER_APP_NAME				APPIRATER_LOCALIZED_APP_NAME ?: [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"] ?: [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"]
 
 /*!
  This is the message your users will see once they've passed the day+launches
