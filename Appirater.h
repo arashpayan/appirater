@@ -41,6 +41,7 @@
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
 extern NSString *const kAppiraterSignificantEventCount;
+extern NSString *const kAppiraterNegativeEventCount;
 extern NSString *const kAppiraterCurrentVersion;
 extern NSString *const kAppiraterRatedCurrentVersion;
 extern NSString *const kAppiraterDeclinedToRate;
@@ -143,6 +144,16 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating;
 
+
+/*!
+ Tells Appirater that the user experienced a negative event (like a crash)
+
+ If the user has experienced too many negative events, he is more likely to leave negative feedback.
+ Keep up with crash reports and update the app to keep users happy.
+
+ */
++ (void)userExperiencedNegativeEvent;
+
 /*!
  Tells Appirater to try and show the prompt (a rating alert). The prompt will be showed
  if there is connection available, the user hasn't declined to rate
@@ -234,6 +245,14 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 + (void) setSignificantEventsUntilPrompt:(NSInteger)value;
 
+
+/*!
+ A negative event is anything that can make user leave negative feedback
+ (crash, connectivity issue, etc.).  To tell Appirater that the user has experienced
+ a negative event, call the method:
+ [Appirater userExperiencedNegativeEvent:];
+ */
++ (void)setMaxNegativeEvents:(NSInteger)maxNegativeEvents;
 
 /*!
  Once the rating alert is presented to the user, they might select
