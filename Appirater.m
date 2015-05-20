@@ -77,6 +77,7 @@ static BOOL _alwaysUseMainBundle = NO;
 @property (nonatomic, copy) NSString *alertMessage;
 @property (nonatomic, copy) NSString *alertCancelTitle;
 @property (nonatomic, copy) NSString *alertRateTitle;
+@property (nonatomic, copy) NSString *customActionTitle;
 @property (nonatomic, copy) NSString *alertRateLaterTitle;
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
@@ -134,6 +135,11 @@ static BOOL _alwaysUseMainBundle = NO;
     [self sharedInstance].alertRateTitle = rateTitle;
 }
 
++ (void) setCustomActionButtonTitle:(NSString *)actionTitle
+{
+    [self sharedInstance].customActionTitle = actionTitle;
+}
+
 + (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle
 {
     [self sharedInstance].alertRateLaterTitle = rateLaterTitle;
@@ -147,7 +153,7 @@ static BOOL _alwaysUseMainBundle = NO;
     _debug = debug;
 }
 + (void)setDelegate:(id<AppiraterDelegate>)delegate{
-	_delegate = delegate;
+    [self sharedInstance].delegate = delegate;
 }
 + (void)setUsesAnimation:(BOOL)animation {
 	_usesAnimation = animation;
@@ -281,16 +287,17 @@ static BOOL _alwaysUseMainBundle = NO;
                                            message:self.alertMessage
                                           delegate:self
                                  cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
+                                 otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, self.customActionTitle, nil];
   } else {
   	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
                                            message:self.alertMessage
                                           delegate:self
                                  cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, nil];
+                                 otherButtonTitles:self.alertRateTitle, self.customActionTitle, nil];
   }
 
 	self.ratingAlert = alertView;
+    self.ratingAlert.tag = displayRateLaterButton;
     [alertView show];
 
     id <AppiraterDelegate> delegate = _delegate;
@@ -726,7 +733,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     
     id <AppiraterDelegate> delegate = _delegate;
-	
+	BOOL isDisplayingRateLater = (BOOL) alertView.tag;
 	switch (buttonIndex) {
 		case 0:
 		{
@@ -748,17 +755,27 @@ static BOOL _alwaysUseMainBundle = NO;
 			break;
 		}
 		case 2:
-			// remind them later
-			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
-			[userDefaults synchronize];
-			if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
-				[delegate appiraterDidOptToRemindLater:self];
-			}
-			break;
+            if (isDisplayingRateLater)
+            {
+                // remind them later
+                [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+                [userDefaults synchronize];
+                if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
+                    [delegate appiraterDidOptToRemindLater:self];
+                }
+                break;
+            }
+        case 3:
+            // fall through to call delegate custom action from case 2 when not displaying RateLater
+            if(delegate && [delegate respondsToSelector:@selector(appiraterDidSelectCustomAction:)]){
+                [delegate appiraterDidSelectCustomAction:self];
+            }
+            break;
 		default:
 			break;
 	}
 }
+
 
 //Delegate call from the StoreKit view.
 - (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {

@@ -193,6 +193,7 @@ extern NSString *const kAppiraterReminderRequestDate;
 */
 + (void)closeModal;
 
+
 /*!
  Asks Appirater if the user has declined to rate;
 */
@@ -285,6 +286,13 @@ extern NSString *const kAppiraterReminderRequestDate;
  Set customized rate later button title for alert view.
  */
 + (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle;
+
+/*!
+ Sets Custom Action button title. When set additional button will appear, and delegate method
+ appiraterDidSelectCustomAction: will be called.  Can be used to add "Report a problem" button,
+ that will bring up a email composition or other form to communicate with authors directly, bypassing reviews.
+ */
++ (void)setCustomActionButtonTitle:(NSString *)actionTitle;
 
 /*!
  'YES' will show the Appirater alert everytime. Useful for testing how your message
