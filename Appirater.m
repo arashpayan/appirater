@@ -503,7 +503,15 @@ static BOOL _alwaysUseMainBundle = NO;
 + (void)appLaunched:(BOOL)canPromptForRating {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
-                       [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+                       Appirater *a = [Appirater sharedInstance];
+                       if (_debug) {
+                           dispatch_async(dispatch_get_main_queue(),
+                                          ^{
+                                              [a showRatingAlert];
+                                          });
+                       } else {
+                           [a incrementAndRate:canPromptForRating]; 
+                       }
                    });
 }
 
