@@ -268,6 +268,11 @@ extern NSString *const kAppiraterReminderRequestDate;
 + (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle;
 
 /*!
+ Decides whether the display later button can be shown.
+ */
++ (void) setShowsRateLaterButton:(BOOL)showsRateLaterButton;
+
+/*!
  'YES' will show the Appirater alert everytime. Useful for testing how your message
  looks and making sure the link to your app's review page works.
  */
