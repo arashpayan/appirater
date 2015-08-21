@@ -611,10 +611,17 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 + (void)rateApp {
+    [self rateApp:YES];
+}
+
++ (void)rateApp:(BOOL)shouldRecord {
 	
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
-	[userDefaults synchronize];
+    if (shouldRecord) {
+        // Record that the user rated the current version of the app
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        [userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+        [userDefaults synchronize];
+    }
 
 	//Use the in-app StoreKit view if available (iOS 6) and imported. This works in the simulator.
 	if (![Appirater sharedInstance].openInAppStore && NSStringFromClass([SKStoreProductViewController class]) != nil) {

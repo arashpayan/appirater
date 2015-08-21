@@ -174,8 +174,14 @@ extern NSString *const kAppiraterReminderRequestDate;
  about calling this -- instead, just call the other functions listed above,
  and let Appirater handle the bookkeeping of deciding when to ask the user
  whether to rate the app.
+ 
+ If shouldRecord is NO, Appirater will not record that the user rated the
+ current version of the app. Set this to NO if you need to display the rating
+ alert several times.
+ Default value is YES.
  */
 + (void)rateApp;
++ (void)rateApp:(BOOL)shouldRecord;
 
 /*!
  Tells Appirater to immediately close any open rating modals (e.g. StoreKit rating VCs).
