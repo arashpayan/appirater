@@ -337,12 +337,12 @@ static const NSInteger kRateAlertViewTag        = 1001;
 	{
 		trackingVersion = version;
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
-        [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterFirstUseDate];
-        [userDefaults setInteger:0 forKey:kAppiraterUseCount];
-        [userDefaults setInteger:0 forKey:kAppiraterSignificantEventCount];
-        [userDefaults setBool:NO forKey:kAppiraterRated];
-        [userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
-        [userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+		[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterFirstUseDate];
+		[userDefaults setInteger:0 forKey:kAppiraterUseCount];
+		[userDefaults setInteger:0 forKey:kAppiraterSignificantEventCount];
+		[userDefaults setBool:NO forKey:kAppiraterRated];
+		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
+		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
 	}
 	
 	if (_debug)
@@ -377,12 +377,12 @@ static const NSInteger kRateAlertViewTag        = 1001;
 	{
 		trackingVersion = version;
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
-        [userDefaults setDouble:0 forKey:kAppiraterFirstUseDate];
-        [userDefaults setInteger:0 forKey:kAppiraterUseCount];
-        [userDefaults setInteger:0 forKey:kAppiraterSignificantEventCount];
-        [userDefaults setBool:NO forKey:kAppiraterRated];
-        [userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
-        [userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+		[userDefaults setDouble:0 forKey:kAppiraterFirstUseDate];
+		[userDefaults setInteger:0 forKey:kAppiraterUseCount];
+		[userDefaults setInteger:0 forKey:kAppiraterSignificantEventCount];
+		[userDefaults setBool:NO forKey:kAppiraterRated];
+		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
+		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
 	}
 	
 	if (_debug)
