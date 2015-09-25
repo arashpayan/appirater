@@ -270,6 +270,12 @@ static BOOL _alwaysUseMainBundle = NO;
 
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
   UIAlertView *alertView = nil;
+  id <AppiraterDelegate> delegate = _delegate;
+    
+  if(delegate && [delegate respondsToSelector:@selector(appiraterShouldDisplayAlert:)] && ![delegate appiraterShouldDisplayAlert:self]) {
+      return;
+  }
+  
   if (displayRateLaterButton) {
   	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
                                            message:self.alertMessage
@@ -287,7 +293,6 @@ static BOOL _alwaysUseMainBundle = NO;
 	self.ratingAlert = alertView;
     [alertView show];
 
-    id <AppiraterDelegate> delegate = _delegate;
     if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
              [delegate appiraterDidDisplayAlert:self];
     }
