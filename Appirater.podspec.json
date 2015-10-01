@@ -7,7 +7,7 @@
   "summary": "A utility that reminds your iPhone app's users to review the app.",
   "homepage": "http://arashpayan.com/blog/2009/09/07/presenting-appirater/",
   "authors": {
-    "Arash Payan": "arash.payan@gmail.com"
+    "Arash Payan": "arash@ara.sh"
   },
   "source": {
     "git": "https://github.com/arashpayan/appirater.git",
