@@ -60,11 +60,6 @@ static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_5_0
-	static id<AppiraterDelegate> _delegate;
-#else
-	__weak static id<AppiraterDelegate> _delegate;
-#endif
 static BOOL _usesAnimation = TRUE;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
@@ -141,7 +136,7 @@ static BOOL _alwaysUseMainBundle = NO;
     _debug = debug;
 }
 + (void)setDelegate:(id<AppiraterDelegate>)delegate{
-	_delegate = delegate;
+    [Appirater sharedInstance].delegate = delegate;
 }
 + (void)setUsesAnimation:(BOOL)animation {
 	_usesAnimation = animation;
@@ -259,7 +254,6 @@ static BOOL _alwaysUseMainBundle = NO;
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
             appirater = [[Appirater alloc] init];
-			appirater.delegate = _delegate;
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:
                 UIApplicationWillResignActiveNotification object:nil];
         });
@@ -270,7 +264,7 @@ static BOOL _alwaysUseMainBundle = NO;
 
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
   UIAlertView *alertView = nil;
-  id <AppiraterDelegate> delegate = _delegate;
+  id <AppiraterDelegate> delegate = self.delegate;
     
   if(delegate && [delegate respondsToSelector:@selector(appiraterShouldDisplayAlert:)] && ![delegate appiraterShouldDisplayAlert:self]) {
       return;
@@ -669,7 +663,7 @@ static BOOL _alwaysUseMainBundle = NO;
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     
-    id <AppiraterDelegate> delegate = _delegate;
+    id <AppiraterDelegate> delegate = self.delegate;
 	
 	switch (buttonIndex) {
 		case 0:
