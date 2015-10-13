@@ -274,6 +274,11 @@ extern NSString *const kAppiraterReminderRequestDate;
 + (void) setDebug:(BOOL)debug;
 
 /*!
+ Determines if Appirater should reset user declines on new versions
+ */
++ (void) setResetDeclinedToRateOnNewVersion:(BOOL)reset;
+
+/*!
  Set the delegate if you want to know when Appirater does something
  */
 + (void)setDelegate:(id<AppiraterDelegate>)delegate;
