@@ -70,6 +70,11 @@ static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
 static BOOL _alwaysUseMainBundle = NO;
 
+
+@interface AppiraterDefaultAlert : UIAlertView <AppiraterAlert>
+
+@end
+
 @interface Appirater ()
 @property (nonatomic, copy) NSString *alertTitle;
 @property (nonatomic, copy) NSString *alertMessage;
@@ -269,29 +274,45 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
-  UIAlertView *alertView = nil;
+
   id <AppiraterDelegate> delegate = _delegate;
     
   if(delegate && [delegate respondsToSelector:@selector(appiraterShouldDisplayAlert:)] && ![delegate appiraterShouldDisplayAlert:self]) {
       return;
   }
-  
-  if (displayRateLaterButton) {
-  	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
-                                           message:self.alertMessage
-                                          delegate:self
-                                 cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
-  } else {
-  	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
-                                           message:self.alertMessage
-                                          delegate:self
-                                 cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, nil];
-  }
+    
+  id<AppiraterAlert> alert = nil;
+  __weak typeof  (self) weakSelf = self;
+    
+   if(delegate && [delegate respondsToSelector:@selector(appirater:wantsToShowAlertWithTitle:message:cancelButtonTitle:cancelButtonAction:rateButtonTitle:rateButtonAction:laterButtonTitle:laterButtonAction:)]) {
+      alert = [delegate appirater:self wantsToShowAlertWithTitle:self.alertTitle message:self.alertMessage cancelButtonTitle:self.alertCancelTitle cancelButtonAction:^{
+          [weakSelf alertDidDeclineToRate];
+      } rateButtonTitle:self.alertRateTitle rateButtonAction:^{
+          [weakSelf alertDidOptToRate];
+      } laterButtonTitle:(displayRateLaterButton)?self.alertRateLaterTitle:nil
+      laterButtonAction:(displayRateLaterButton==NO)?nil:^{
+          [weakSelf alertDidOptToRemindLater];
+      }];
+   }
+    
+   if(alert==nil){
+          if (displayRateLaterButton) {
+            alert = [[AppiraterDefaultAlert alloc] initWithTitle:self.alertTitle
+                                                   message:self.alertMessage
+                                                  delegate:self
+                                         cancelButtonTitle:self.alertCancelTitle
+                                         otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
+          } else {
+            alert = [[AppiraterDefaultAlert alloc] initWithTitle:self.alertTitle
+                                                   message:self.alertMessage
+                                                  delegate:self
+                                         cancelButtonTitle:self.alertCancelTitle
+                                         otherButtonTitles:self.alertRateTitle, nil];
+          }
+    }
 
-	self.ratingAlert = alertView;
-    [alertView show];
+	self.ratingAlert = alert;
+    [alert show];
 
     if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
              [delegate appiraterDidDisplayAlert:self];
@@ -318,7 +339,7 @@ static BOOL _alwaysUseMainBundle = NO;
 - (BOOL)ratingAlertIsAppropriate {
     return ([self connectedToNetwork]
             && ![self userHasDeclinedToRate]
-            && !self.ratingAlert.visible
+            && !self.ratingAlert.isVisible
             && ![self userHasRatedCurrentVersion]);
 }
 
@@ -521,10 +542,10 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)hideRatingAlert {
-	if (self.ratingAlert.visible) {
+	if (self.ratingAlert.isVisible) {
 		if (_debug)
 			NSLog(@"APPIRATER Hiding Alert");
-		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
+		[self.ratingAlert hide];
 	}	
 }
 
@@ -666,38 +687,52 @@ static BOOL _alwaysUseMainBundle = NO;
 	}
 }
 
-- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    
+- (void)alertDidDeclineToRate{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     id <AppiraterDelegate> delegate = _delegate;
+    [userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
+    [userDefaults synchronize];
+    if(delegate && [delegate respondsToSelector:@selector(appiraterDidDeclineToRate:)]){
+        [delegate appiraterDidDeclineToRate:self];
+    }
+}
+
+- (void)alertDidOptToRate{
+    id <AppiraterDelegate> delegate = _delegate;
+    [Appirater rateApp];
+    if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
+        [delegate appiraterDidOptToRate:self];
+    }
+}
+
+- (void)alertDidOptToRemindLater{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    id <AppiraterDelegate> delegate = _delegate;
+    [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+    [userDefaults synchronize];
+    if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
+        [delegate appiraterDidOptToRemindLater:self];
+    }
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
 	
 	switch (buttonIndex) {
 		case 0:
 		{
-			// they don't want to rate it
-			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
-			[userDefaults synchronize];
-			if(delegate && [delegate respondsToSelector:@selector(appiraterDidDeclineToRate:)]){
-				[delegate appiraterDidDeclineToRate:self];
-			}
+            // they don't want to rate it
+            [self alertDidDeclineToRate];
 			break;
 		}
 		case 1:
 		{
 			// they want to rate it
-			[Appirater rateApp];
-			if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
-				[delegate appiraterDidOptToRate:self];
-			}
+            [self alertDidOptToRate];
 			break;
 		}
 		case 2:
 			// remind them later
-			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
-			[userDefaults synchronize];
-			if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
-				[delegate appiraterDidOptToRemindLater:self];
-			}
+            [self alertDidOptToRemindLater];
 			break;
 		default:
 			break;
@@ -727,6 +762,15 @@ static BOOL _alwaysUseMainBundle = NO;
 		}];
 		[self.class setStatusBarStyle:(UIStatusBarStyle)nil];
 	}
+}
+
+@end
+
+
+@implementation AppiraterDefaultAlert
+
+- (void)hide{
+    [self dismissWithClickedButtonIndex:-1 animated:NO];
 }
 
 @end
