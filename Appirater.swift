@@ -17,13 +17,6 @@ enum AppiraterError: ErrorType {
     case UnableToSetDispatchQueue
 }
 
-let kAppiraterFirstUseDate				= "kAppiraterFirstUseDate"
-let kAppiraterUseCount					= "kAppiraterUseCount"
-let kAppiraterSignificantEventCount		= "kAppiraterSignificantEventCount"
-let kAppiraterCurrentVersion			= "kAppiraterCurrentVersion"
-let kAppiraterRatedCurrentVersion		= "kAppiraterRatedCurrentVersion"
-let kAppiraterDeclinedToRate			= "kAppiraterDeclinedToRate"
-let kAppiraterReminderRequestDate		= "kAppiraterReminderRequestDate"
 
 var templateReviewURL = "itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID"
 var templateReviewURLiOS7 = "itms-apps://itunes.apple.com/app/idAPP_ID"
@@ -42,10 +35,18 @@ protocol AppiraterDelegate : class {
 
 class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDelegate {
     
+    private static let kFirstUseDate            = "kFirstUseDate"
+    private static let kUseCount				= "kUseCount"
+    private static let kSignificantEventCount	= "kSignificantEventCount"
+    private static let kCurrentVersion			= "kCurrentVersion"
+    private static let kRatedCurrentVersion		= "kRatedCurrentVersion"
+    private static let kDeclinedToRate			= "kDeclinedToRate"
+    private static let kReminderRequestDate		= "kReminderRequestDate"
+
     /*!
     Your localized app's name.
     */
-    static var LOCALIZED_APP_NAME : String? {
+    private static var LOCALIZED_APP_NAME : String? {
         get {
             return NSBundle.mainBundle().localizedInfoDictionary?["CFBundleDisplayName"] as? String
         }
@@ -54,7 +55,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     /*!
     Your app's name.
     */
-    static var APP_NAME : String {
+    private static var APP_NAME : String {
         get {
             if let localizedAppName = self.LOCALIZED_APP_NAME
             {
@@ -73,13 +74,13 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     This is the message your users will see once they've passed the day+launches
     threshold.
     */
-    static var LOCALIZED_MESSAGE : String {
+    private static var LOCALIZED_MESSAGE : String {
         
         get {
             return NSLocalizedString("If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", tableName: "AppiraterLocalizable", bundle: Appirater.bundle(), comment: "")
         }
     }
-    static var APPIRATER_MESSAGE : String {
+    private static var APPIRATER_MESSAGE : String {
         get {
             return String(format: self.LOCALIZED_MESSAGE, self.APP_NAME)
         }
@@ -88,12 +89,12 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     /*!
     This is the title of the message alert that users will see.
     */
-    static var LOCALIZED_MESSAGE_TITLE : String {
+    private static var LOCALIZED_MESSAGE_TITLE : String {
         get {
             return NSLocalizedString("Rate %", tableName: "AppiraterLocalizable", bundle: Appirater.bundle(), comment: "")
         }
     }
-    static var APPIRATER_MESSAGE_TITLE : String {
+    private static var APPIRATER_MESSAGE_TITLE : String {
         get {
             return String(format: self.LOCALIZED_MESSAGE_TITLE, self.APP_NAME)
         }
@@ -102,7 +103,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     /*!
     The text of the button that rejects reviewing the app.
     */
-    static var CANCEL_BUTTON : String {
+    private static var CANCEL_BUTTON : String {
         get {
             return NSLocalizedString("No, Thanks", tableName: "AppiraterLocalizable", bundle: Appirater.bundle(), comment: "")
         }
@@ -111,12 +112,12 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     /*!
     Text of button that will send user to app review page.
     */
-    static var LOCALIZED_RATE_BUTTON : String {
+    private static var LOCALIZED_RATE_BUTTON : String {
         get {
             return NSLocalizedString("Rate %@", tableName: "AppiraterLocalizable", bundle: Appirater.bundle(), comment: "")
         }
     }
-    static var RATE_BUTTON : String {
+    private static var RATE_BUTTON : String {
         get {
             return String(format: self.LOCALIZED_RATE_BUTTON, self.APP_NAME)
         }
@@ -125,12 +126,12 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     /*!
     Text for button to remind the user to review later.
     */
-    static var RATE_LATER : String {
+    private static var RATE_LATER : String {
         get {
             return NSLocalizedString("Remind me later", tableName: "AppiraterLocalizable", bundle: Appirater.bundle(), comment: "")
         }
     }
-    class func bundle() -> NSBundle
+    private class func bundle() -> NSBundle
     {
         var bundle : NSBundle
         
@@ -150,8 +151,8 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     }
     
     // Shared Instance
-    static var _appirater : Appirater? = nil
-    static var onceToken : dispatch_once_t = 0
+    private static var _appirater : Appirater? = nil
+    private static var onceToken : dispatch_once_t = 0
     static var sharedInstance : Appirater {
         
         get {
@@ -209,7 +210,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         self.sharedInstance.openInAppStore = openInStore
     }
     
-    static var _appId : String?
+    private static var _appId : String?
     /*!
     Set your Apple generated software id here.
     */
@@ -217,7 +218,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         self._appId = appId
     }
 
-    static var _daysUntilPrompt : Double = 30
+    private static var _daysUntilPrompt : Double = 30
     /*!
     Users will need to have the same version of your app installed for this many
     days before they will be prompted to rate it.
@@ -227,7 +228,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     }
 
     
-    static var _usesUntilPrompt : Int = 20
+    private static var _usesUntilPrompt : Int = 20
     /*!
     An example of a 'use' would be if the user launched the app. Bringing the app
     into the foreground (on devices that support it) would also be considered
@@ -242,7 +243,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         self._usesUntilPrompt = count
     }
 
-    static var _significantEventsUntilPrompt : Int = -1
+    private static var _significantEventsUntilPrompt : Int = -1
     /*!
     A significant event can be anything you want to be in your app. In a
     telephone app, a significant event might be placing or receiving a call.
@@ -258,17 +259,17 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         self._significantEventsUntilPrompt = count
     }
     
-    static var _timeBeforeReminding : Double = 1
-        /*!
-        Once the rating alert is presented to the user, they might select
-        'Remind me later'. This value specifies how long (in days) Appirater
-        will wait before reminding them.
-        */
+    private static var _timeBeforeReminding : Double = 1
+    /*!
+    Once the rating alert is presented to the user, they might select
+    'Remind me later'. This value specifies how long (in days) Appirater
+    will wait before reminding them.
+    */
     class func setTimeBeforeReminding(count : Double) {
         self._timeBeforeReminding = count
     }
     
-    static var _debug : Bool = false
+    private static var _debug : Bool = false
     /*!
     'YES' will show the Appirater alert everytime. Useful for testing how your message
     looks and making sure the link to your app's review page works.
@@ -277,7 +278,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         self._debug = debug
     }
     
-    static weak var _delegate : AppiraterDelegate?
+    private static weak var _delegate : AppiraterDelegate?
     /*!
     Set the delegate if you want to know when Appirater does something
     */
@@ -285,7 +286,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         self._delegate = delegate
     }
 
-    static var _usesAnimation : Bool = true
+    private static var _usesAnimation : Bool = true
     /*!
     Set whether or not Appirater uses animation (currently respected when pushing modal StoreKit rating VCs).
     */
@@ -293,17 +294,17 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         self._usesAnimation = animate
     }
 
-    static var _statusBarStyle : UIStatusBarStyle = .Default
-    class func setStatusBarStyle(style : UIStatusBarStyle) {
+    private static var _statusBarStyle : UIStatusBarStyle = .Default
+    private class func setStatusBarStyle(style : UIStatusBarStyle) {
         self._statusBarStyle = style
     }
 
-    static var _modalOpen : Bool = false
-    class func setModalOpen(modalOpen : Bool) {
+    private static var _modalOpen : Bool = false
+    private class func setModalOpen(modalOpen : Bool) {
         self._modalOpen = modalOpen
     }
 
-    static var _alwaysUseMainBundle : Bool = false
+    private static var _alwaysUseMainBundle : Bool = false
     /*!
     If set to YES, the main bundle will always be used to load localized strings.
     Set this to YES if you have provided your own custom localizations in AppiraterLocalizable.strings
@@ -319,7 +320,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
 
     // TODO: Obj-C implements has these properties with copy attribute but swift doesn't
     private var _alertTitle : String?
-    var alertTitle : String {
+    private var alertTitle : String {
         get
         {
             return self._alertTitle != nil ? self._alertTitle! : Appirater.APPIRATER_MESSAGE_TITLE
@@ -331,7 +332,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
 
     // TODO: Obj-C implements has these properties with copy attribute but swift doesn't
     private var _alertMessage : String?
-    var alertMessage : String {
+    private var alertMessage : String {
         get
         {
             return self._alertMessage != nil ? self._alertMessage! : Appirater.APPIRATER_MESSAGE
@@ -344,7 +345,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
 
     // TODO: Obj-C implements has these properties with copy attribute but swift doesn't
     private var _alertCancelTitle : String?
-    var alertCancelTitle : String {
+    private var alertCancelTitle : String {
         get
         {
             return self._alertCancelTitle != nil ? self._alertCancelTitle! : Appirater.CANCEL_BUTTON
@@ -357,7 +358,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
 
     // TODO: Obj-C implements has these properties with copy attribute but swift doesn't
     private var _alertRateTitle : String?
-    var alertRateTitle : String {
+    private var alertRateTitle : String {
         get
         {
             return self._alertRateTitle != nil ? self._alertRateTitle! : Appirater.RATE_BUTTON
@@ -369,7 +370,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     }
     // TODO: Obj-C implements has these properties with copy attribute but swift doesn't
     private var _alertRateLaterTitle : String?
-    var alertRateLaterTitle : String {
+    private var alertRateLaterTitle : String {
         get
         {
             return self._alertRateLaterTitle != nil ? self._alertRateLaterTitle! : Appirater.RATE_LATER
@@ -395,7 +396,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func connectedToNetwork() -> Bool {
+    private func connectedToNetwork() -> Bool {
         
         var zeroAddress = sockaddr_in()
         zeroAddress.sin_len = UInt8(sizeofValue(zeroAddress))
@@ -428,7 +429,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     }
     
     
-    func showRatingAlert(displayRateLaterButton: Bool)
+    private func showRatingAlert(displayRateLaterButton: Bool)
     {
         var alertView: UIAlertView?
         let delegate = self.delegate
@@ -457,7 +458,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         delegate?.appiraterDidDisplayAlert?(self)
     }
     
-    func showRatingAlert()
+    private func showRatingAlert()
     {
         self.showRatingAlert(true)
     }
@@ -474,7 +475,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     // * number of uses of app
     // * number of significant events
     // * time since last reminder
-    func ratingAlertIsAppropriate() -> Bool
+    private func ratingAlertIsAppropriate() -> Bool
     {
         return self.connectedToNetwork()
             && !self.userHasDeclinedToRate()
@@ -494,7 +495,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     // * whether user has rated before
     // * whether user has declined to rate
     // * whether rating alert is currently showing visibly
-    func ratingConditionsHaveBeenMet() -> Bool
+    private func ratingConditionsHaveBeenMet() -> Bool
     {
         if Appirater._debug {
             return true
@@ -502,21 +503,21 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         
         let userDefaults = NSUserDefaults.standardUserDefaults()
         
-        let dateOfFirstLaunch = NSDate(timeIntervalSince1970:userDefaults.doubleForKey(kAppiraterFirstUseDate))
+        let dateOfFirstLaunch = NSDate(timeIntervalSince1970:userDefaults.doubleForKey(Appirater.kFirstUseDate))
         let timeSinceFirstLaunch = NSDate().timeIntervalSinceDate(dateOfFirstLaunch)
         let timeUntilRate = 60 * 60 * 24 * Appirater._daysUntilPrompt
         if timeSinceFirstLaunch < timeUntilRate {return false}
         
         // check if the app has been used enough
-        let useCount = userDefaults.integerForKey(kAppiraterUseCount)
+        let useCount = userDefaults.integerForKey(Appirater.kUseCount)
         if useCount < Appirater._usesUntilPrompt { return false }
         
         // check if the user has done enough significant events
-        let sigEventCount = userDefaults.integerForKey(kAppiraterSignificantEventCount)
+        let sigEventCount = userDefaults.integerForKey(Appirater.kSignificantEventCount)
         if (sigEventCount < Appirater._significantEventsUntilPrompt) { return false }
         
         // if the user wanted to be reminded later, has enough time passed?
-        let reminderRequestDate = NSDate(timeIntervalSince1970:userDefaults.doubleForKey(kAppiraterReminderRequestDate))
+        let reminderRequestDate = NSDate(timeIntervalSince1970:userDefaults.doubleForKey(Appirater.kReminderRequestDate))
         let timeSinceReminderRequest = NSDate().timeIntervalSinceDate(reminderRequestDate)
         let timeUntilReminder = 60 * 60 * 24 * Appirater._timeBeforeReminding
         if timeSinceReminderRequest < timeUntilReminder {return false}
@@ -524,17 +525,17 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         return false
     }
     
-    func incrementUseCount() {
+    private func incrementUseCount() {
         // get the app's version
         let version = NSBundle.mainBundle().infoDictionary![kCFBundleVersionKey as String]! as! String
         
         // get the version number that we've been tracking
         let userDefaults = NSUserDefaults.standardUserDefaults()
-        var trackingVersion = userDefaults.stringForKey(kAppiraterCurrentVersion)
+        var trackingVersion = userDefaults.stringForKey(Appirater.kCurrentVersion)
         if trackingVersion == nil
         {
             trackingVersion = version
-            userDefaults.setObject(version, forKey:kAppiraterCurrentVersion)
+            userDefaults.setObject(version, forKey:Appirater.kCurrentVersion)
         }
         
         if Appirater._debug
@@ -545,17 +546,17 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         if trackingVersion == version
         {
             // check if the first use date has been set. if not, set it.
-            var timeInterval = userDefaults.doubleForKey(kAppiraterFirstUseDate)
+            var timeInterval = userDefaults.doubleForKey(Appirater.kFirstUseDate)
             if timeInterval == 0
             {
                 timeInterval = NSDate().timeIntervalSince1970
-                userDefaults.setDouble(timeInterval, forKey:kAppiraterFirstUseDate)
+                userDefaults.setDouble(timeInterval, forKey:Appirater.kFirstUseDate)
             }
             
             // increment the use count
-            var useCount = userDefaults.integerForKey(kAppiraterUseCount)
+            var useCount = userDefaults.integerForKey(Appirater.kUseCount)
             useCount++
-            userDefaults.setInteger(useCount, forKey:kAppiraterUseCount)
+            userDefaults.setInteger(useCount, forKey:Appirater.kUseCount)
             if Appirater._debug
             {
                 print("APPIRATER Use count: \(useCount)")
@@ -564,29 +565,29 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         else
         {
             // it's a new version of the app, so restart tracking
-            userDefaults.setObject(version, forKey:kAppiraterCurrentVersion)
-            userDefaults.setDouble(NSDate().timeIntervalSince1970, forKey:kAppiraterFirstUseDate)
-            userDefaults.setInteger(1, forKey:kAppiraterUseCount)
-            userDefaults.setInteger(0, forKey:kAppiraterSignificantEventCount)
-            userDefaults.setBool(false, forKey:kAppiraterRatedCurrentVersion)
-            userDefaults.setBool(false, forKey:kAppiraterDeclinedToRate)
-            userDefaults.setDouble(0, forKey:kAppiraterReminderRequestDate)
+            userDefaults.setObject(version, forKey:Appirater.kCurrentVersion)
+            userDefaults.setDouble(NSDate().timeIntervalSince1970, forKey:Appirater.kFirstUseDate)
+            userDefaults.setInteger(1, forKey:Appirater.kUseCount)
+            userDefaults.setInteger(0, forKey:Appirater.kSignificantEventCount)
+            userDefaults.setBool(false, forKey:Appirater.kRatedCurrentVersion)
+            userDefaults.setBool(false, forKey:Appirater.kDeclinedToRate)
+            userDefaults.setDouble(0, forKey:Appirater.kReminderRequestDate)
         }
         
         userDefaults.synchronize()
     }
     
-    func incrementSignificantEventCount() {
+    private func incrementSignificantEventCount() {
         // get the app's version
         let version = NSBundle.mainBundle().infoDictionary![kCFBundleVersionKey as String] as! String
         
         // get the version number that we've been tracking
         let userDefaults = NSUserDefaults.standardUserDefaults()
-        var trackingVersion = userDefaults.stringForKey(kAppiraterCurrentVersion)
+        var trackingVersion = userDefaults.stringForKey(Appirater.kCurrentVersion)
         if trackingVersion == nil
         {
             trackingVersion = version
-            userDefaults.setObject(version, forKey:kAppiraterCurrentVersion)
+            userDefaults.setObject(version, forKey:Appirater.kCurrentVersion)
         }
         
         if Appirater._debug
@@ -596,17 +597,17 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         if trackingVersion == version
         {
             // check if the first use date has been set. if not, set it.
-            var timeInterval = userDefaults.doubleForKey(kAppiraterFirstUseDate)
+            var timeInterval = userDefaults.doubleForKey(Appirater.kFirstUseDate)
             if timeInterval == 0
             {
                 timeInterval = NSDate().timeIntervalSince1970
-                userDefaults.setDouble(timeInterval, forKey:kAppiraterFirstUseDate)
+                userDefaults.setDouble(timeInterval, forKey:Appirater.kFirstUseDate)
             }
             
             // increment the significant event count
-            var sigEventCount = userDefaults.integerForKey(kAppiraterSignificantEventCount)
+            var sigEventCount = userDefaults.integerForKey(Appirater.kSignificantEventCount)
             sigEventCount++
-            userDefaults.setInteger(sigEventCount, forKey:kAppiraterSignificantEventCount)
+            userDefaults.setInteger(sigEventCount, forKey:Appirater.kSignificantEventCount)
             if Appirater._debug
             {
                 print("APPIRATER Significant event count: \(sigEventCount)")
@@ -615,19 +616,19 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         else
         {
             // it's a new version of the app, so restart tracking
-            userDefaults.setObject(version, forKey:kAppiraterCurrentVersion)
-            userDefaults.setDouble(0, forKey:kAppiraterFirstUseDate)
-            userDefaults.setInteger(0, forKey:kAppiraterUseCount)
-            userDefaults.setInteger(1, forKey:kAppiraterSignificantEventCount)
-            userDefaults.setBool(false, forKey:kAppiraterRatedCurrentVersion)
-            userDefaults.setBool(false, forKey:kAppiraterDeclinedToRate)
-            userDefaults.setDouble(0, forKey:kAppiraterReminderRequestDate)
+            userDefaults.setObject(version, forKey:Appirater.kCurrentVersion)
+            userDefaults.setDouble(0, forKey:Appirater.kFirstUseDate)
+            userDefaults.setInteger(0, forKey:Appirater.kUseCount)
+            userDefaults.setInteger(1, forKey:Appirater.kSignificantEventCount)
+            userDefaults.setBool(false, forKey:Appirater.kRatedCurrentVersion)
+            userDefaults.setBool(false, forKey:Appirater.kDeclinedToRate)
+            userDefaults.setDouble(0, forKey:Appirater.kReminderRequestDate)
         }
         
         userDefaults.synchronize()
     }
     
-    func incrementAndRate(canPromptForRating : Bool)
+    private func incrementAndRate(canPromptForRating : Bool)
     {
         self.incrementUseCount()
         
@@ -641,7 +642,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         }
     }
     
-    func incrementSignificantEventAndRate(canPromptForRating:Bool)
+    private func incrementSignificantEventAndRate(canPromptForRating:Bool)
     {
         self.incrementSignificantEventCount()
         
@@ -660,7 +661,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
 
     func userHasDeclinedToRate() -> Bool
     {
-        return NSUserDefaults.standardUserDefaults().boolForKey(kAppiraterDeclinedToRate)
+        return NSUserDefaults.standardUserDefaults().boolForKey(Appirater.kDeclinedToRate)
     }
     /*!
     Asks Appirater if the user has rated the current version.
@@ -669,7 +670,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     */
     func userHasRatedCurrentVersion() -> Bool
     {
-        return NSUserDefaults.standardUserDefaults().boolForKey(kAppiraterRatedCurrentVersion)
+        return NSUserDefaults.standardUserDefaults().boolForKey(Appirater.kRatedCurrentVersion)
     }
     
     /*!
@@ -705,7 +706,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
             }
         })
     }
-    func hideRatingAlert()
+    private func hideRatingAlert()
     {
         if (self.ratingAlert!.visible) {
             if Appirater._debug
@@ -716,7 +717,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         }
     }
     
-    class func appWillResignActive()
+    private class func appWillResignActive()
     {
         if Appirater._debug
         {
@@ -766,7 +767,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         })
     }
     
-    class func showPrompt()
+    private class func showPrompt()
     {
         Appirater.tryToShowPrompt()
     }
@@ -799,13 +800,13 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
             displayRateLaterButton:displayRateLaterButton)
     }
     
-    func showPromptWithChecks(withChecks:Bool, displayRateLaterButton:Bool) {
+    private func showPromptWithChecks(withChecks:Bool, displayRateLaterButton:Bool) {
         if (withChecks == false) || self.ratingAlertIsAppropriate() {
             self.showRatingAlert(displayRateLaterButton)
         }
     }
     
-    class func getRootViewController() -> AnyObject?
+    private class func getRootViewController() -> AnyObject?
     {
         let window = UIApplication.sharedApplication().keyWindow
         if window!.windowLevel != UIWindowLevelNormal {
@@ -820,7 +821,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         return Appirater.iterateSubViewsForViewController(window!) // iOS 8+ deep traverse
     }
     
-    class func iterateSubViewsForViewController(parentView:UIView) -> AnyObject?
+    private class func iterateSubViewsForViewController(parentView:UIView) -> AnyObject?
     {
         for subView in parentView.subviews
         {
@@ -836,7 +837,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         return nil
     }
     
-    class func topMostViewController(var controller : UIViewController) -> UIViewController {
+    private class func topMostViewController(var controller : UIViewController) -> UIViewController {
         var isPresenting = false
         repeat {
             // this path is called only on iOS 6+, so -presentedViewController is fine here.
@@ -866,7 +867,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     {
     
         let userDefaults = NSUserDefaults.standardUserDefaults()
-        userDefaults.setBool(true, forKey:kAppiraterRatedCurrentVersion)
+        userDefaults.setBool(true, forKey:kRatedCurrentVersion)
         userDefaults.synchronize()
         
         //Use the in-app StoreKit view if available (iOS 6) and imported. This works in the simulator.
@@ -919,7 +920,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
             #endif
         }
     }
-    func alertView(alertView: UIAlertView, didDismissWithButtonIndex buttonIndex: Int) {
+    internal func alertView(alertView: UIAlertView, didDismissWithButtonIndex buttonIndex: Int) {
         let userDefaults = NSUserDefaults.standardUserDefaults()
         
         let delegate = Appirater._delegate
@@ -928,7 +929,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         {
         case 0:
             // they don't want to rate it
-            userDefaults.setBool(true, forKey:kAppiraterDeclinedToRate)
+            userDefaults.setBool(true, forKey:Appirater.kDeclinedToRate)
             userDefaults.synchronize()
             delegate?.appiraterDidDeclineToRate?(self)
         case 1:
@@ -937,14 +938,14 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
             delegate?.appiraterDidOptToRate?(self)
         case 2:
             // remind them later
-            userDefaults.setDouble(NSDate().timeIntervalSince1970, forKey:kAppiraterReminderRequestDate)
+            userDefaults.setDouble(NSDate().timeIntervalSince1970, forKey:Appirater.kReminderRequestDate)
             userDefaults.synchronize()
             delegate?.appiraterDidOptToRemindLater?(self)
         default:
             break
         }
     }
-    func productViewControllerDidFinish(viewController: SKStoreProductViewController) {
+    internal func productViewControllerDidFinish(viewController: SKStoreProductViewController) {
         Appirater.closeModal()
     }
     
