@@ -10,18 +10,6 @@ import Foundation
 import SystemConfiguration
 import StoreKit
 
-enum AppiraterError: ErrorType {
-    case FailedToCreateWithAddress(sockaddr_in)
-    case FailedToCreateWithHostname(String)
-    case UnableToSetCallback
-    case UnableToSetDispatchQueue
-}
-
-
-var templateReviewURL = "itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID"
-var templateReviewURLiOS7 = "itms-apps://itunes.apple.com/app/idAPP_ID"
-var templateReviewURLiOS8 = "itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=APP_ID&onlyLatestVersion=true&pageNumber=0&sortOrdering=1&type=Purple+Software"
-
 @objc
 protocol AppiraterDelegate : class {
     optional func appiraterShouldDisplayAlert(appirater : Appirater) -> Bool
@@ -43,10 +31,14 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     private static let kDeclinedToRate			= "kDeclinedToRate"
     private static let kReminderRequestDate		= "kReminderRequestDate"
 
+    private static var templateReviewURL = "itms-apps://ax.itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=APP_ID"
+    private static var templateReviewURLiOS7 = "itms-apps://itunes.apple.com/app/idAPP_ID"
+    private static var templateReviewURLiOS8 = "itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=APP_ID&onlyLatestVersion=true&pageNumber=0&sortOrdering=1&type=Purple+Software"
+
     /*!
     Your localized app's name.
     */
-    private static var LOCALIZED_APP_NAME : String? {
+    static var LOCALIZED_APP_NAME : String? {
         get {
             return NSBundle.mainBundle().localizedInfoDictionary?["CFBundleDisplayName"] as? String
         }
@@ -55,7 +47,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     /*!
     Your app's name.
     */
-    private static var APP_NAME : String {
+    static var APP_NAME : String {
         get {
             if let localizedAppName = self.LOCALIZED_APP_NAME
             {
@@ -74,7 +66,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     This is the message your users will see once they've passed the day+launches
     threshold.
     */
-    private static var LOCALIZED_MESSAGE : String {
+    static var LOCALIZED_MESSAGE : String {
         
         get {
             return NSLocalizedString("If you enjoy using %@, would you mind taking a moment to rate it? It won't take more than a minute. Thanks for your support!", tableName: "AppiraterLocalizable", bundle: Appirater.bundle(), comment: "")
@@ -89,7 +81,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     /*!
     This is the title of the message alert that users will see.
     */
-    private static var LOCALIZED_MESSAGE_TITLE : String {
+    static var LOCALIZED_MESSAGE_TITLE : String {
         get {
             return NSLocalizedString("Rate %", tableName: "AppiraterLocalizable", bundle: Appirater.bundle(), comment: "")
         }
@@ -103,7 +95,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     /*!
     The text of the button that rejects reviewing the app.
     */
-    private static var CANCEL_BUTTON : String {
+    static var CANCEL_BUTTON : String {
         get {
             return NSLocalizedString("No, Thanks", tableName: "AppiraterLocalizable", bundle: Appirater.bundle(), comment: "")
         }
@@ -112,7 +104,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     /*!
     Text of button that will send user to app review page.
     */
-    private static var LOCALIZED_RATE_BUTTON : String {
+    static var LOCALIZED_RATE_BUTTON : String {
         get {
             return NSLocalizedString("Rate %@", tableName: "AppiraterLocalizable", bundle: Appirater.bundle(), comment: "")
         }
@@ -126,7 +118,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     /*!
     Text for button to remind the user to review later.
     */
-    private static var RATE_LATER : String {
+    static var RATE_LATER : String {
         get {
             return NSLocalizedString("Remind me later", tableName: "AppiraterLocalizable", bundle: Appirater.bundle(), comment: "")
         }
@@ -673,6 +665,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         return NSUserDefaults.standardUserDefaults().boolForKey(Appirater.kRatedCurrentVersion)
     }
     
+    
     /*!
     Tells Appirater that the app has launched, and on devices that do NOT
     support multitasking, the 'uses' count will be incremented. You should
@@ -686,11 +679,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
     can also be triggered by appEnteredForeground: and userDidSignificantEvent:
     (as long as you pass YES for canPromptForRating in those methods).
     */
-    class func appLaunched()
-    {
-        Appirater.appLaunched(true)
-    }
-    
+
     class func appLaunched(canPromptForRating : Bool)
     {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), { () -> Void in
@@ -767,10 +756,7 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         })
     }
     
-    private class func showPrompt()
-    {
-        Appirater.tryToShowPrompt()
-    }
+    
     /*!
     Tells Appirater to try and show the prompt (a rating alert). The prompt will be showed
     if there is connection available, the user hasn't declined to rate
@@ -799,7 +785,10 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
         Appirater.sharedInstance.showPromptWithChecks(false,
             displayRateLaterButton:displayRateLaterButton)
     }
-    
+    private class func showPrompt()
+    {
+        Appirater.tryToShowPrompt()
+    }
     private func showPromptWithChecks(withChecks:Bool, displayRateLaterButton:Bool) {
         if (withChecks == false) || self.ratingAlertIsAppropriate() {
             self.showRatingAlert(displayRateLaterButton)
@@ -902,18 +891,18 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
             #if (arch(i386) || arch(x86_64)) && os(iOS)
                 print("APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.")
             #else
-                var reviewURL = templateReviewURL.stringByReplacingOccurrencesOfString("APP_ID", withString:String(format:"%@", Appirater._appId!))
+                var reviewURL = Appirater.templateReviewURL.stringByReplacingOccurrencesOfString("APP_ID", withString:String(format:"%@", Appirater._appId!))
                 
                 // iOS 7 needs a different templateReviewURL @see https://github.com/arashpayan/appirater/issues/131
                 // Fixes condition @see https://github.com/arashpayan/appirater/issues/205
                 let version = (UIDevice.currentDevice().systemVersion as NSString).floatValue
                 if version >= 7.0 && version < 8.0 {
-                    reviewURL = templateReviewURLiOS7.stringByReplacingOccurrencesOfString("APP_ID", withString:String(format:"%@", Appirater._appId!))
+                    reviewURL = Appirater.templateReviewURLiOS7.stringByReplacingOccurrencesOfString("APP_ID", withString:String(format:"%@", Appirater._appId!))
                 }
                     // iOS 8 needs a different templateReviewURL also @see https://github.com/arashpayan/appirater/issues/182
                 else if version >= 8.0
                 {
-                    reviewURL = templateReviewURLiOS8.stringByReplacingOccurrencesOfString("APP_ID", withString:String(format:"%@", Appirater._appId!))
+                    reviewURL = Appirater.templateReviewURLiOS8.stringByReplacingOccurrencesOfString("APP_ID", withString:String(format:"%@", Appirater._appId!))
                 }
                 
                 UIApplication.sharedApplication().openURL(NSURL(string:reviewURL)!)
@@ -971,5 +960,9 @@ class Appirater: NSObject, UIAlertViewDelegate, SKStoreProductViewControllerDele
             Appirater.setStatusBarStyle(UIStatusBarStyle.Default)
         }
     }
-
+    @available(*, deprecated=0.1)
+    class func appLaunched()
+    {
+        Appirater.appLaunched(true)
+    }
 }
