@@ -414,7 +414,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	[userDefaults synchronize];
 }
 
-- (void)incrementSignificantEventCount {
+- (void)incrementSignificantEventCountWithQuantity:(NSInteger)quantity {
 	// get the app's version
 	NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleVersionKey];
 	
@@ -442,7 +442,7 @@ static BOOL _alwaysUseMainBundle = NO;
 		
 		// increment the significant event count
 		NSInteger sigEventCount = [userDefaults integerForKey:kAppiraterSignificantEventCount];
-		sigEventCount++;
+		sigEventCount += quantity;
 		[userDefaults setInteger:sigEventCount forKey:kAppiraterSignificantEventCount];
 		if (_debug)
 			NSLog(@"APPIRATER Significant event count: %@", @(sigEventCount));
@@ -453,7 +453,7 @@ static BOOL _alwaysUseMainBundle = NO;
 		[userDefaults setObject:version forKey:kAppiraterCurrentVersion];
 		[userDefaults setDouble:0 forKey:kAppiraterFirstUseDate];
 		[userDefaults setInteger:0 forKey:kAppiraterUseCount];
-		[userDefaults setInteger:1 forKey:kAppiraterSignificantEventCount];
+		[userDefaults setInteger:quantity forKey:kAppiraterSignificantEventCount];
 		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
@@ -476,8 +476,8 @@ static BOOL _alwaysUseMainBundle = NO;
 	}
 }
 
-- (void)incrementSignificantEventAndRate:(BOOL)canPromptForRating {
-	[self incrementSignificantEventCount];
+- (void)incrementSignificantEventWithQuantity:(NSInteger)quantity andRate:(BOOL)canPromptForRating {
+	[self incrementSignificantEventCountWithQuantity:quantity];
 	
     if (canPromptForRating &&
         [self ratingConditionsHaveBeenMet] &&
@@ -542,9 +542,13 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating {
+	[self userDidSignificantEvent:canPromptForRating withQuantity:1];
+}
+
++ (void)userDidSignificantEvent:(BOOL)canPromptForRating withQuantity:(NSInteger)quantity {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
                    ^{
-                       [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
+                       [[Appirater sharedInstance] incrementSignificantEventWithQuantity:quantity andRate:canPromptForRating];
                    });
 }
 
