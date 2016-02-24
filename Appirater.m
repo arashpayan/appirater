@@ -407,7 +407,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	{
 		// check if the first use date has been set. if not, set it.
 		NSTimeInterval timeInterval = [userDefaults doubleForKey:kAppiraterFirstUseDate];
-		if (timeInterval == 0)
+		if (fequalzero(timeInterval))
 		{
 			timeInterval = [[NSDate date] timeIntervalSince1970];
 			[userDefaults setDouble:timeInterval forKey:kAppiraterFirstUseDate];
@@ -455,7 +455,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	{
 		// check if the first use date has been set. if not, set it.
 		NSTimeInterval timeInterval = [userDefaults doubleForKey:kAppiraterFirstUseDate];
-		if (timeInterval == 0)
+		if (fequalzero(timeInterval))
 		{
 			timeInterval = [[NSDate date] timeIntervalSince1970];
 			[userDefaults setDouble:timeInterval forKey:kAppiraterFirstUseDate];
