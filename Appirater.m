@@ -407,7 +407,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	{
 		// check if the first use date has been set. if not, set it.
 		NSTimeInterval timeInterval = [userDefaults doubleForKey:kAppiraterFirstUseDate];
-		if (fequalzero(timeInterval))
+		if (fabs(timeInterval) < FLT_EPSILON)
 		{
 			timeInterval = [[NSDate date] timeIntervalSince1970];
 			[userDefaults setDouble:timeInterval forKey:kAppiraterFirstUseDate];
@@ -455,7 +455,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	{
 		// check if the first use date has been set. if not, set it.
 		NSTimeInterval timeInterval = [userDefaults doubleForKey:kAppiraterFirstUseDate];
-		if (fequalzero(timeInterval))
+		if (fabs(timeInterval) < FLT_EPSILON)
 		{
 			timeInterval = [[NSDate date] timeIntervalSince1970];
 			[userDefaults setDouble:timeInterval forKey:kAppiraterFirstUseDate];
@@ -595,10 +595,10 @@ static BOOL _alwaysUseMainBundle = NO;
 
 + (id)getRootViewController {
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
-    if (window.windowLevel != UIWindowLevelNormal) {
+    if (!(fabs((window.windowLevel) - (UIWindowLevelNormal)) < FLT_EPSILON)) {
         NSArray *windows = [[UIApplication sharedApplication] windows];
         for(window in windows) {
-            if (window.windowLevel == UIWindowLevelNormal) {
+            if ((fabs((window.windowLevel) - (UIWindowLevelNormal)) < FLT_EPSILON)) {
                 break;
             }
         }
