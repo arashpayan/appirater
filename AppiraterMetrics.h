@@ -10,7 +10,7 @@
 
 // notifications for different appirater events
 
-NSString *const ARAppiraterDidDisplayAlertNotification;
-NSString *const ARAppiraterDidDeclineToRateNotification;
-NSString *const ARAppiraterDidOptToRateNotification;
-NSString *const ARAppiraterDidOptToRemindLaterNotification;
+extern NSString *const ARAppiraterDidDisplayAlertNotification;
+extern NSString *const ARAppiraterDidDeclineToRateNotification;
+extern NSString *const ARAppiraterDidOptToRateNotification;
+extern NSString *const ARAppiraterDidOptToRemindLaterNotification;
