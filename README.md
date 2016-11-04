@@ -1,23 +1,15 @@
 Introduction
-------------
+---------------
+
 Appirater is a class that you can drop into any iPhone app (iOS 4.0 or later) that will help remind your users
 to review your app on the App Store. The code is released under the MIT/X11, so feel free to
-modify and share your changes with the world. Read on below for how to get started. If you need any help using, 
-the library check out the [Appirater group] [appiratergroup].
-
+modify and share your changes with the world. Read on below for how to get started. If you need any help using, the library, post your questions on [Stack Overflow] [stackoverflow] under the `appirater` tag.
 
 Getting Started
 ---------------
 
-###CocoaPods
-If you're new to CocoaPods [watch this](http://nsscreencast.com/episodes/5-cocoapods). To add Appirater to your app, add `pod "Appirater"` to your Podfile.
-
-CocoaPods support is still experimental, and might not work in all use cases. If you experience problems, open an issue and install via Git submodule
-
-###Manually
-1. Add the Appirater code into your project.
-2. If your project doesn't use ARC, add the `-fobjc-arc` compiler flag to `Appirater.m` in your target's Build Phases » Compile Sources section.
-3. Add the `CFNetwork`, `SystemConfiguration`, and `StoreKit` frameworks to your project. Be sure to **change Required to Optional** for StoreKit in your target's Build Phases » Link Binary with Libraries section.
+### CocoaPods
+To add Appirater to your app, add `pod "Appirater"` to your Podfile.
 
 Configuration
 -------------
@@ -73,7 +65,7 @@ Requests for help, questions about usage, suggestions and other relevant topics 
 
 License
 -------
-Copyright 2014. [Arash Payan] [arash].
+Copyright 2016. [Arash Payan] [arash].
 This library is distributed under the terms of the MIT/X11.
 
 While not required, I greatly encourage and appreciate any improvements that you make
@@ -88,9 +80,9 @@ A few people have ported Appirater to other SDKs. The ports are listed here in h
 + Corona SDK. [Github] [coronasdkport]
 + Titanium SDK. [Github] [titaniumport]
 
-[appiratergroup]: http://groups.google.com/group/appirater
-[homepage]: http://arashpayan.com/blog/index.php/2009/09/07/presenting-appirater/
-[arash]: http://arashpayan.com
+[stackoverflow]: http://stackoverflow.com/
+[homepage]: https://arashpayan.com/blog/2009/09/07/presenting-appirater/
+[arash]: https://arashpayan.com
 [Appirater.h]: https://github.com/arashpayan/appirater/blob/master/Appirater.h
 [monotouchport]: https://github.com/chebum/Appirater-for-MonoTouch
 [monotouchbinding]: https://github.com/theonlylawislove/MonoTouch.Appirater
