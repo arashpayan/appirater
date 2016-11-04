@@ -34,8 +34,9 @@
  * Copyright 2012 Arash Payan. All rights reserved.
  */
 
+@import SystemConfiguration;
+@import CFNetwork;
 #import "Appirater.h"
-#import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
 
 #if ! __has_feature(objc_arc)
