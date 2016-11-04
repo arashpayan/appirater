@@ -76,6 +76,7 @@ static BOOL _alwaysUseMainBundle = NO;
 @property (nonatomic, copy) NSString *alertCancelTitle;
 @property (nonatomic, copy) NSString *alertRateTitle;
 @property (nonatomic, copy) NSString *alertRateLaterTitle;
+@property (nonatomic, strong) NSOperationQueue *eventQueue;
 - (BOOL)connectedToNetwork;
 + (Appirater*)sharedInstance;
 - (void)showPromptWithChecks:(BOOL)withChecks
@@ -260,6 +261,8 @@ static BOOL _alwaysUseMainBundle = NO;
         dispatch_once(&onceToken, ^{
             appirater = [[Appirater alloc] init];
 			appirater.delegate = _delegate;
+            appirater.eventQueue = [[NSOperationQueue alloc] init];
+            appirater.eventQueue.maxConcurrentOperationCount = 1;
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:
                 UIApplicationWillResignActiveNotification object:nil];
         });
@@ -535,17 +538,17 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 + (void)appEnteredForeground:(BOOL)canPromptForRating {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
-                   ^{
-                       [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
-                   });
+    Appirater *a = [Appirater sharedInstance];
+    [a.eventQueue addOperationWithBlock:^{
+        [[Appirater sharedInstance] incrementAndRate:canPromptForRating];
+    }];
 }
 
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
-                   ^{
-                       [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
-                   });
+    Appirater *a = [Appirater sharedInstance];
+    [a.eventQueue addOperationWithBlock:^{
+       [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
+    }];
 }
 
 #pragma GCC diagnostic push
