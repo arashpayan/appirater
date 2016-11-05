@@ -95,7 +95,7 @@ extern NSString *const kAppiraterReminderRequestDate;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 @property(nonatomic, strong) UIAlertView *ratingAlert;
-#pragma clan diagnostic pop
+#pragma clang diagnostic pop
 @property(nonatomic) BOOL openInAppStore;
 #if __has_feature(objc_arc_weak)
 @property(nonatomic, weak) NSObject <AppiraterDelegate> *delegate;
