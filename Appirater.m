@@ -34,8 +34,8 @@
  * Copyright 2012 Arash Payan. All rights reserved.
  */
 
-@import SystemConfiguration;
-@import CFNetwork;
+#import <SystemConfiguration/SystemConfiguration.h>
+#import <CFNetwork/CFNetwork.h>
 #import "Appirater.h"
 #include <netinet/in.h>
 
