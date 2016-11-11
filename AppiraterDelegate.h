@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 News.me. All rights reserved.
 //
 
-@import Foundation;
+#import <Foundation/Foundation.h>
 
 @class Appirater;
 
