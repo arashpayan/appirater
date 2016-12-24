@@ -70,6 +70,8 @@ static BOOL _usesAnimation = TRUE;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
 static BOOL _alwaysUseMainBundle = NO;
+static NSString *_affiliateToken = nil;
+static NSString *_affiliateCampaign = nil;
 
 @interface Appirater ()
 @property (nonatomic, copy) NSString *alertTitle;
@@ -159,6 +161,13 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 + (void)setAlwaysUseMainBundle:(BOOL)alwaysUseMainBundle {
     _alwaysUseMainBundle = alwaysUseMainBundle;
+}
+
++ (void)setAffiliateToken:(NSString*)token {
+    _affiliateToken = token;
+}
++ (void)setAffiliateCampaign:(NSString*)campaign{
+    _affiliateCampaign = campaign;
 }
 
 + (NSBundle *)bundle
@@ -637,7 +646,14 @@ static BOOL _alwaysUseMainBundle = NO;
 		
 		SKStoreProductViewController *storeViewController = [[SKStoreProductViewController alloc] init];
 		NSNumber *appId = [NSNumber numberWithInteger:_appId.integerValue];
-		[storeViewController loadProductWithParameters:@{SKStoreProductParameterITunesItemIdentifier:appId} completionBlock:nil];
+        NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObject:appId forKey:SKStoreProductParameterITunesItemIdentifier];
+        if (_affiliateToken != nil) {
+            [params setValue:_affiliateToken forKey:SKStoreProductParameterAffiliateToken];
+        }
+        if (_affiliateCampaign != nil) {
+            [params setValue:_affiliateCampaign forKey:SKStoreProductParameterCampaignToken];
+        }
+		[storeViewController loadProductWithParameters:params completionBlock:nil];
 		storeViewController.delegate = self.sharedInstance;
         
         id <AppiraterDelegate> delegate = self.sharedInstance.delegate;
@@ -665,6 +681,13 @@ static BOOL _alwaysUseMainBundle = NO;
         else if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0)
         {
             reviewURL = [templateReviewURLiOS8 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+        }
+        
+        if (_affiliateToken) {
+            reviewURL = [reviewURL stringByAppendingFormat:@"&at=%@", _affiliateToken];
+        }
+        if (_affiliateCampaign) {
+            reviewURL = [reviewURL stringByAppendingFormat:@"&ct=%@", _affiliateCampaign];
         }
 
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];

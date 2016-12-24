@@ -300,6 +300,9 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 + (void)setAlwaysUseMainBundle:(BOOL)useMainBundle;
 
++ (void)setAffiliateToken:(NSString*)token;
++ (void)setAffiliateCampaign:(NSString*)campaign;
+
 @end
 
 
