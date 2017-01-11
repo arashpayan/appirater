@@ -251,7 +251,10 @@ static const NSInteger kRateAlertViewTag        = 1001;
 }
 
 - (void)reallyShowPreliminaryAlert {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_PRELIMINARY_MESSAGE_TITLE
+#pragma clang diagnostic pop
                                                         message:APPIRATER_PRELIMINARY_MESSAGE
                                                        delegate:self
                                               cancelButtonTitle:APPIRATER_PRELIMINARY_MESSAGE_NO_BUTTON
@@ -268,15 +271,24 @@ static const NSInteger kRateAlertViewTag        = 1001;
 }
 
 - (void)reallyShowRatingAlert:(BOOL)displayRateLaterButton {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     UIAlertView *alertView = nil;
+#pragma clang diagnostic pop
     if (displayRateLaterButton) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+#pragma clang diagnostic pop
                                                message:APPIRATER_MESSAGE
                                               delegate:self
                                      cancelButtonTitle:APPIRATER_CANCEL_BUTTON
                                      otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
     } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+#pragma clang diagnostic pop
                                                message:APPIRATER_MESSAGE
                                               delegate:self
                                      cancelButtonTitle:APPIRATER_CANCEL_BUTTON
@@ -595,7 +607,11 @@ static const NSInteger kRateAlertViewTag        = 1001;
 	}
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#pragma clang diagnostic ignored "-Wdeprecated-implementations"
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+#pragma clang diagnostic push
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 
     id <AppiraterDelegate> delegate = _delegate;
