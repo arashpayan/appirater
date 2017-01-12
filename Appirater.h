@@ -35,8 +35,8 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "AppiraterDelegate.h"
 #import <StoreKit/StoreKit.h>
+#import "AppiraterDelegate.h"
 
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
@@ -99,11 +99,16 @@ extern NSString *const kAppiraterReminderRequestDate;
 #define APPIRATER_RATE_LATER			NSLocalizedStringFromTableInBundle(@"Remind me later", @"AppiraterLocalizable", [Appirater bundle], nil)
 
 @interface Appirater : NSObject <UIAlertViewDelegate, SKStoreProductViewControllerDelegate> {
-
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 	UIAlertView		*ratingAlert;
+#pragma clang diagnostic pop
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 @property(nonatomic, strong) UIAlertView *ratingAlert;
+#pragma clang diagnostic pop
 @property(nonatomic) BOOL openInAppStore;
 #if __has_feature(objc_arc_weak)
 @property(nonatomic, weak) NSObject <AppiraterDelegate> *delegate;

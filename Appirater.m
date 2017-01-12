@@ -34,8 +34,9 @@
  * Copyright 2012 Arash Payan. All rights reserved.
  */
 
+#import <SystemConfiguration/SystemConfiguration.h>
+#import <CFNetwork/CFNetwork.h>
 #import "Appirater.h"
-#import <SystemConfiguration/SCNetworkReachability.h>
 #include <netinet/in.h>
 
 #if ! __has_feature(objc_arc)
@@ -206,10 +207,17 @@ static const NSInteger kRateAlertViewTag        = 1001;
 	BOOL nonWiFi = flags & kSCNetworkReachabilityFlagsTransientConnection;
 	
 	NSURL *testURL = [NSURL URLWithString:@"http://www.apple.com/"];
-	NSURLRequest *testRequest = [NSURLRequest requestWithURL:testURL  cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:20.0];
-	NSURLConnection *testConnection = [[NSURLConnection alloc] initWithRequest:testRequest delegate:self];
 	
-    return ((isReachable && !needsConnection) || nonWiFi) ? (testConnection ? YES : NO) : NO;
+    NSURLSessionConfiguration* sessionConfiguration = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+    sessionConfiguration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
+    sessionConfiguration.timeoutIntervalForRequest = 20.0;
+
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:sessionConfiguration];
+
+    NSURLSessionTask *task = [session dataTaskWithURL:testURL];
+    [task resume];
+    
+    return ((isReachable && !needsConnection) || nonWiFi) ? ( (task.state != NSURLSessionTaskStateSuspended) ? YES : NO ) : NO;
 }
 
 + (Appirater*)sharedInstance {
@@ -567,11 +575,6 @@ static const NSInteger kRateAlertViewTag        = 1001;
 		}
 		[[self getRootViewController] presentViewController:storeViewController animated:_usesAnimation completion:^{
 			[self setModalOpen:YES];
-			//Temporarily use a black status bar to match the StoreKit view.
-			[self setStatusBarStyle:[UIApplication sharedApplication].statusBarStyle];
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000
-			[[UIApplication sharedApplication]setStatusBarStyle:UIStatusBarStyleLightContent animated:_usesAnimation];
-#endif
 		}];
 	
 	//Use the standard openUrl method if StoreKit is unavailable.
@@ -670,7 +673,6 @@ static const NSInteger kRateAlertViewTag        = 1001;
 //Close the in-app rating (StoreKit) view and restore the previous status bar style.
 + (void)closeModal {
 	if (_modalOpen) {
-		[[UIApplication sharedApplication]setStatusBarStyle:_statusBarStyle animated:_usesAnimation];
 		BOOL usedAnimation = _usesAnimation;
 		[self setModalOpen:NO];
 		
