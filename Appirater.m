@@ -82,7 +82,6 @@ static BOOL _alwaysUseMainBundle = NO;
 @property (nonatomic, copy) NSString *alertRateTitle;
 @property (nonatomic, copy) NSString *alertRateLaterTitle;
 - (BOOL)connectedToNetwork;
-+ (Appirater*)sharedInstance;
 - (void)showPromptWithChecks:(BOOL)withChecks
       displayRateLaterButton:(BOOL)displayRateLaterButton;
 - (void)showRatingAlert:(BOOL)displayRateLaterButton;
