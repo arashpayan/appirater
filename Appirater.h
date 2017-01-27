@@ -41,6 +41,7 @@
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
 extern NSString *const kAppiraterSignificantEventCount;
+extern NSString *const kAppiraterNegativeEventCount;
 extern NSString *const kAppiraterCurrentVersion;
 extern NSString *const kAppiraterRatedCurrentVersion;
 extern NSString *const kAppiraterDeclinedToRate;
@@ -148,6 +149,16 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 + (void)userDidSignificantEvent:(BOOL)canPromptForRating;
 
+
+/*!
+ Tells Appirater that the user experienced a negative event (like a crash)
+
+ If the user has experienced too many negative events, he is more likely to leave negative feedback.
+ Keep up with crash reports and update the app to keep users happy.
+
+ */
++ (void)userExperiencedNegativeEvent;
+
 /*!
  Tells Appirater to try and show the prompt (a rating alert). The prompt will be showed
  if there is connection available, the user hasn't declined to rate
@@ -186,6 +197,7 @@ extern NSString *const kAppiraterReminderRequestDate;
  Tells Appirater to immediately close any open rating modals (e.g. StoreKit rating VCs).
 */
 + (void)closeModal;
+
 
 /*!
  Asks Appirater if the user has declined to rate;
@@ -241,6 +253,14 @@ extern NSString *const kAppiraterReminderRequestDate;
 
 
 /*!
+ A negative event is anything that can make user leave negative feedback
+ (crash, connectivity issue, etc.).  To tell Appirater that the user has experienced
+ a negative event, call the method:
+ [Appirater userExperiencedNegativeEvent:];
+ */
++ (void)setMaxNegativeEvents:(NSInteger)maxNegativeEvents;
+
+/*!
  Once the rating alert is presented to the user, they might select
  'Remind me later'. This value specifies how long (in days) Appirater
  will wait before reminding them.
@@ -271,6 +291,13 @@ extern NSString *const kAppiraterReminderRequestDate;
  Set customized rate later button title for alert view.
  */
 + (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle;
+
+/*!
+ Sets Custom Action button title. When set additional button will appear, and delegate method
+ appiraterDidSelectCustomAction: will be called.  Can be used to add "Report a problem" button,
+ that will bring up a email composition or other form to communicate with authors directly, bypassing reviews.
+ */
++ (void)setCustomActionButtonTitle:(NSString *)actionTitle;
 
 /*!
  'YES' will show the Appirater alert everytime. Useful for testing how your message

@@ -46,6 +46,7 @@
 NSString *const kAppiraterFirstUseDate				= @"kAppiraterFirstUseDate";
 NSString *const kAppiraterUseCount					= @"kAppiraterUseCount";
 NSString *const kAppiraterSignificantEventCount		= @"kAppiraterSignificantEventCount";
+NSString *const kAppiraterNegativeEventCount        = @"kAppiraterNegativeEventCount";
 NSString *const kAppiraterCurrentVersion			= @"kAppiraterCurrentVersion";
 NSString *const kAppiraterRatedCurrentVersion		= @"kAppiraterRatedCurrentVersion";
 NSString *const kAppiraterDeclinedToRate			= @"kAppiraterDeclinedToRate";
@@ -59,6 +60,7 @@ static NSString *_appId;
 static double _daysUntilPrompt = 30;
 static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
+static NSInteger _negativeEventsMax = 0;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_5_0
@@ -76,6 +78,7 @@ static BOOL _alwaysUseMainBundle = NO;
 @property (nonatomic, copy) NSString *alertMessage;
 @property (nonatomic, copy) NSString *alertCancelTitle;
 @property (nonatomic, copy) NSString *alertRateTitle;
+@property (nonatomic, copy) NSString *customActionTitle;
 @property (nonatomic, copy) NSString *alertRateLaterTitle;
 @property (nonatomic, strong) NSOperationQueue *eventQueue;
 - (BOOL)connectedToNetwork;
@@ -134,16 +137,25 @@ static BOOL _alwaysUseMainBundle = NO;
     [self sharedInstance].alertRateTitle = rateTitle;
 }
 
++ (void) setCustomActionButtonTitle:(NSString *)actionTitle
+{
+    [self sharedInstance].customActionTitle = actionTitle;
+}
+
 + (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle
 {
     [self sharedInstance].alertRateLaterTitle = rateLaterTitle;
+}
+
++ (void)setMaxNegativeEvents:(NSInteger)maxNegativeEvents {
+    _negativeEventsMax = maxNegativeEvents;
 }
 
 + (void) setDebug:(BOOL)debug {
     _debug = debug;
 }
 + (void)setDelegate:(id<AppiraterDelegate>)delegate{
-	_delegate = delegate;
+    [self sharedInstance].delegate = delegate;
 }
 + (void)setUsesAnimation:(BOOL)animation {
 	_usesAnimation = animation;
@@ -292,16 +304,17 @@ static BOOL _alwaysUseMainBundle = NO;
                                            message:self.alertMessage
                                           delegate:self
                                  cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
+                                 otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, self.customActionTitle, nil];
   } else {
   	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
                                            message:self.alertMessage
                                           delegate:self
                                  cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, nil];
+                                 otherButtonTitles:self.alertRateTitle, self.customActionTitle, nil];
   }
 
 	self.ratingAlert = alertView;
+    self.ratingAlert.tag = displayRateLaterButton;
     [alertView show];
 
     if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
@@ -350,8 +363,12 @@ static BOOL _alwaysUseMainBundle = NO;
 		return YES;
 	
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	
-	NSDate *dateOfFirstLaunch = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterFirstUseDate]];
+
+    int failCount = [userDefaults integerForKey:kAppiraterNegativeEventCount];
+    if (failCount > _negativeEventsMax)
+        return NO;
+
+    NSDate *dateOfFirstLaunch = [NSDate dateWithTimeIntervalSince1970:[userDefaults doubleForKey:kAppiraterFirstUseDate]];
 	NSTimeInterval timeSinceFirstLaunch = [[NSDate date] timeIntervalSinceDate:dateOfFirstLaunch];
 	NSTimeInterval timeUntilRate = 60 * 60 * 24 * _daysUntilPrompt;
 	if (timeSinceFirstLaunch < timeUntilRate)
@@ -417,6 +434,7 @@ static BOOL _alwaysUseMainBundle = NO;
 		[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterFirstUseDate];
 		[userDefaults setInteger:1 forKey:kAppiraterUseCount];
 		[userDefaults setInteger:0 forKey:kAppiraterSignificantEventCount];
+        [userDefaults setInteger:0 forKey:kAppiraterNegativeEventCount];
 		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
@@ -465,12 +483,62 @@ static BOOL _alwaysUseMainBundle = NO;
 		[userDefaults setDouble:0 forKey:kAppiraterFirstUseDate];
 		[userDefaults setInteger:0 forKey:kAppiraterUseCount];
 		[userDefaults setInteger:1 forKey:kAppiraterSignificantEventCount];
+        [userDefaults setInteger:0 forKey:kAppiraterNegativeEventCount];
 		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
 	}
 	
 	[userDefaults synchronize];
+}
+
+- (void)incrementNegativeEventCount {
+    // get the app's version
+    NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleVersionKey];
+
+    // get the version number that we've been tracking
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *trackingVersion = [userDefaults stringForKey:kAppiraterCurrentVersion];
+    if (trackingVersion == nil)
+    {
+        trackingVersion = version;
+        [userDefaults setObject:version forKey:kAppiraterCurrentVersion];
+    }
+
+    if (_debug)
+        NSLog(@"APPIRATER Tracking version: %@", trackingVersion);
+
+    if ([trackingVersion isEqualToString:version])
+    {
+        // check if the first use date has been set. if not, set it.
+        NSTimeInterval timeInterval = [userDefaults doubleForKey:kAppiraterFirstUseDate];
+        if (timeInterval == 0)
+        {
+            timeInterval = [[NSDate date] timeIntervalSince1970];
+            [userDefaults setDouble:timeInterval forKey:kAppiraterFirstUseDate];
+        }
+
+        // increment negative event count
+        int negEventCount = [userDefaults integerForKey:kAppiraterNegativeEventCount];
+        negEventCount++;
+        [userDefaults setInteger:negEventCount forKey:kAppiraterNegativeEventCount];
+        if (_debug)
+            NSLog(@"APPIRATER Negative event count: %d", negEventCount);
+    }
+    else
+    {
+        // it's a new version of the app, so restart tracking
+        [userDefaults setObject:version forKey:kAppiraterCurrentVersion];
+        [userDefaults setDouble:0 forKey:kAppiraterFirstUseDate];
+        [userDefaults setInteger:0 forKey:kAppiraterUseCount];
+        [userDefaults setInteger:1 forKey:kAppiraterSignificantEventCount];
+        [userDefaults setInteger:0 forKey:kAppiraterNegativeEventCount];
+        [userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
+        [userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
+        [userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
+    }
+
+    [userDefaults synchronize];
 }
 
 - (void)incrementAndRate:(BOOL)canPromptForRating {
@@ -557,6 +625,14 @@ static BOOL _alwaysUseMainBundle = NO;
     [a.eventQueue addOperationWithBlock:^{
        [[Appirater sharedInstance] incrementSignificantEventAndRate:canPromptForRating];
     }];
+}
+
++ (void)userExperiencedNegativeEvent
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0),
+            ^{
+                [[Appirater sharedInstance] incrementNegativeEventCount];
+            });
 }
 
 #pragma GCC diagnostic push
@@ -676,7 +752,7 @@ static BOOL _alwaysUseMainBundle = NO;
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     
     id <AppiraterDelegate> delegate = _delegate;
-	
+	BOOL isDisplayingRateLater = (BOOL) alertView.tag;
 	switch (buttonIndex) {
 		case 0:
 		{
@@ -698,17 +774,27 @@ static BOOL _alwaysUseMainBundle = NO;
 			break;
 		}
 		case 2:
-			// remind them later
-			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
-			[userDefaults synchronize];
-			if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
-				[delegate appiraterDidOptToRemindLater:self];
-			}
-			break;
+            if (isDisplayingRateLater)
+            {
+                // remind them later
+                [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+                [userDefaults synchronize];
+                if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
+                    [delegate appiraterDidOptToRemindLater:self];
+                }
+                break;
+            }
+        case 3:
+            // fall through to call delegate custom action from case 2 when not displaying RateLater
+            if(delegate && [delegate respondsToSelector:@selector(appiraterDidSelectCustomAction:)]){
+                [delegate appiraterDidSelectCustomAction:self];
+            }
+            break;
 		default:
 			break;
 	}
 }
+
 
 //Delegate call from the StoreKit view.
 - (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
