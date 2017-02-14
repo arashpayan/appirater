@@ -61,6 +61,8 @@ static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
+static BOOL _displayRateLaterButton = YES;
+static BOOL _rateOnce = NO;
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_5_0
 	static id<AppiraterDelegate> _delegate;
 #else
@@ -137,6 +139,16 @@ static BOOL _alwaysUseMainBundle = NO;
 + (void) setCustomAlertRateLaterButtonTitle:(NSString *)rateLaterTitle
 {
     [self sharedInstance].alertRateLaterTitle = rateLaterTitle;
+}
+
++ (void) setDisplayRateLaterButton:(BOOL)displayRateLaterButton
+{
+    _displayRateLaterButton = displayRateLaterButton;
+}
+
++ (void) setRateOnce:(BOOL)rateOnce
+{
+    _rateOnce = rateOnce;
 }
 
 + (void) setDebug:(BOOL)debug {
@@ -311,7 +323,7 @@ static BOOL _alwaysUseMainBundle = NO;
 
 - (void)showRatingAlert
 {
-  [self showRatingAlert:true];
+  [self showRatingAlert:_displayRateLaterButton];
 }
 
 // is this an ok time to show the alert? (regardless of whether the rating conditions have been met)
@@ -417,7 +429,8 @@ static BOOL _alwaysUseMainBundle = NO;
 		[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterFirstUseDate];
 		[userDefaults setInteger:1 forKey:kAppiraterUseCount];
 		[userDefaults setInteger:0 forKey:kAppiraterSignificantEventCount];
-		[userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
+        if (_rateOnce == NO)
+            [userDefaults setBool:NO forKey:kAppiraterRatedCurrentVersion];
 		[userDefaults setBool:NO forKey:kAppiraterDeclinedToRate];
 		[userDefaults setDouble:0 forKey:kAppiraterReminderRequestDate];
 	}
