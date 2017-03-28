@@ -38,6 +38,7 @@
 #import <CFNetwork/CFNetwork.h>
 #import "Appirater.h"
 #include <netinet/in.h>
+#import <StoreKit/StoreKit.h>
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -302,10 +303,11 @@ static BOOL _alwaysUseMainBundle = NO;
   }
 
 	self.ratingAlert = alertView;
-    [alertView show];
+    [SKStoreReviewController requestReview];
+    //[alertView show];
 
     if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
-             [delegate appiraterDidDisplayAlert:self];
+        [delegate appiraterDidDisplayAlert:self];
     }
 }
 
