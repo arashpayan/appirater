@@ -29,10 +29,10 @@ Configuration
 4. Call `[Appirater appEnteredForeground:YES]` in your app delegate's `applicationWillEnterForeground:` method.
 5. (OPTIONAL) Call `[Appirater userDidSignificantEvent:YES]` when the user does something 'significant' in the app.
 
-###Development
+### Development
 Setting `[Appirater setDebug:YES]` will ensure that the rating request is shown each time the app is launched.
 
-###Production
+### Production
 Make sure you set `[Appirater setDebug:NO]` to ensure the request is not shown every time the app is launched. Also make sure that each of these components are set in the `application:didFinishLaunchingWithOptions:` method.
 
 This example states that the rating request is only shown when the app has been launched 5 times **and** after 7 days.
