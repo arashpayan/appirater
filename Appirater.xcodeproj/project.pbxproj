@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		827211DF1EB3639D00DBFBEB /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 827211DE1EB3639D00DBFBEB /* Appirater.m */; };
-		827211E11EB363A700DBFBEB /* AppiraterDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 827211E01EB363A700DBFBEB /* AppiraterDelegate.h */; };
+		827211E11EB363A700DBFBEB /* AppiraterDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 827211E01EB363A700DBFBEB /* AppiraterDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8272126A1EB3640400DBFBEB /* AppiraterLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8272126C1EB3640400DBFBEB /* AppiraterLocalizable.strings */; };
 		8272128E1EB3650300DBFBEB /* Appirater.h in Headers */ = {isa = PBXBuildFile; fileRef = 8272128D1EB3650300DBFBEB /* Appirater.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
