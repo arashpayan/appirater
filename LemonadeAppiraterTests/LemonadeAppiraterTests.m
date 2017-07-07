@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-
+#import <LemonadeAppirater/Appirater.h>
 @interface LemonadeAppiraterTests : XCTestCase
 
 @end
@@ -25,8 +25,8 @@
 }
 
 - (void)testExample {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
+    [Appirater setAppId:@"770699556"];
+    //TODO: create extensions to get app id and verify that it is set correctly.
 }
 
 - (void)testPerformanceExample {

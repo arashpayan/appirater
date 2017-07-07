@@ -9,13 +9,13 @@
 /* Begin PBXBuildFile section */
 		22B476761F0F3BA9002F3E37 /* LemonadeAppirater.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22B4766C1F0F3BA9002F3E37 /* LemonadeAppirater.framework */; };
 		22B4767B1F0F3BA9002F3E37 /* LemonadeAppiraterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22B4767A1F0F3BA9002F3E37 /* LemonadeAppiraterTests.m */; };
-		22B4767D1F0F3BA9002F3E37 /* LemonadeAppirater.h in Headers */ = {isa = PBXBuildFile; fileRef = 22B4766F1F0F3BA9002F3E37 /* LemonadeAppirater.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		22B4768A1F0F3C44002F3E37 /* Appirater.h in Headers */ = {isa = PBXBuildFile; fileRef = 22B476871F0F3C44002F3E37 /* Appirater.h */; };
 		22B4768B1F0F3C44002F3E37 /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 22B476881F0F3C44002F3E37 /* Appirater.m */; };
-		22B4768C1F0F3C44002F3E37 /* AppiraterDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 22B476891F0F3C44002F3E37 /* AppiraterDelegate.h */; };
 		22B476B01F0F3C49002F3E37 /* AppiraterLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 22B4768E1F0F3C49002F3E37 /* AppiraterLocalizable.strings */; };
 		22B476B21F0F3C4E002F3E37 /* CHANGELOG.md in Sources */ = {isa = PBXBuildFile; fileRef = 22B476B11F0F3C4E002F3E37 /* CHANGELOG.md */; };
 		22B476B41F0F3C52002F3E37 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 22B476B31F0F3C52002F3E37 /* README.md */; };
+		22B476C21F0F3FC5002F3E37 /* LemonadeAppirater.h in Headers */ = {isa = PBXBuildFile; fileRef = 22B4766F1F0F3BA9002F3E37 /* LemonadeAppirater.h */; };
+		22B476C71F0F4077002F3E37 /* Appirater.h in Headers */ = {isa = PBXBuildFile; fileRef = 22B476871F0F3C44002F3E37 /* Appirater.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		22B476C81F0F407C002F3E37 /* AppiraterDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 22B476891F0F3C44002F3E37 /* AppiraterDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -159,9 +159,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22B4767D1F0F3BA9002F3E37 /* LemonadeAppirater.h in Headers */,
-				22B4768A1F0F3C44002F3E37 /* Appirater.h in Headers */,
-				22B4768C1F0F3C44002F3E37 /* AppiraterDelegate.h in Headers */,
+				22B476C71F0F4077002F3E37 /* Appirater.h in Headers */,
+				22B476C81F0F407C002F3E37 /* AppiraterDelegate.h in Headers */,
+				22B476C21F0F3FC5002F3E37 /* LemonadeAppirater.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
