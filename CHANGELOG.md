@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Unreleased:
+----------------------------
+* Use SKStoreReviewController if available
+  * Available on iOS > 10.3 
+  * You'll need to link the StoreKit Framework
+
 Version 2.1.0 *(2016-11-04)*
 ----------------------------
 * Fix and suppress various Xcode warnings

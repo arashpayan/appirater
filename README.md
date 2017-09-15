@@ -59,6 +59,14 @@ If you wanted to show the request after 5 days only you can set the following:
 [Appirater appLaunched:YES];
 ```
 
+SKStoreReviewController
+----------------------
+In iOS 10.3, [SKStoreReviewController](https://developer.apple.com/library/content/releasenotes/General/WhatsNewIniOS/Articles/iOS10_3.html) was introduced which allows rating directly within the app without any additional setup.
+
+Appirater automatically uses `SKStoreReviewController` if available. You'll need to manually link `StoreKit` in your App however.
+
+If `SKStoreReviewController` is used, Appirater is used only to decide when to show the rating dialog to the user. Keep in mind, that `SKStoreReviewController` automatically limits the number of impressions, so the dialog might be displayed less frequently than your configured conditions might suggest.
+
 Help and Support Group
 ----------------------
 Requests for help, questions about usage, suggestions and other relevant topics should be posted at the [Appirater group] [appiratergroup]. As much as I'd like to help everyone who emails me, I can't respond to private emails, but I'll respond to posts on the group where others can benefit from the Q&As.
