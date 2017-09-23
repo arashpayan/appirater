@@ -6,6 +6,8 @@ Unreleased:
 * Use SKStoreReviewController if available
   * Available on iOS > 10.3 
   * You'll need to link the StoreKit Framework
+* Armenian localization
+* Fix delegate not being set after Appirater initialization (Issue #215)
 
 Version 2.1.0 *(2016-11-04)*
 ----------------------------
