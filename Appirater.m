@@ -280,33 +280,39 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
-  UIAlertView *alertView = nil;
   id <AppiraterDelegate> delegate = _delegate;
     
   if(delegate && [delegate respondsToSelector:@selector(appiraterShouldDisplayAlert:)] && ![delegate appiraterShouldDisplayAlert:self]) {
       return;
   }
   
-  if (displayRateLaterButton) {
-  	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
-                                           message:self.alertMessage
-                                          delegate:self
-                                 cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
+  if (NSStringFromClass([SKStoreReviewController class]) != nil) {
+    // If SKStoreReviewController is used, skip the custom dialog and directly go the the rating 
+    [Appirater rateApp];
   } else {
-  	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
-                                           message:self.alertMessage
-                                          delegate:self
-                                 cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, nil];
+    // Otherwise show a custom Alert
+    UIAlertView *alertView = nil;
+    if (displayRateLaterButton) {
+      alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
+                                             message:self.alertMessage
+                                            delegate:self
+                                   cancelButtonTitle:self.alertCancelTitle
+                                   otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
+    } else {
+      alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
+                                             message:self.alertMessage
+                                            delegate:self
+                                   cancelButtonTitle:self.alertCancelTitle
+                                   otherButtonTitles:self.alertRateTitle, nil];
+    }
+    
+    self.ratingAlert = alertView;
+    [alertView show];
   }
 
-	self.ratingAlert = alertView;
-    [alertView show];
-
-    if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
-             [delegate appiraterDidDisplayAlert:self];
-    }
+  if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
+           [delegate appiraterDidDisplayAlert:self];
+  }
 }
 
 - (void)showRatingAlert
@@ -628,9 +634,19 @@ static BOOL _alwaysUseMainBundle = NO;
 
 + (void)rateApp {
 	
+  //Use the built SKStoreReviewController if available (available from iOS 10.3 upwards)
+  if (NSStringFromClass([SKStoreReviewController class]) != nil) {
+    // Also note, that SKStoreReviewController takes care of impression limitation by itself so it's ok to not save the impression manually 
+    // This also works in the simulator
+    [SKStoreReviewController requestReview];
+    return;
+  }
+
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
+
+  
 
 	//Use the in-app StoreKit view if available (iOS 6) and imported. This works in the simulator.
 	if (![Appirater sharedInstance].openInAppStore && NSStringFromClass([SKStoreProductViewController class]) != nil) {
