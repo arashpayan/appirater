@@ -670,17 +670,17 @@ static BOOL _alwaysUseMainBundle = NO;
 		#if TARGET_IPHONE_SIMULATOR
 		NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
 		#else
-		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:_appId];
 
 		// iOS 7 needs a different templateReviewURL @see https://github.com/arashpayan/appirater/issues/131
         // Fixes condition @see https://github.com/arashpayan/appirater/issues/205
 		if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 && [[[UIDevice currentDevice] systemVersion] floatValue] < 8.0) {
-			reviewURL = [templateReviewURLiOS7 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+			reviewURL = [templateReviewURLiOS7 stringByReplacingOccurrencesOfString:@"APP_ID" withString:_appId];
 		}
         // iOS 8 needs a different templateReviewURL also @see https://github.com/arashpayan/appirater/issues/182
         else if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0)
         {
-            reviewURL = [templateReviewURLiOS8 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+            reviewURL = [templateReviewURLiOS8 stringByReplacingOccurrencesOfString:@"APP_ID" withString:_appId];
         }
 
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
