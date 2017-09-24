@@ -1,9 +1,7 @@
 Introduction
 ---------------
 
-Appirater is a class that you can drop into any iPhone app (iOS 4.0 or later) that will help remind your users
-to review your app on the App Store. The code is released under the MIT/X11, so feel free to
-modify and share your changes with the world. Read on below for how to get started. If you need any help using, the library, post your questions on [Stack Overflow] [stackoverflow] under the `appirater` tag.
+Appirater is a class that you can drop into any iPhone app (iOS 4.0 or later) that will help remind your users to review your app on the App Store. The code is released under the MIT/X11, so feel free to modify and share your changes with the world. Read on below for how to get started. If you need any help using, the library, post your questions on [Stack Overflow] [stackoverflow] under the `appirater` tag.
 
 Getting Started
 ---------------
@@ -29,10 +27,10 @@ Configuration
 4. Call `[Appirater appEnteredForeground:YES]` in your app delegate's `applicationWillEnterForeground:` method.
 5. (OPTIONAL) Call `[Appirater userDidSignificantEvent:YES]` when the user does something 'significant' in the app.
 
-###Development
+### Development
 Setting `[Appirater setDebug:YES]` will ensure that the rating request is shown each time the app is launched.
 
-###Production
+### Production
 Make sure you set `[Appirater setDebug:NO]` to ensure the request is not shown every time the app is launched. Also make sure that each of these components are set in the `application:didFinishLaunchingWithOptions:` method.
 
 This example states that the rating request is only shown when the app has been launched 5 times **and** after 7 days.
@@ -67,13 +65,9 @@ Appirater automatically uses `SKStoreReviewController` if available. You'll need
 
 If `SKStoreReviewController` is used, Appirater is used only to decide when to show the rating dialog to the user. Keep in mind, that `SKStoreReviewController` automatically limits the number of impressions, so the dialog might be displayed less frequently than your configured conditions might suggest.
 
-Help and Support Group
-----------------------
-Requests for help, questions about usage, suggestions and other relevant topics should be posted at the [Appirater group] [appiratergroup]. As much as I'd like to help everyone who emails me, I can't respond to private emails, but I'll respond to posts on the group where others can benefit from the Q&As.
-
 License
 -------
-Copyright 2016. [Arash Payan] [arash].
+Copyright 2017. [Arash Payan] [arash].
 This library is distributed under the terms of the MIT/X11.
 
 While not required, I greatly encourage and appreciate any improvements that you make
@@ -83,16 +77,10 @@ Ports for other SDKs
 --------------
 A few people have ported Appirater to other SDKs. The ports are listed here in hopes that they may assist developers of those SDKs. I don't know how closesly (if at all) they track the Objective-C version of Appirater. If you need support for any of the libraries, please contact the maintainer of the port.
 
-+ MonoTouch Port (using C#). [Github] [monotouchport]
 + MonoTouch Binding (using native Appirater). [Github] [monotouchbinding]
-+ Corona SDK. [Github] [coronasdkport]
-+ Titanium SDK. [Github] [titaniumport]
 
 [stackoverflow]: http://stackoverflow.com/
 [homepage]: https://arashpayan.com/blog/2009/09/07/presenting-appirater/
 [arash]: https://arashpayan.com
 [Appirater.h]: https://github.com/arashpayan/appirater/blob/master/Appirater.h
-[monotouchport]: https://github.com/chebum/Appirater-for-MonoTouch
 [monotouchbinding]: https://github.com/theonlylawislove/MonoTouch.Appirater
-[coronasdkport]: https://github.com/aliasgar84/Appirater
-[titaniumport]: https://github.com/mpociot/TiAppirater

@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-Unreleased:
+Version 2.2.0 *(2017-09-23)*
 ----------------------------
 * Use SKStoreReviewController if available
   * Available on iOS > 10.3 
