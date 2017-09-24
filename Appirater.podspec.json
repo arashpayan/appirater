@@ -1,6 +1,6 @@
 {
   "name": "Appirater",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "platforms": {
     "ios": "5.0"
   },
@@ -11,7 +11,7 @@
   },
   "source": {
     "git": "https://github.com/arashpayan/appirater.git",
-    "tag": "2.1.0"
+    "tag": "2.2.0"
   },
   "source_files": "*.{h,m}",
   "resource_bundles": {
@@ -27,6 +27,6 @@
   "weak_frameworks": "StoreKit",
   "license": {
     "type": "MIT",
-    "text": "Copyright 2016. Arash Payan. This library is distributed under the terms of the MIT/X11."
+    "text": "Copyright 2017. Arash Payan. This library is distributed under the terms of the MIT/X11."
   }
 }
