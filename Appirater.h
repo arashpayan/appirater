@@ -99,7 +99,6 @@ extern NSString *const kAppiraterReminderRequestDate;
 @interface Appirater : NSObject <UIAlertViewDelegate, SKStoreProductViewControllerDelegate>
 
 @property(nonatomic, strong) id<AppiraterAlert> ratingAlert;
-@property(nonatomic) BOOL openInAppStore;
 #if __has_feature(objc_arc_weak)
 @property(nonatomic, weak) NSObject <AppiraterDelegate> *delegate;
 #else
@@ -292,11 +291,6 @@ extern NSString *const kAppiraterReminderRequestDate;
  Set whether or not Appirater uses animation (currently respected when pushing modal StoreKit rating VCs).
  */
 + (void)setUsesAnimation:(BOOL)animation;
-
-/*!
- If set to YES, Appirater will open App Store link (instead of SKStoreProductViewController on iOS 6). Default YES.
- */
-+ (void)setOpenInAppStore:(BOOL)openInAppStore;
 
 /*!
  If set to YES, the main bundle will always be used to load localized strings.
