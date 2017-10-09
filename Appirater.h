@@ -35,8 +35,8 @@
  */
 
 #import <Foundation/Foundation.h>
-#import <StoreKit/StoreKit.h>
 #import "AppiraterDelegate.h"
+#import <StoreKit/StoreKit.h>
 
 extern NSString *const kAppiraterFirstUseDate;
 extern NSString *const kAppiraterUseCount;
@@ -85,23 +85,27 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 #define APPIRATER_RATE_LATER			NSLocalizedStringFromTableInBundle(@"Remind me later", @"AppiraterLocalizable", [Appirater bundle], nil)
 
-@interface Appirater : NSObject <UIAlertViewDelegate, SKStoreProductViewControllerDelegate> {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-	UIAlertView		*ratingAlert;
-#pragma clang diagnostic pop
-}
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-@property(nonatomic, strong) UIAlertView *ratingAlert;
-#pragma clang diagnostic pop
-@property(nonatomic) BOOL openInAppStore;
+@protocol AppiraterAlert <NSObject>
+
+- (void)show;
+
+- (BOOL)isVisible;
+
+- (void)hide;
+
+@end
+
+@interface Appirater : NSObject <UIAlertViewDelegate, SKStoreProductViewControllerDelegate>
+
+@property(nonatomic, strong) id<AppiraterAlert> ratingAlert;
 #if __has_feature(objc_arc_weak)
 @property(nonatomic, weak) NSObject <AppiraterDelegate> *delegate;
 #else
 @property(nonatomic, unsafe_unretained) NSObject <AppiraterDelegate> *delegate;
 #endif
+
++ (Appirater*)sharedInstance;
 
 /*!
  Tells Appirater that the app has launched, and on devices that do NOT
@@ -287,11 +291,6 @@ extern NSString *const kAppiraterReminderRequestDate;
  Set whether or not Appirater uses animation (currently respected when pushing modal StoreKit rating VCs).
  */
 + (void)setUsesAnimation:(BOOL)animation;
-
-/*!
- If set to YES, Appirater will open App Store link (instead of SKStoreProductViewController on iOS 6). Default YES.
- */
-+ (void)setOpenInAppStore:(BOOL)openInAppStore;
 
 /*!
  If set to YES, the main bundle will always be used to load localized strings.
