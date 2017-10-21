@@ -85,16 +85,12 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 #define APPIRATER_RATE_LATER			NSLocalizedStringFromTableInBundle(@"Remind me later", @"AppiraterLocalizable", [Appirater bundle], nil)
 
-@interface Appirater : NSObject <UIAlertViewDelegate, SKStoreProductViewControllerDelegate> {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-	UIAlertView		*ratingAlert;
-#pragma clang diagnostic pop
-}
+@interface Appirater : NSObject <UIAlertViewDelegate, SKStoreProductViewControllerDelegate>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-@property(nonatomic, strong) UIAlertView *ratingAlert;
+/*!
+ UIAlertController for iOS 8 and later, otherwise UIAlertView
+ */
+@property(nonatomic, strong) id ratingAlert;
 #pragma clang diagnostic pop
 @property(nonatomic) BOOL openInAppStore;
 #if __has_feature(objc_arc_weak)
