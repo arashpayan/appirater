@@ -627,20 +627,18 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 + (void)rateApp {
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+    [userDefaults synchronize];
 	
-  //Use the built SKStoreReviewController if available (available from iOS 10.3 upwards)
-  if (NSStringFromClass([SKStoreReviewController class]) != nil) {
-    // Also note, that SKStoreReviewController takes care of impression limitation by itself so it's ok to not save the impression manually 
-    // This also works in the simulator
-    [SKStoreReviewController requestReview];
-    return;
-  }
-
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
-	[userDefaults synchronize];
-
-  
+    //Use the built SKStoreReviewController if available (available from iOS 10.3 upwards)
+    if (NSStringFromClass([SKStoreReviewController class]) != nil) {
+        // Also note, that SKStoreReviewController takes care of impression limitation by itself so it's ok to not save the impression manually
+        // This also works in the simulator
+        [SKStoreReviewController requestReview];
+        return;
+    }
 
 	//Use the in-app StoreKit view if available (iOS 6) and imported. This works in the simulator.
 	if (![Appirater sharedInstance].openInAppStore && NSStringFromClass([SKStoreProductViewController class]) != nil) {
