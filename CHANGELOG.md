@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 2.3.0 *(2017-10-30)*
+----------------------------
+* if (iOS >= 8 && iOS <= 10.3) { use UIAlertController }
+* Note when the SKStoreReviewController is called, even though we don't get feedback
+
 Version 2.2.0 *(2017-09-23)*
 ----------------------------
 * Use SKStoreReviewController if available
