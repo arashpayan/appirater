@@ -278,7 +278,7 @@ static BOOL _alwaysUseMainBundle = NO;
       return;
   }
   
-    if (@available(iOS 10.3, *)) {
+    if (NSStringFromClass([SKStoreReviewController class]) != nil) {
         [Appirater rateApp];
     } else {
         // Otherwise show a custom Alert
@@ -286,7 +286,7 @@ static BOOL _alwaysUseMainBundle = NO;
         if (displayRateLaterButton) {
             [buttons addObject:self.alertRateLaterTitle];
         }
-        if (@available(iOS 8.0, *)) {
+        if (NSStringFromClass([UIAlertController class]) != nil) {
             [buttons addObject:self.alertCancelTitle];
             
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:self.alertTitle message:self.alertMessage preferredStyle:UIAlertControllerStyleAlert];
@@ -553,7 +553,7 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (BOOL)isRatingAlertVisible {
-    if (@available(iOS 8.0, *)) {
+    if (NSStringFromClass([UIAlertController class]) != nil) {
         return ((UIAlertController *)self.ratingAlert).view.superview != nil;
     } else {
 #pragma clang diagnostic push
@@ -665,7 +665,7 @@ static BOOL _alwaysUseMainBundle = NO;
     [userDefaults synchronize];
 	
   //Use the built SKStoreReviewController if available (available from iOS 10.3 upwards)
-    if (@available(iOS 10.3, *)) {
+    if (NSStringFromClass([SKStoreReviewController class]) != nil) {
         [SKStoreReviewController requestReview];
         return;
     }
