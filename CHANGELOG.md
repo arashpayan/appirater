@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 2.3.1 *(2017-11-17)*
+----------------------------
+* Fix crash that occurs when app resigns active while alert is showing (bug was introduced in 2.3.0)
+* Remove @available syntax to be compatible with Xcode 8
+* Fix compiler warnings
+
 Version 2.3.0 *(2017-10-30)*
 ----------------------------
 * if (iOS >= 8 && iOS <= 10.3) { use UIAlertController }
