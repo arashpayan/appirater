@@ -565,9 +565,14 @@ static BOOL _alwaysUseMainBundle = NO;
 
 - (void)hideRatingAlert {
 	if ([self isRatingAlertVisible]) {
-		if (_debug)
+        if (_debug) {
 			NSLog(@"APPIRATER Hiding Alert");
-		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
+        }
+        if ([self.ratingAlert respondsToSelector:@selector(dismissWithClickedButtonIndex:animated:)]) {
+            [self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
+        } else {
+            [self.ratingAlert dismissViewControllerAnimated:NO completion:nil];
+        }
 	}	
 }
 
