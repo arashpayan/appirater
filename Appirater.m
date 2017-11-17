@@ -278,7 +278,10 @@ static BOOL _alwaysUseMainBundle = NO;
       return;
   }
   
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
     if (NSStringFromClass([SKStoreReviewController class]) != nil) {
+#pragma clang diagnostic pop
         [Appirater rateApp];
     } else {
         // Otherwise show a custom Alert
@@ -669,9 +672,12 @@ static BOOL _alwaysUseMainBundle = NO;
     [userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
     [userDefaults synchronize];
 	
-  //Use the built SKStoreReviewController if available (available from iOS 10.3 upwards)
+    // Use the built SKStoreReviewController if available (available from iOS 10.3 upwards)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
     if (NSStringFromClass([SKStoreReviewController class]) != nil) {
         [SKStoreReviewController requestReview];
+#pragma clang diagnostic pop
         return;
     }
 
