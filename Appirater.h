@@ -91,7 +91,6 @@ extern NSString *const kAppiraterReminderRequestDate;
  UIAlertController for iOS 8 and later, otherwise UIAlertView
  */
 @property(nonatomic, strong) id ratingAlert;
-#pragma clang diagnostic pop
 @property(nonatomic) BOOL openInAppStore;
 #if __has_feature(objc_arc_weak)
 @property(nonatomic, weak) NSObject <AppiraterDelegate> *delegate;
