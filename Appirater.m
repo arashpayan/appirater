@@ -65,12 +65,14 @@ static BOOL _usesAnimation = TRUE;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
 static BOOL _alwaysUseMainBundle = NO;
+static BOOL _rateAndReview = NO;
 
 @interface Appirater ()
 @property (nonatomic, copy) NSString *alertTitle;
 @property (nonatomic, copy) NSString *alertMessage;
 @property (nonatomic, copy) NSString *alertCancelTitle;
 @property (nonatomic, copy) NSString *alertRateTitle;
+@property (nonatomic, copy) NSString *alertRateAndReviewTitle;
 @property (nonatomic, copy) NSString *alertRateLaterTitle;
 @property (nonatomic, strong) NSOperationQueue *eventQueue;
 - (BOOL)connectedToNetwork;
@@ -153,6 +155,9 @@ static BOOL _alwaysUseMainBundle = NO;
 + (void)setAlwaysUseMainBundle:(BOOL)alwaysUseMainBundle {
     _alwaysUseMainBundle = alwaysUseMainBundle;
 }
++ (void) setShowRateAndReview:(BOOL)rateAndReview {
+    _rateAndReview = rateAndReview;
+}
 
 + (NSBundle *)bundle
 {
@@ -197,6 +202,11 @@ static BOOL _alwaysUseMainBundle = NO;
 - (NSString *)alertRateLaterTitle
 {
     return _alertRateLaterTitle ? _alertRateLaterTitle : APPIRATER_RATE_LATER;
+}
+
+- (NSString *)alertRateAndReviewTitle
+{
+    return _alertRateAndReviewTitle ? _alertRateAndReviewTitle : APPIRATER_RATE_AND_REVIEW_BUTTON;
 }
 
 - (void)dealloc {
@@ -283,13 +293,20 @@ static BOOL _alwaysUseMainBundle = NO;
     if (NSStringFromClass([SKStoreReviewController class]) != nil) {
 #pragma clang diagnostic pop
         [Appirater rateApp];
+    if (@available(iOS 10.3, *)) {
+        [Appirater rateApp:NO];
     } else {
         // Otherwise show a custom Alert
         NSMutableArray *buttons = [[NSMutableArray alloc] initWithObjects:self.alertRateTitle, nil];
+        
+        if (_rateAndReview){
+            [buttons addObject:self.alertRateAndReviewTitle];
+        }
         if (displayRateLaterButton) {
             [buttons addObject:self.alertRateLaterTitle];
         }
         if (NSStringFromClass([UIAlertController class]) != nil) {
+        if (@available(iOS 8.0, *)) {
             [buttons addObject:self.alertCancelTitle];
             
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:self.alertTitle message:self.alertMessage preferredStyle:UIAlertControllerStyleAlert];
@@ -304,8 +321,10 @@ static BOOL _alwaysUseMainBundle = NO;
                         buttonIndex = 1;
                     } else if ([title isEqual:self.alertRateLaterTitle]) {
                         buttonIndex = 2;
+                    } else if ([title isEqual:self.alertRateAndReviewTitle]) {
+                        buttonIndex = 3;
                     }
-                    
+
                     [self alertViewDidDismissWithButtonIndex:buttonIndex];
                 }]];
             }
@@ -556,7 +575,7 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (BOOL)isRatingAlertVisible {
-    if (NSStringFromClass([UIAlertController class]) != nil) {
+    if (@available(iOS 8.0, *)) {
         return ((UIAlertController *)self.ratingAlert).view.superview != nil;
     } else {
 #pragma clang diagnostic push
@@ -568,14 +587,9 @@ static BOOL _alwaysUseMainBundle = NO;
 
 - (void)hideRatingAlert {
 	if ([self isRatingAlertVisible]) {
-        if (_debug) {
+		if (_debug)
 			NSLog(@"APPIRATER Hiding Alert");
-        }
-        if ([self.ratingAlert respondsToSelector:@selector(dismissWithClickedButtonIndex:animated:)]) {
-            [self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
-        } else {
-            [self.ratingAlert dismissViewControllerAnimated:NO completion:nil];
-        }
+		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
 	}	
 }
 
@@ -666,18 +680,15 @@ static BOOL _alwaysUseMainBundle = NO;
 	return controller;
 }
 
-+ (void)rateApp {
++ (void)rateApp:(BOOL)writeReviewPage {
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
     [userDefaults synchronize];
 	
-    // Use the built SKStoreReviewController if available (available from iOS 10.3 upwards)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability"
-    if (NSStringFromClass([SKStoreReviewController class]) != nil) {
+  //Use the built SKStoreReviewController if available (available from iOS 10.3 upwards)
+    if (@available(iOS 10.3, *)) {
         [SKStoreReviewController requestReview];
-#pragma clang diagnostic pop
         return;
     }
 
@@ -716,6 +727,11 @@ static BOOL _alwaysUseMainBundle = NO;
             reviewURL = [templateReviewURLiOS8 stringByReplacingOccurrencesOfString:@"APP_ID" withString:_appId];
         }
 
+        if (writeReviewPage)
+        {
+            reviewURL = [reviewURL stringByAppendingString:@"&action=write-review"];
+        }
+        
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
 		#endif
 	}
@@ -747,7 +763,7 @@ static BOOL _alwaysUseMainBundle = NO;
         case 1:
         {
             // they want to rate it
-            [Appirater rateApp];
+            [Appirater rateApp:NO];
             if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
                 [delegate appiraterDidOptToRate:self];
             }
@@ -761,6 +777,15 @@ static BOOL _alwaysUseMainBundle = NO;
                 [delegate appiraterDidOptToRemindLater:self];
             }
             break;
+        case 3:
+        {
+            // they want to rate it
+            [Appirater rateApp:YES];
+            if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
+                [delegate appiraterDidOptToRate:self];
+            }
+            break;
+        }
         default:
             break;
     }

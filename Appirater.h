@@ -75,7 +75,7 @@ extern NSString *const kAppiraterReminderRequestDate;
 #define APPIRATER_CANCEL_BUTTON			NSLocalizedStringFromTableInBundle(@"No, Thanks", @"AppiraterLocalizable", [Appirater bundle], nil)
 
 /*!
- Text of button that will send user to app review page.
+ Text of button that will send user to app rate page.
  */
 #define APPIRATER_LOCALIZED_RATE_BUTTON NSLocalizedStringFromTableInBundle(@"Rate %@", @"AppiraterLocalizable", [Appirater bundle], nil)
 #define APPIRATER_RATE_BUTTON			[NSString stringWithFormat:APPIRATER_LOCALIZED_RATE_BUTTON, APPIRATER_APP_NAME]
@@ -85,12 +85,19 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 #define APPIRATER_RATE_LATER			NSLocalizedStringFromTableInBundle(@"Remind me later", @"AppiraterLocalizable", [Appirater bundle], nil)
 
+/*!
+ Text of button that will send user to app rate & review page.
+ */
+#define APPIRATER_LOCALIZED_RATE_AND_REVIEW_BUTTON NSLocalizedStringFromTableInBundle(@"Rate and review %@", @"AppiraterLocalizable", [Appirater bundle], nil)
+#define APPIRATER_RATE_AND_REVIEW_BUTTON            [NSString stringWithFormat:APPIRATER_LOCALIZED_RATE_AND_REVIEW_BUTTON, APPIRATER_APP_NAME]
+
 @interface Appirater : NSObject <UIAlertViewDelegate, SKStoreProductViewControllerDelegate>
 
 /*!
  UIAlertController for iOS 8 and later, otherwise UIAlertView
  */
 @property(nonatomic, strong) id ratingAlert;
+#pragma clang diagnostic pop
 @property(nonatomic) BOOL openInAppStore;
 #if __has_feature(objc_arc_weak)
 @property(nonatomic, weak) NSObject <AppiraterDelegate> *delegate;
@@ -174,8 +181,12 @@ extern NSString *const kAppiraterReminderRequestDate;
  about calling this -- instead, just call the other functions listed above,
  and let Appirater handle the bookkeeping of deciding when to ask the user
  whether to rate the app.
+
+ @param writeReviewPage: is used if StoreKit is unavailable, used to
+ redirect user to write review in additional to his rating
  */
-+ (void)rateApp;
+
++ (void)rateApp:(BOOL)writeReviewPage;
 
 /*!
  Tells Appirater to immediately close any open rating modals (e.g. StoreKit rating VCs).
@@ -273,6 +284,10 @@ extern NSString *const kAppiraterReminderRequestDate;
  */
 + (void) setDebug:(BOOL)debug;
 
+/*!
+ 'YES' will show button 'Rate and Review' in dialog if StoreKit is unavailable.
+ */
++ (void) setShowRateAndReview:(BOOL)rateAndReview;
 /*!
  Set the delegate if you want to know when Appirater does something
  */
