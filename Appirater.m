@@ -161,7 +161,7 @@ static BOOL _alwaysUseMainBundle = NO;
     if (_alwaysUseMainBundle) {
         bundle = [NSBundle mainBundle];
     } else {
-        NSURL *appiraterBundleURL = [[NSBundle mainBundle] URLForResource:@"Appirater" withExtension:@"bundle"];
+        NSURL *appiraterBundleURL = [[NSBundle bundleForClass:self] URLForResource:@"Appirater" withExtension:@"bundle"];
 
         if (appiraterBundleURL) {
             // Appirater.bundle will likely only exist when used via CocoaPods
