@@ -602,7 +602,9 @@ static const NSInteger kRateAlertViewTag        = 1001;
 			reviewURL = [templateReviewURLiOS7 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
 		}
 
-		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
+        [UIApplication.sharedApplication openURL:[NSURL URLWithString:reviewURL]
+                                         options:@{}
+                               completionHandler:nil];
 		#endif
 	}
 }
