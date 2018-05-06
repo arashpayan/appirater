@@ -211,19 +211,34 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)showRatingAlert {
-	UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-														 message:APPIRATER_MESSAGE
-														delegate:self
-											   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-											   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
-	self.ratingAlert = alertView;
-    [alertView show];
+    
+    if (@available(iOS 10.3, *)) {
+        
+        // use the new built-in review prompt starting from 10.3
+    
+        [SKStoreReviewController requestReview];
+        
+        // record it as if user rated to avoid prompting again for this same version
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+        [userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
+        [userDefaults synchronize];
+        
+    } else {
+    
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
+                                                             message:APPIRATER_MESSAGE
+                                                            delegate:self
+                                                   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
+                                                   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
+        self.ratingAlert = alertView;
+        [alertView show];
 
-    id <AppiraterDelegate> delegate = _delegate;
-    if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
-             [delegate appiraterDidDisplayAlert:self];
+        id <AppiraterDelegate> delegate = _delegate;
+        if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
+                 [delegate appiraterDidDisplayAlert:self];
+        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidDisplayAlertNotification object:self];
     }
-    [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidDisplayAlertNotification object:self];
 }
 
 - (BOOL)ratingConditionsHaveBeenMet {
