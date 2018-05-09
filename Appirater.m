@@ -223,6 +223,9 @@ static BOOL _alwaysUseMainBundle = NO;
         [userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
         [userDefaults synchronize];
         
+        // send notification as if rating alert is shown
+        [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidDisplayAlertNotification object:self];
+        
     } else {
     
         UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
