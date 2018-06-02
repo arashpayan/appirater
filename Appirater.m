@@ -275,6 +275,20 @@ static BOOL _alwaysUseMainBundle = NO;
   id<AppiraterAlert> alert = nil;
   __weak typeof  (self) weakSelf = self;
     
+    if (displayRateLaterButton) {
+        alert = [[AppiraterDefaultAlert alloc] initWithTitle:self.alertTitle
+                                                     message:self.alertMessage
+                                                    delegate:self
+                                           cancelButtonTitle:self.alertCancelTitle
+                                           otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
+    } else {
+        alert = [[AppiraterDefaultAlert alloc] initWithTitle:self.alertTitle
+                                                     message:self.alertMessage
+                                                    delegate:self
+                                           cancelButtonTitle:self.alertCancelTitle
+                                           otherButtonTitles:self.alertRateTitle, nil];
+    }
+    
    if(delegate && [delegate respondsToSelector:@selector(appirater:wantsToShowAlertWithTitle:message:cancelButtonTitle:cancelButtonAction:rateButtonTitle:rateButtonAction:laterButtonTitle:laterButtonAction:)]) {
       alert = [delegate appirater:self wantsToShowAlertWithTitle:self.alertTitle message:self.alertMessage cancelButtonTitle:self.alertCancelTitle cancelButtonAction:^{
           [weakSelf alertDidDeclineToRate];
@@ -285,28 +299,12 @@ static BOOL _alwaysUseMainBundle = NO;
           [weakSelf alertDidOptToRemindLater];
       }];
    }
-    
-   if(alert==nil){
-          if (displayRateLaterButton) {
-            alert = [[AppiraterDefaultAlert alloc] initWithTitle:self.alertTitle
-                                                   message:self.alertMessage
-                                                  delegate:self
-                                         cancelButtonTitle:self.alertCancelTitle
-                                         otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
-          } else {
-            alert = [[AppiraterDefaultAlert alloc] initWithTitle:self.alertTitle
-                                                   message:self.alertMessage
-                                                  delegate:self
-                                         cancelButtonTitle:self.alertCancelTitle
-                                         otherButtonTitles:self.alertRateTitle, nil];
-          }
-    }
 
 	self.ratingAlert = alert;
     [alert show];
 
     if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
-             [delegate appiraterDidDisplayAlert:self];
+        [delegate appiraterDidDisplayAlert:self];
     }
 }
 
