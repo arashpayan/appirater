@@ -84,7 +84,7 @@ static BOOL _alwaysUseMainBundle = NO;
 - (void)hideRatingAlert;
 @end
 
-@implementation Appirater 
+@implementation Appirater
 
 @synthesize ratingAlert;
 
@@ -227,20 +227,65 @@ static BOOL _alwaysUseMainBundle = NO;
         [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidDisplayAlertNotification object:self];
         
     } else {
-    
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:APPIRATER_MESSAGE_TITLE
-                                                             message:APPIRATER_MESSAGE
-                                                            delegate:self
-                                                   cancelButtonTitle:APPIRATER_CANCEL_BUTTON
-                                                   otherButtonTitles:APPIRATER_RATE_BUTTON, APPIRATER_RATE_LATER, nil];
-        self.ratingAlert = alertView;
-        [alertView show];
-
+        
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:APPIRATER_MESSAGE_TITLE
+                                                                       message:APPIRATER_MESSAGE
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        
+        self.ratingAlert = alert;
+        
+        NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
         id <AppiraterDelegate> delegate = _delegate;
-        if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
-                 [delegate appiraterDidDisplayAlert:self];
-        }
-        [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidDisplayAlertNotification object:self];
+        
+        UIAlertAction *cancelAction = [UIAlertAction
+                                       actionWithTitle:APPIRATER_CANCEL_BUTTON
+                                       style:UIAlertActionStyleCancel
+                                       handler:^(UIAlertAction * _Nonnull action) {
+                                           // they don't want to rate it
+                                           [userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
+                                           [userDefaults synchronize];
+                                           if(delegate && [delegate respondsToSelector:@selector(appiraterDidDeclineToRate:)]){
+                                               [delegate appiraterDidDeclineToRate:self];
+                                           }
+                                           [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidDeclineToRateNotification object:self];
+                                        }];
+        
+        UIAlertAction *rateAction = [UIAlertAction
+                                     actionWithTitle:APPIRATER_RATE_BUTTON
+                                     style:UIAlertActionStyleDefault
+                                     handler:^(UIAlertAction * _Nonnull action) {
+                                         // they want to rate it
+                                         [Appirater rateApp];
+                                         if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
+                                             [delegate appiraterDidOptToRate:self];
+                                         }
+                                         [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidOptToRateNotification object:self];
+                                     }];
+        
+        UIAlertAction *remindAction = [UIAlertAction
+                                       actionWithTitle:APPIRATER_RATE_LATER
+                                       style:UIAlertActionStyleDefault
+                                       handler:^(UIAlertAction * _Nonnull action) {
+                                           // remind them later
+                                           [userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
+                                           [userDefaults synchronize];
+                                           if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
+                                               [delegate appiraterDidOptToRemindLater:self];
+                                           }
+                                           [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidOptToRemindLaterNotification object:self];
+                                       }];
+        
+        [alert addAction:cancelAction];
+        [alert addAction:rateAction];
+        [alert addAction:remindAction];
+        
+        [[[[[UIApplication sharedApplication] windows] lastObject] rootViewController] presentViewController:alert animated:YES completion:^{
+            if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
+                [delegate appiraterDidDisplayAlert:self];
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidDisplayAlertNotification object:self];
+        }];
+
     }
 }
 
@@ -428,10 +473,10 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)hideRatingAlert {
-	if (self.ratingAlert.visible) {
+	if (self.ratingAlert.presentingViewController) {
 		if (_debug)
 			NSLog(@"APPIRATER Hiding Alert");
-		[self.ratingAlert dismissWithClickedButtonIndex:-1 animated:NO];
+        [self.ratingAlert dismissViewControllerAnimated:NO completion:nil];
 	}	
 }
 
@@ -543,47 +588,6 @@ static BOOL _alwaysUseMainBundle = NO;
 
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];
 		#endif
-	}
-}
-
-- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    
-    id <AppiraterDelegate> delegate = _delegate;
-	
-	switch (buttonIndex) {
-		case 0:
-		{
-			// they don't want to rate it
-			[userDefaults setBool:YES forKey:kAppiraterDeclinedToRate];
-			[userDefaults synchronize];
-			if(delegate && [delegate respondsToSelector:@selector(appiraterDidDeclineToRate:)]){
-				[delegate appiraterDidDeclineToRate:self];
-			}
-            [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidDeclineToRateNotification object:self];
-			break;
-		}
-		case 1:
-		{
-			// they want to rate it
-			[Appirater rateApp];
-			if(delegate&& [delegate respondsToSelector:@selector(appiraterDidOptToRate:)]){
-				[delegate appiraterDidOptToRate:self];
-			}
-            [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidOptToRateNotification object:self];
-			break;
-		}
-		case 2:
-			// remind them later
-			[userDefaults setDouble:[[NSDate date] timeIntervalSince1970] forKey:kAppiraterReminderRequestDate];
-			[userDefaults synchronize];
-			if(delegate && [delegate respondsToSelector:@selector(appiraterDidOptToRemindLater:)]){
-				[delegate appiraterDidOptToRemindLater:self];
-			}
-            [[NSNotificationCenter defaultCenter] postNotificationName:ARAppiraterDidOptToRemindLaterNotification object:self];
-			break;
-		default:
-			break;
 	}
 }
 
