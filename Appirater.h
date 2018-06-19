@@ -273,15 +273,3 @@ extern NSString *const kAppiraterReminderRequestDate;
 +(NSBundle *)bundle;
 
 @end
-
-@interface Appirater(Deprecated)
-
-/*!
- DEPRECATED: While still functional, it's better to use
- appLaunched:(BOOL)canPromptForRating instead.
- 
- Calls [Appirater appLaunched:YES]. See appLaunched: for details of functionality.
- */
-+ (void)appLaunched __attribute__((deprecated)); 
-
-@end
