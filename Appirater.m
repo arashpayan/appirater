@@ -182,16 +182,25 @@ static BOOL _alwaysUseMainBundle = NO;
         NSLog(@"Error. Could not recover network reachability flags");
         return NO;
     }
+    
+    // needsConnection check is not needed, because testConnection will always contains NSURLConnection address
+    // to remove needsConnection and testConnection from the checks below
 	
     BOOL isReachable = flags & kSCNetworkFlagsReachable;
-    BOOL needsConnection = flags & kSCNetworkFlagsConnectionRequired;
+    //BOOL needsConnection = flags & kSCNetworkFlagsConnectionRequired;
 	BOOL nonWiFi = flags & kSCNetworkReachabilityFlagsTransientConnection;
 	
-	NSURL *testURL = [NSURL URLWithString:@"http://www.apple.com/"];
-	NSURLRequest *testRequest = [NSURLRequest requestWithURL:testURL  cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:20.0];
-	NSURLConnection *testConnection = [[NSURLConnection alloc] initWithRequest:testRequest delegate:self];
+	//NSURL *testURL = [NSURL URLWithString:@"http://www.apple.com/"];
+	//NSURLRequest *testRequest = [NSURLRequest requestWithURL:testURL  cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:20.0];
+	// NSURLConnection *testConnection = [[NSURLConnection alloc] initWithRequest:testRequest delegate:self];
 	
-    return ((isReachable && !needsConnection) || nonWiFi) ? (testConnection ? YES : NO) : NO;
+    //return ((isReachable && !needsConnection) || nonWiFi) ? (testConnection ? YES : NO) : NO;
+    // after removing needs connection check
+    BOOL connected = (isReachable || nonWiFi) ? YES : NO;
+    if (_debug) {
+        NSLog(@"APPIRATER connected to network: %@", (connected ? @"Yes" : @"No"));
+    }
+    return connected;
 }
 
 + (Appirater*)sharedInstance {
