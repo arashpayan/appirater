@@ -288,7 +288,7 @@ static BOOL _alwaysUseMainBundle = NO;
         [alert addAction:rateAction];
         [alert addAction:remindAction];
         
-        [[[[[UIApplication sharedApplication] windows] lastObject] rootViewController] presentViewController:alert animated:YES completion:^{
+        [[[self class] getRootViewController] presentViewController:alert animated:YES completion:^{
             if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
                 [delegate appiraterDidDisplayAlert:self];
             }
