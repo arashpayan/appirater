@@ -722,7 +722,7 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#pragma clang diagnostic ignored "-Wdeprecated-implementations"
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
     [self alertViewDidDismissWithButtonIndex:buttonIndex];
 }
