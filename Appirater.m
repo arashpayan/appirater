@@ -162,13 +162,13 @@ static BOOL _alwaysUseMainBundle = NO;
         bundle = [NSBundle mainBundle];
     } else {
         NSURL *appiraterBundleURL = [[NSBundle mainBundle] URLForResource:@"Appirater" withExtension:@"bundle"];
-
-        if (appiraterBundleURL) {
-            // Appirater.bundle will likely only exist when used via CocoaPods
-            bundle = [NSBundle bundleWithURL:appiraterBundleURL];
-        } else {
-            bundle = [NSBundle mainBundle];
+        NSError *err;
+        if (![appiraterBundleURL checkResourceIsReachableAndReturnError:&err]) {
+            // integrate appirater by framwork in swift project
+            appiraterBundleURL = [[NSBundle bundleForClass:[Appirater class]] URLForResource:@"Appirater" withExtension:@"bundle"];
         }
+        // Appirater.bundle will likely only exist when used via CocoaPods
+        bundle = [NSBundle bundleWithURL:appiraterBundleURL];
     }
 
     return bundle;
