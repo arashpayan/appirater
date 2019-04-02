@@ -11,6 +11,9 @@
 		827211E11EB363A700DBFBEB /* AppiraterDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 827211E01EB363A700DBFBEB /* AppiraterDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8272126A1EB3640400DBFBEB /* AppiraterLocalizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8272126C1EB3640400DBFBEB /* AppiraterLocalizable.strings */; };
 		8272128E1EB3650300DBFBEB /* Appirater.h in Headers */ = {isa = PBXBuildFile; fileRef = 8272128D1EB3650300DBFBEB /* Appirater.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B56F7AA82252E94200ED1841 /* GULUserDefaults.h in Headers */ = {isa = PBXBuildFile; fileRef = B56F7AA52252E94200ED1841 /* GULUserDefaults.h */; };
+		B56F7AA92252E94200ED1841 /* GULUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = B56F7AA62252E94200ED1841 /* GULUserDefaults.m */; };
+		B56F7AAA2252E94200ED1841 /* Appirater.podspec.json in Resources */ = {isa = PBXBuildFile; fileRef = B56F7AA72252E94200ED1841 /* Appirater.podspec.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +55,9 @@
 		8272128B1EB3642D00DBFBEB /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/AppiraterLocalizable.strings"; sourceTree = "<group>"; };
 		8272128C1EB3642E00DBFBEB /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/AppiraterLocalizable.strings"; sourceTree = "<group>"; };
 		8272128D1EB3650300DBFBEB /* Appirater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appirater.h; sourceTree = SOURCE_ROOT; };
+		B56F7AA52252E94200ED1841 /* GULUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GULUserDefaults.h; sourceTree = SOURCE_ROOT; };
+		B56F7AA62252E94200ED1841 /* GULUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GULUserDefaults.m; sourceTree = SOURCE_ROOT; };
+		B56F7AA72252E94200ED1841 /* Appirater.podspec.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Appirater.podspec.json; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +90,9 @@
 		827211D51EB3633600DBFBEB /* Appirater */ = {
 			isa = PBXGroup;
 			children = (
+				B56F7AA72252E94200ED1841 /* Appirater.podspec.json */,
+				B56F7AA52252E94200ED1841 /* GULUserDefaults.h */,
+				B56F7AA62252E94200ED1841 /* GULUserDefaults.m */,
 				8272128D1EB3650300DBFBEB /* Appirater.h */,
 				827211DE1EB3639D00DBFBEB /* Appirater.m */,
 				827211E01EB363A700DBFBEB /* AppiraterDelegate.h */,
@@ -100,6 +109,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B56F7AA82252E94200ED1841 /* GULUserDefaults.h in Headers */,
 				827211E11EB363A700DBFBEB /* AppiraterDelegate.h in Headers */,
 				8272128E1EB3650300DBFBEB /* Appirater.h in Headers */,
 			);
@@ -195,6 +205,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B56F7AAA2252E94200ED1841 /* Appirater.podspec.json in Resources */,
 				8272126A1EB3640400DBFBEB /* AppiraterLocalizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -207,6 +218,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				827211DF1EB3639D00DBFBEB /* Appirater.m in Sources */,
+				B56F7AA92252E94200ED1841 /* GULUserDefaults.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
