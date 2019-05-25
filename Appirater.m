@@ -713,7 +713,7 @@ static BOOL _alwaysUseMainBundle = NO;
 //Close the in-app rating (StoreKit) view and restore the previous status bar style.
 + (void)closeModal {
 	if (_modalOpen) {
-		[[UIApplication sharedApplication]setStatusBarStyle:_statusBarStyle animated:_usesAnimation];
+        @try {[[UIApplication sharedApplication]setStatusBarStyle:_statusBarStyle animated:_usesAnimation];} @catch (NSException *exception) {}
 		BOOL usedAnimation = _usesAnimation;
 		[self setModalOpen:NO];
 		
