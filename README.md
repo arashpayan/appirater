@@ -1,7 +1,7 @@
 Introduction
 ---------------
 
-Appirater is a class that you can drop into any iPhone app (iOS 4.0 or later) that will help remind your users to review your app on the App Store. The code is released under the MIT/X11, so feel free to modify and share your changes with the world. Read on below for how to get started. If you need any help using, the library, post your questions on [Stack Overflow] [stackoverflow] under the `appirater` tag.
+Appirater is a class that you can drop into any iPhone app (iOS 4.0 or later) that will help remind your users to review your app on the App Store. The code is released under the MIT/X11, so feel free to modify and share your changes with the world. Read on below for how to get started. If you need any help using, the library, post your questions on [Stack Overflow](https://stackoverflow.com/) under the `appirater` tag.
 
 Getting Started
 ---------------
