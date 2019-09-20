@@ -280,9 +280,12 @@ static BOOL _alwaysUseMainBundle = NO;
   
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability"
-    if (NSStringFromClass([SKStoreReviewController class]) != nil) {
+    if (![Appirater sharedInstance].openInAppStore && NSStringFromClass([SKStoreReviewController class]) != nil) {
 #pragma clang diagnostic pop
         [Appirater rateApp];
+        if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayStoreKitAlert:)]) {
+            [delegate appiraterDidDisplayStoreKitAlert:self];
+        }
     } else {
         // Otherwise show a custom Alert
         NSMutableArray *buttons = [[NSMutableArray alloc] initWithObjects:self.alertRateTitle, nil];
@@ -325,6 +328,9 @@ static BOOL _alwaysUseMainBundle = NO;
             self.ratingAlert = alertView;
             [alertView show];
 #pragma clang diagnostic pop
+        }
+        if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAppiraterAlert:)]) {
+            [delegate appiraterDidDisplayAppiraterAlert:self];
         }
     }
 
@@ -675,7 +681,7 @@ static BOOL _alwaysUseMainBundle = NO;
     // Use the built SKStoreReviewController if available (available from iOS 10.3 upwards)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability"
-    if (NSStringFromClass([SKStoreReviewController class]) != nil) {
+    if (![Appirater sharedInstance].openInAppStore && NSStringFromClass([SKStoreReviewController class]) != nil) {
         [SKStoreReviewController requestReview];
 #pragma clang diagnostic pop
         return;

@@ -15,6 +15,8 @@
 @optional
 -(BOOL)appiraterShouldDisplayAlert:(Appirater *)appirater;
 -(void)appiraterDidDisplayAlert:(Appirater *)appirater;
+-(void)appiraterDidDisplayAppiraterAlert:(Appirater *)appirater;
+-(void)appiraterDidDisplayStoreKitAlert:(Appirater *)appirater;
 -(void)appiraterDidDeclineToRate:(Appirater *)appirater;
 -(void)appiraterDidOptToRate:(Appirater *)appirater;
 -(void)appiraterDidOptToRemindLater:(Appirater *)appirater;
