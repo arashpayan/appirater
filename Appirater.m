@@ -38,6 +38,7 @@
 #import <CFNetwork/CFNetwork.h>
 #import "Appirater.h"
 #include <netinet/in.h>
+#import <objc/runtime.h>
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -65,6 +66,8 @@ static BOOL _usesAnimation = TRUE;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
 static BOOL _alwaysUseMainBundle = NO;
+
+static char SKStoreProductViewControllerPresentingController;
 
 @interface Appirater ()
 @property (nonatomic, copy) NSString *alertTitle;
@@ -693,7 +696,9 @@ static BOOL _alwaysUseMainBundle = NO;
 		if ([delegate respondsToSelector:@selector(appiraterWillPresentModalView:animated:)]) {
 			[delegate appiraterWillPresentModalView:self.sharedInstance animated:_usesAnimation];
 		}
-		[[self getRootViewController] presentViewController:storeViewController animated:_usesAnimation completion:^{
+		id rootViewController = [self getRootViewController];
+		objc_setAssociatedObject(self, &SKStoreProductViewControllerPresentingController, rootViewController, OBJC_ASSOCIATION_ASSIGN);
+		[rootViewController presentViewController:storeViewController animated:_usesAnimation completion:^{
 			[self setModalOpen:YES];
 		}];
 	
@@ -779,9 +784,8 @@ static BOOL _alwaysUseMainBundle = NO;
 		BOOL usedAnimation = _usesAnimation;
 		[self setModalOpen:NO];
 		
-		// get the top most controller (= the StoreKit Controller) and dismiss it
-		UIViewController *presentingController = [UIApplication sharedApplication].keyWindow.rootViewController;
-		presentingController = [self topMostViewController: presentingController];
+		// Retrieve a reference to the UIViewController used to present the StoreKit view controller
+		UIViewController *presentingController = objc_getAssociatedObject(self, &SKStoreProductViewControllerPresentingController);
 		[presentingController dismissViewControllerAnimated:_usesAnimation completion:^{
             id <AppiraterDelegate> delegate = self.sharedInstance.delegate;
 			if ([delegate respondsToSelector:@selector(appiraterDidDismissModalView:animated:)]) {
